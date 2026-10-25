@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import os
+import sys
+import traceback
 from collections import Counter
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, NoReturn
 
 import typer
 
@@ -44,15 +47,36 @@ def sample(
     ] = None,
 ) -> None:
     """Stream a seeded sample, label each doc train/val/test, and write it with a manifest."""
-    src = get_source(source)
-    spec = SampleSpec(n_docs=n_docs, seed=seed, val_frac=val_frac, test_frac=test_frac)
-    rev = revision or latest_revision(src.repo)
-    typer.echo(f"{src.name}: {src.repo} @ {rev[:10]}, drawing {n_docs} docs (seed {seed})")
-    stats: Counter[str] = Counter()
-    docs = build_docs(stream_raw(src, spec, rev), src, spec, stats)
-    m = write_sample(docs, out_dir, src, spec, rev, stats)
-    typer.echo(f"wrote {m.n_docs} docs {m.docs_per_split}; sha256 {m.sha256[:12]}")
-    typer.echo(f"stats: {m.stats}")
+    code = 0
+    try:
+        src = get_source(source)
+        spec = SampleSpec(n_docs=n_docs, seed=seed, val_frac=val_frac, test_frac=test_frac)
+        rev = revision or latest_revision(src.repo)
+        typer.echo(f"{src.name}: {src.repo} @ {rev[:10]}, drawing {n_docs} docs (seed {seed})")
+        stats: Counter[str] = Counter()
+        docs = build_docs(stream_raw(src, spec, rev), src, spec, stats)
+        m = write_sample(docs, out_dir, src, spec, rev, stats)
+        typer.echo(f"wrote {m.n_docs} docs {m.docs_per_split}; sha256 {m.sha256[:12]}")
+        typer.echo(f"stats: {m.stats}")
+    except BaseException:
+        traceback.print_exc()
+        code = 1
+    finally:
+        _exit_now(code)
+
+
+def _exit_now(code: int) -> NoReturn:
+    """End the process without interpreter finalization.
+
+    We stop reading the HF stream early, which can leave an Arrow I/O worker running Python
+    code (e.g. a download retry sleeping). At normal exit Arrow's thread pool waits for that
+    worker while the worker waits for the finalizing interpreter's GIL: a deadlock that hangs
+    the CLI forever (confirmed with gdb: main thread in arrow::internal::ThreadPool::Shutdown).
+    Output is already fsynced and atomically renamed by write_sample, so exiting here is safe.
+    """
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(code)
 
 
 @data_app.command("verify")
