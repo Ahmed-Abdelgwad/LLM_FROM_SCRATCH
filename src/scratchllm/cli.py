@@ -1,0 +1,77 @@
+"""Command-line entry point: `scratchllm --help`."""
+
+from __future__ import annotations
+
+from collections import Counter
+from pathlib import Path
+from typing import Annotated
+
+import typer
+
+from scratchllm.data.leakage import collect_eval_hashes, count_train_leaks, purge_train_leaks
+from scratchllm.data.sampling import (
+    SampleSpec,
+    build_docs,
+    latest_revision,
+    stream_raw,
+    verify_manifest,
+    write_sample,
+)
+from scratchllm.data.sources import SOURCES, get_source
+
+app = typer.Typer(no_args_is_help=True, help="scratchllm: bilingual GPT from scratch.")
+data_app = typer.Typer(no_args_is_help=True, help="Data acquisition and analysis.")
+app.add_typer(data_app, name="data")
+
+
+@data_app.command("sources")
+def list_sources() -> None:
+    """List the registered corpora."""
+    for s in SOURCES.values():
+        typer.echo(f"{s.name:18} {s.repo}/{s.config:14} {s.language} {s.variety:16} {s.license}")
+
+
+@data_app.command("sample")
+def sample(
+    source: Annotated[str, typer.Argument(help="Registered source name (see `data sources`).")],
+    n_docs: Annotated[int, typer.Option(help="Documents to draw.")] = 50_000,
+    seed: int = 0,
+    val_frac: float = 0.02,
+    test_frac: float = 0.02,
+    out_dir: Path = Path("data/raw/eda"),
+    revision: Annotated[
+        str | None, typer.Option(help="Pin a dataset commit; default is latest.")
+    ] = None,
+) -> None:
+    """Stream a seeded sample, label each doc train/val/test, and write it with a manifest."""
+    src = get_source(source)
+    spec = SampleSpec(n_docs=n_docs, seed=seed, val_frac=val_frac, test_frac=test_frac)
+    rev = revision or latest_revision(src.repo)
+    typer.echo(f"{src.name}: {src.repo} @ {rev[:10]}, drawing {n_docs} docs (seed {seed})")
+    stats: Counter[str] = Counter()
+    docs = build_docs(stream_raw(src, spec, rev), src, spec, stats)
+    m = write_sample(docs, out_dir, src, spec, rev, stats)
+    typer.echo(f"wrote {m.n_docs} docs {m.docs_per_split}; sha256 {m.sha256[:12]}")
+    typer.echo(f"stats: {m.stats}")
+
+
+@data_app.command("verify")
+def verify(manifests: list[Path]) -> None:
+    """Check data files still match their manifests (hash and counts)."""
+    for path in manifests:
+        m = verify_manifest(path)
+        typer.echo(f"OK {path.name}: {m.n_docs} docs")
+
+
+@data_app.command("leaks")
+def leaks(
+    manifests: list[Path],
+    purge_to: Annotated[Path | None, typer.Option(help="Write leak-free copies here.")] = None,
+) -> None:
+    """Report (and optionally remove) train docs that duplicate an eval doc, across sources."""
+    eval_hashes = collect_eval_hashes(manifests)
+    typer.echo(f"{len(eval_hashes)} distinct eval texts")
+    typer.echo(f"train leaks per source: {count_train_leaks(manifests, eval_hashes)}")
+    if purge_to is not None:
+        for name, r in purge_train_leaks(manifests, eval_hashes, purge_to).items():
+            typer.echo(f"{name}: kept {r['kept']}, removed {r['removed_train_leaks']}")
