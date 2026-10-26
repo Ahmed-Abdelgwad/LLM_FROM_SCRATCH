@@ -1,4 +1,5 @@
 import threading
+import time
 from collections import Counter
 from itertools import islice
 from pathlib import Path
@@ -262,3 +263,38 @@ def test_source_without_data_glob_is_rejected(tmp_path: Path):
     src = Source("nog", "x/y", "c", "ar", "msa", "MIT", "web")
     with pytest.raises(ValueError, match="data_glob"):
         next(iter_source_rows(src, SampleSpec(n_docs=1), Counter(), LocalFileSystem(), "/"))
+
+
+# ---------- timing instrumentation ----------
+
+
+def slow_open(path: str, n: int) -> bool:
+    time.sleep(0.05)  # every open costs 50 ms; never raises
+    return False
+
+
+def test_group_read_timings_are_recorded(corpus: Path):
+    groups = list_row_groups(LocalFileSystem(), f"{corpus}/*.parquet")
+    _, stats = sample(SpyFS(), groups, workers=2)
+    assert "ms_group_reads_sum" in stats and "ms_group_read_max" in stats
+    assert 0 <= stats["ms_group_read_max"] <= stats["ms_group_reads_sum"]
+
+
+def test_recorded_read_time_reflects_real_slowness(corpus: Path):
+    groups = list_row_groups(LocalFileSystem(), f"{corpus}/*.parquet")
+    _, stats = sample(SpyFS(fail=slow_open), groups, workers=1)
+    assert stats["ms_group_reads_sum"] >= 100  # 3 files opened once each at 50 ms
+
+
+def test_listing_and_total_time_reach_the_manifest(tmp_path: Path):
+    corp = tmp_path / "corp"
+    corp.mkdir()
+    for prefix in ("a", "b", "c"):
+        make_parquet(corp / f"{prefix}.parquet", prefix, 100, 50)
+    spec = SampleSpec(n_docs=60, rows_per_group=30, read_workers=1)
+    stats: Counter[str] = Counter()
+    rows = iter_source_rows(tiny_source(), spec, stats, SpyFS(fail=slow_open), str(corp))
+    docs = build_docs(rows, tiny_source(), spec, stats)
+    m = write_sample(docs, tmp_path / "out", tiny_source(), spec, "rev0", stats)
+    assert m.stats["ms_listing"] >= 150  # 3 footers, 1 worker, 50 ms each
+    assert m.stats["ms_draw_total"] >= m.stats["ms_listing"]

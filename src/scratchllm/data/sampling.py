@@ -13,6 +13,7 @@ import json
 import math
 import os
 import re
+import time
 from collections import Counter
 from collections.abc import Iterable, Iterator
 from dataclasses import asdict, dataclass
@@ -90,7 +91,9 @@ def iter_source_rows(
     """Lazily yield sampled raw rows of `source`; records what it found in `stats`."""
     if not source.data_glob:
         raise ValueError(f"source {source.name!r} has no data_glob")
+    started = time.perf_counter()
     groups = list_row_groups(fs, f"{root}/{source.data_glob}", workers=spec.read_workers)
+    stats["ms_listing"] = int((time.perf_counter() - started) * 1000)
     per_group = effective_rows_per_group(spec.n_docs, len(groups), spec.rows_per_group)
     stats["files_total"] = len({g.path for g in groups})
     stats["row_groups_total"] = len(groups)
@@ -184,6 +187,7 @@ def write_sample(
 
     Call `stats` only after this returns: it is filled lazily while `docs` is consumed.
     """
+    draw_started = time.perf_counter()
     out_dir.mkdir(parents=True, exist_ok=True)
     final = out_dir / f"{source.name}.jsonl"
     tmp = final.with_suffix(".jsonl.tmp")
@@ -200,6 +204,7 @@ def write_sample(
         os.fsync(f.fileno())
     if n < spec.n_docs:
         stats["short_sample"] = spec.n_docs - n  # the stream ended before reaching n_docs
+    stats["ms_draw_total"] = int((time.perf_counter() - draw_started) * 1000)  # list+read+write
     os.replace(tmp, final)
 
     manifest = Manifest(

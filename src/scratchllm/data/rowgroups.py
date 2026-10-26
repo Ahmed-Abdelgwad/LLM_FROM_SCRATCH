@@ -107,7 +107,9 @@ def iter_sampled_rows(
             cache[path] = pq.ParquetFile(fs.open(path, "rb"))
         return cache[path]
 
-    def read(ref: RowGroupRef) -> list[dict[str, Any]]:
+    def read(ref: RowGroupRef) -> tuple[list[dict[str, Any]], int]:
+        """Rows of one row group and the wall time spent getting them (retries included), ms."""
+
         def once() -> list[dict[str, Any]]:
             try:
                 table = open_file(ref.path).read_row_group(ref.index, columns=columns)
@@ -118,10 +120,12 @@ def iter_sampled_rows(
             picks = sorted(rng.sample(range(table.num_rows), min(rows_per_group, table.num_rows)))
             return table.take(picks).to_pylist()
 
-        return retry(once, base_delay=retry_delay)
+        started = time.perf_counter()
+        rows = retry(once, base_delay=retry_delay)
+        return rows, int((time.perf_counter() - started) * 1000)
 
     pool = ThreadPoolExecutor(max_workers=workers)
-    window: deque[Future[list[dict[str, Any]]]] = deque()
+    window: deque[Future[tuple[list[dict[str, Any]], int]]] = deque()
     todo = iter(order)
 
     def fill() -> None:
@@ -137,7 +141,7 @@ def iter_sampled_rows(
         while window:
             future = window.popleft()
             try:
-                rows = future.result()
+                rows, elapsed_ms = future.result()
             except Exception as exc:
                 stats["row_groups_failed"] += 1
                 consecutive_failures += 1
@@ -149,6 +153,9 @@ def iter_sampled_rows(
                 continue
             consecutive_failures = 0
             stats["row_groups_read"] += 1
+            # per-group wall times overlap across workers, so the sum can exceed elapsed time
+            stats["ms_group_reads_sum"] += elapsed_ms
+            stats["ms_group_read_max"] = max(stats["ms_group_read_max"], elapsed_ms)
             fill()
             yield from rows
     finally:
