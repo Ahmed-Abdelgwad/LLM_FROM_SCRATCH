@@ -4,18 +4,20 @@ Each is a contract: `result()` returns exactly the keys listed in the class docs
 report and the later decisions read them). Until a check is implemented its `update` raises
 NotImplementedError, and the runner reports it as "not_implemented" instead of failing.
 
-Status: ScriptMix and SurfaceVariation are implemented (written by the assistant at the owner's
-request, with the decisions explained in their docstrings). NearDuplicates is still a contract:
-write its tests first, with hand-made strings whose answers you know (see
-tests/test_eda_learner.py for the style), then make them pass.
+Status: all three are implemented (written by the assistant at the owner's request, with the
+decisions explained in their docstrings).
 """
 
 from __future__ import annotations
 
+import hashlib
 import re
 import unicodedata
+import zlib
 from collections import Counter
 from typing import Any
+
+import numpy as np
 
 # Unicode blocks whose letters belong to the Arabic script: the main block, its supplement,
 # extended-A, and the two presentation-form blocks (what copy-pasted PDF text often contains,
@@ -277,6 +279,21 @@ class SurfaceVariation:
         }
 
 
+# MinHash works on hash values below a prime larger than 2**32. With a_i < 2**32 and x < 2**32,
+# a_i * x + b_i < 2**64, so the arithmetic below cannot overflow unsigned 64-bit integers.
+_PRIME = 4_294_967_311
+
+
+def word_shingles(text: str, size: int) -> list[str]:
+    """Overlapping runs of `size` words. A text shorter than `size` words is one shingle."""
+    words = text.split()
+    if not words:
+        return []
+    if len(words) <= size:
+        return [" ".join(words)]
+    return [" ".join(words[i : i + size]) for i in range(len(words) - size + 1)]
+
+
 class NearDuplicates:
     """EDA question #3 / acceptance criterion A2: how much of the sample is near-duplicate?
 
@@ -284,29 +301,135 @@ class NearDuplicates:
     shingles is >= `threshold`. Exact duplicates were already removed at sampling time, so this
     finds templated pages (same text with a few words changed).
 
-    Implement MinHash signatures and LSH banding yourself (no extra dependency). A signature
-    summarises a document's shingle set in `num_perm` numbers; documents whose signatures agree
-    in a whole band become candidate pairs; candidates are then confirmed by comparing
-    signatures against `threshold`. With 50k documents everything fits in memory.
+    How it works (MinHash + LSH banding, no extra dependency):
+    1. A document becomes the set of its word shingles (`word_shingles`), each hashed to 32 bits
+       with crc32. crc32 is used instead of hash() on purpose: Python randomises hash() for str
+       between runs, which would make the result differ every time.
+    2. A signature of `num_perm` numbers summarises that set: for each of `num_perm` random hash
+       functions (a*x+b mod prime), the minimum over the shingles. Two signatures agree at a
+       position with probability equal to the Jaccard similarity of the sets, so the fraction of
+       agreeing positions estimates it (standard error about 0.03 at 128 permutations).
+    3. LSH banding finds candidates without comparing all pairs: the signature is cut into
+       bands of `rows_per_band` positions, and documents whose band is identical share a bucket.
+       With 128 permutations and 8 rows per band, a pair at similarity 0.8 shares a bucket with
+       probability about 0.95, and at 0.9 about 0.9999, while pairs far below the threshold
+       rarely do.
+    4. A candidate is confirmed when its estimated similarity is >= `threshold`. Confirmed pairs
+       are merged into clusters (union-find), so a template family counts as one cluster.
+
+    Approximation, deliberately: inside a bucket each member is compared with the bucket's first
+    member only, so the cost stays linear even when thousands of pages share a template. A pair
+    can therefore be missed by one band and still be joined through another band or through the
+    cluster. Recall is high but not exact; the estimate of similarity is also noisy near the
+    threshold, so a rate should be read as "about", not to the unit.
 
     result() keys:
       docs                          number of documents seen
-      threshold, num_perm, shingle_words   the parameters actually used
+      docs_without_signature        documents with no words, which cannot be compared
+      threshold, num_perm, shingle_words, rows_per_band   the parameters actually used
+      signatures_sha256             fingerprint of all signatures (16 hex of SHA-256); equal inputs
+                                    and parameters must give it on every run and machine
       near_duplicate_docs           documents that have at least one near-duplicate neighbour
       near_duplicate_rate           near_duplicate_docs / docs        (A2 asks for <= 0.30)
       clusters                      number of groups of 2 or more near-duplicates
       largest_cluster_sizes         sizes of the 10 largest clusters, descending
-      largest_cluster_examples      for each of those, the first 3 document ids and 120 chars
-                                    of the first one, so a human can read what the template is
+      largest_cluster_examples      for each of those: size, the first 3 document ids and the first
+                                    120 characters of the first document, so a human can read what
+                                    the template is
     """
 
     name = "near_duplicates"
 
-    def __init__(self, threshold: float = 0.8, num_perm: int = 128, shingle_words: int = 5) -> None:
-        self.threshold, self.num_perm, self.shingle_words = threshold, num_perm, shingle_words
+    def __init__(
+        self,
+        threshold: float = 0.8,
+        num_perm: int = 128,
+        shingle_words: int = 5,
+        rows_per_band: int = 8,
+        seed: int = 0,
+    ) -> None:
+        if num_perm % rows_per_band:
+            raise ValueError("num_perm must be a multiple of rows_per_band")
+        self.threshold, self.num_perm = threshold, num_perm
+        self.shingle_words, self.rows_per_band = shingle_words, rows_per_band
+        rng = np.random.RandomState(seed)  # fixed generator, stable across numpy versions
+        self._a = rng.randint(1, 2**32 - 1, size=num_perm, dtype=np.uint64)[:, None]
+        self._b = rng.randint(0, 2**32 - 1, size=num_perm, dtype=np.uint64)[:, None]
+        self.docs = 0
+        self.docs_without_signature = 0
+        self._ids: list[str] = []
+        self._snippets: list[str] = []
+        self._signatures: list[Any] = []
 
     def update(self, doc: dict[str, Any]) -> None:
-        raise NotImplementedError("NearDuplicates.update is yours to write")
+        self.docs += 1
+        shingles = word_shingles(doc["text"], self.shingle_words)
+        if not shingles:
+            self.docs_without_signature += 1
+            return
+        hashed = np.unique(
+            np.fromiter((zlib.crc32(s.encode("utf-8")) for s in shingles), np.uint64)
+        )
+        # row i = hash function i applied to every shingle; the signature keeps each row's minimum
+        self._signatures.append(((self._a * hashed + self._b) % _PRIME).min(axis=1))
+        self._ids.append(str(doc["id"]))
+        self._snippets.append(doc["text"][:120])
+
+    def _clusters(self) -> list[list[int]]:
+        n = len(self._signatures)
+        if n < 2:
+            return []
+        sigs = np.stack(self._signatures)
+        parent = list(range(n))
+
+        def find(i: int) -> int:
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]  # path halving
+                i = parent[i]
+            return i
+
+        for band in range(self.num_perm // self.rows_per_band):
+            columns = sigs[:, band * self.rows_per_band : (band + 1) * self.rows_per_band]
+            first_in_bucket: dict[bytes, int] = {}
+            for i in range(n):
+                first = first_in_bucket.setdefault(columns[i].tobytes(), i)
+                if first == i or find(first) == find(i):
+                    continue
+                if (sigs[first] == sigs[i]).mean() >= self.threshold:
+                    parent[find(i)] = find(first)
+
+        groups: dict[int, list[int]] = {}
+        for i in range(n):
+            groups.setdefault(find(i), []).append(i)
+        return [members for members in groups.values() if len(members) >= 2]
+
+    def _fingerprint(self) -> str:
+        if not self._signatures:
+            return ""
+        return hashlib.sha256(np.stack(self._signatures).tobytes()).hexdigest()[:16]
 
     def result(self) -> dict[str, Any]:
-        raise NotImplementedError("NearDuplicates.result is yours to write")
+        clusters = sorted(self._clusters(), key=lambda members: (-len(members), members[0]))
+        top = clusters[:10]
+        near_duplicate_docs = sum(len(members) for members in clusters)
+        return {
+            "docs": self.docs,
+            "docs_without_signature": self.docs_without_signature,
+            "threshold": self.threshold,
+            "num_perm": self.num_perm,
+            "shingle_words": self.shingle_words,
+            "rows_per_band": self.rows_per_band,
+            "signatures_sha256": self._fingerprint(),
+            "near_duplicate_docs": near_duplicate_docs,
+            "near_duplicate_rate": round(near_duplicate_docs / self.docs, 4) if self.docs else 0.0,
+            "clusters": len(clusters),
+            "largest_cluster_sizes": [len(members) for members in top],
+            "largest_cluster_examples": [
+                {
+                    "size": len(members),
+                    "ids": [self._ids[i] for i in members[:3]],
+                    "first_text": self._snippets[members[0]],
+                }
+                for members in top
+            ],
+        }

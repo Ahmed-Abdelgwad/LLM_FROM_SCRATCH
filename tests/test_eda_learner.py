@@ -7,7 +7,13 @@ import pytest
 
 from scratchllm.data.sampling import SampleSpec, manifest_path, text_hash, write_sample
 from scratchllm.data.sources import get_source
-from scratchllm.eda.checks_learner import ScriptMix, SurfaceVariation, letter_script
+from scratchllm.eda.checks_learner import (
+    NearDuplicates,
+    ScriptMix,
+    SurfaceVariation,
+    letter_script,
+    word_shingles,
+)
 from scratchllm.eda.runner import analyze_source
 
 
@@ -278,3 +284,146 @@ def test_empty_result_and_exact_keys():
 def test_surface_variation_runs_inside_the_eda_runner(tmp_path: Path):
     r = analyze_source(six_english_docs_manifest(tmp_path), [SurfaceVariation()])["checks"]
     assert r["surface_variation"]["status"] == "ok" and r["surface_variation"]["docs"] == 6
+
+
+# =====================================================================================
+# NearDuplicates. MinHash is a random estimate, so these tests use texts that are either
+# far above the threshold (about 0.95 similar) or unrelated, never close to 0.8.
+# =====================================================================================
+
+import json  # noqa: E402
+import os  # noqa: E402
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+
+
+def words(prefix: str, n: int = 200) -> list[str]:
+    return [f"{prefix}{i}" for i in range(n)]
+
+
+def doc_id(i: object, text: str) -> dict:
+    d = doc(text)
+    d["id"] = str(i)
+    return d
+
+
+def nd(texts: list[str], **kw) -> dict:
+    check = NearDuplicates(**kw)
+    for i, t in enumerate(texts):
+        check.update(doc_id(i, t))
+    return check.result()
+
+
+def edited(base: list[str], position: int, new_word: str) -> str:
+    changed = list(base)
+    changed[position] = new_word
+    return " ".join(changed)
+
+
+def test_word_shingles():
+    assert word_shingles("a b c d e f", 5) == ["a b c d e", "b c d e f"]
+    assert word_shingles("a b c", 5) == ["a b c"]  # shorter than the window: one shingle
+    assert word_shingles("  a   b  ", 5) == ["a b"]  # whitespace-insensitive
+    assert word_shingles("", 5) == [] and word_shingles("   ", 5) == []
+
+
+def test_a_template_family_is_one_cluster_and_unrelated_documents_are_left_out():
+    base = words("alpha")
+    family = [" ".join(base), edited(base, 50, "changedA"), edited(base, 150, "changedB")]
+    unrelated = [" ".join(words("beta")), " ".join(words("gamma"))]
+    r = nd(family + unrelated)
+    # one word changed in 200 gives similarity of about 0.95 to the original
+    assert (r["docs"], r["near_duplicate_docs"], r["clusters"]) == (5, 3, 1)
+    assert r["near_duplicate_rate"] == 0.6
+    assert r["largest_cluster_sizes"] == [3]
+
+
+def test_distinct_documents_have_no_clusters():
+    r = nd([" ".join(words(p)) for p in ("a", "b", "c", "d")])
+    assert (r["near_duplicate_docs"], r["clusters"], r["near_duplicate_rate"]) == (0, 0, 0.0)
+    assert r["largest_cluster_sizes"] == [] and r["largest_cluster_examples"] == []
+
+
+def test_two_families_are_reported_largest_first_with_readable_examples():
+    a, b = words("fam_a"), words("fam_b")
+    texts = [" ".join(a), edited(a, 10, "x1"), edited(a, 90, "x2"), edited(a, 170, "x3")]
+    texts += [" ".join(b), edited(b, 20, "y1")]
+    r = nd(texts)
+    assert r["largest_cluster_sizes"] == [4, 2]
+    first = r["largest_cluster_examples"][0]
+    assert first["size"] == 4 and first["ids"] == ["0", "1", "2"]  # first three members, in order
+    assert first["first_text"] == " ".join(a)[:120]
+
+
+def test_a_big_template_family_is_found_without_comparing_every_pair():
+    base = words("tmpl")
+    texts = [edited(base, i % 200, f"v{i}") for i in range(300)]  # 300 pages, one word each
+    r = nd(texts)
+    assert r["largest_cluster_sizes"] == [300] and r["near_duplicate_docs"] == 300
+
+
+def test_short_and_empty_documents():
+    r = nd(["too short to shingle", "too short to shingle", "", "   "])
+    assert r["docs"] == 4 and r["docs_without_signature"] == 2
+    assert r["near_duplicate_docs"] == 2 and r["clusters"] == 1  # the two identical short texts
+
+
+def test_threshold_decides_who_counts():
+    base = words("thr")
+    # about 0.80 similar (ten edited words in 200): kept at 0.5, dropped at 0.99
+    heavy = list(base)
+    for i in range(10, 200, 20):
+        heavy[i] = f"edit{i}"
+    pair = [" ".join(base), " ".join(heavy)]
+    assert nd(pair, threshold=0.5)["clusters"] == 1
+    assert nd(pair, threshold=0.99)["clusters"] == 0
+
+
+def test_estimate_tracks_the_true_jaccard():
+    base = words("est", 400)
+    other = list(base)
+    for i in range(0, 400, 4):  # change a quarter of the words
+        other[i] = f"new{i}"
+    left, right = set(word_shingles(" ".join(base), 5)), set(word_shingles(" ".join(other), 5))
+    true = len(left & right) / len(left | right)
+    check = NearDuplicates()
+    for t in (" ".join(base), " ".join(other)):
+        check.update(doc(t))
+    sigs = check._signatures
+    estimate = float((sigs[0] == sigs[1]).mean())
+    assert abs(estimate - true) < 0.15  # standard error is about 0.04, so this is a 3-sigma band
+
+
+def test_result_does_not_depend_on_python_hash_randomisation():
+    program = (
+        "import json; from scratchllm.eda.checks_learner import NearDuplicates\n"
+        "b=[f'w{i}' for i in range(200)]; c=list(b); c[77]='z'\n"
+        "n=NearDuplicates()\n"
+        "for i,t in enumerate([' '.join(b),' '.join(c),'solo '+' '.join(b[::-1])]):\n"
+        "    n.update({'id':str(i),'text':t})\n"
+        "print(json.dumps(n.result(), sort_keys=True))\n"
+    )
+    outputs = set()
+    for hash_seed in ("1", "2", "random"):
+        env = {**os.environ, "PYTHONHASHSEED": hash_seed}
+        out = subprocess.run(
+            [sys.executable, "-c", program], env=env, capture_output=True, text=True, check=True
+        ).stdout
+        outputs.add(out)
+    assert len(outputs) == 1  # the whole result, including the signature fingerprint, is identical
+    result = json.loads(outputs.pop())
+    assert result["clusters"] == 1 and len(result["signatures_sha256"]) == 16
+
+
+def test_bad_band_configuration_is_rejected():
+    with pytest.raises(ValueError):
+        NearDuplicates(num_perm=100, rows_per_band=8)
+
+
+def test_near_duplicates_runs_inside_the_eda_runner(tmp_path: Path):
+    r = analyze_source(six_english_docs_manifest(tmp_path), [NearDuplicates()])["checks"]
+    nd_result = r["near_duplicates"]
+    assert nd_result["status"] == "ok" and nd_result["docs"] == 6
+    # the documents differ in one word that sits inside every 5-word window, so they share no
+    # shingle at all: similarity 0, not near-duplicates
+    assert nd_result["near_duplicate_docs"] == 0
