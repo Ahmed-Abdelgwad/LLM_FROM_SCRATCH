@@ -98,6 +98,17 @@ def _exit_now(code: int) -> NoReturn:
     os._exit(code)
 
 
+@data_app.command("analyze")
+def analyze(
+    manifests: list[Path],
+    out_dir: Annotated[Path, typer.Option(help="Where reports are written.")] = Path("reports/eda"),
+) -> None:
+    """Run the EDA checks on the train split of each sample and write report.json / report.md."""
+    from scratchllm.eda.runner import run_eda
+
+    typer.echo(f"report written to {run_eda(manifests, out_dir)}")
+
+
 @data_app.command("verify")
 def verify(manifests: list[Path]) -> None:
     """Check data files still match their manifests (hash and counts)."""
