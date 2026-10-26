@@ -82,6 +82,16 @@ def test_personal_data_detection(text: str, emails: int, phones: int):
     assert (r["email_matches"], r["phone_like_matches"]) == (emails, phones)
 
 
+def test_a_few_spam_pages_inflate_matches_but_not_the_document_rate():
+    pd = PersonalData()
+    spam = "افضل شيخ روحاني 0096176817976 " * 50  # one page repeating a number 50 times
+    for i in range(1000):
+        pd.update(doc(i, spam if i < 2 else "نص عادي"))
+    r = pd.result()
+    assert r["phone_like_matches"] == 100 and r["hits_per_1000_docs"] == 100.0  # inflated
+    assert r["docs_with_pii"] == 2 and r["docs_with_pii_per_1000"] == 2.0  # the honest figure
+
+
 def test_personal_data_rate_is_per_thousand_documents():
     pd = PersonalData()
     for i in range(1000):

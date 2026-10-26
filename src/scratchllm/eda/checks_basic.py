@@ -76,6 +76,7 @@ class PersonalData:
         self.docs = 0
         self.with_email = 0
         self.with_phone = 0
+        self.with_any = 0
         self.emails = 0
         self.phones = 0
 
@@ -88,6 +89,7 @@ class PersonalData:
         self.docs += 1
         self.with_email += emails > 0
         self.with_phone += phones > 0
+        self.with_any += (emails + phones) > 0
         self.emails += emails
         self.phones += phones
 
@@ -99,5 +101,9 @@ class PersonalData:
             "docs_with_phone_like": self.with_phone,
             "email_matches": self.emails,
             "phone_like_matches": self.phones,
+            # matches can pile up in a few long spam pages that repeat one number, so the rate of
+            # documents with any hit is the figure to judge a source by
+            "docs_with_pii": self.with_any,
+            "docs_with_pii_per_1000": round(self.with_any * per_1000, 2),
             "hits_per_1000_docs": round((self.emails + self.phones) * per_1000, 2),
         }
