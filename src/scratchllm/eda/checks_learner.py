@@ -4,14 +4,15 @@ Each is a contract: `result()` returns exactly the keys listed in the class docs
 report and the later decisions read them). Until a check is implemented its `update` raises
 NotImplementedError, and the runner reports it as "not_implemented" instead of failing.
 
-Status: ScriptMix is implemented (written by the assistant at the owner's request, with the
-decisions explained in `letter_script` and the class docstring). SurfaceVariation and
-NearDuplicates are still contracts. Write the tests first, with hand-made strings whose answers
-you know (see tests/test_eda_learner.py for the style), then make them pass.
+Status: ScriptMix and SurfaceVariation are implemented (written by the assistant at the owner's
+request, with the decisions explained in their docstrings). NearDuplicates is still a contract:
+write its tests first, with hand-made strings whose answers you know (see
+tests/test_eda_learner.py for the style), then make them pass.
 """
 
 from __future__ import annotations
 
+import re
 import unicodedata
 from collections import Counter
 from typing import Any
@@ -129,24 +130,85 @@ class ScriptMix:
         }
 
 
+# Single characters whose occurrences are counted directly. Code points are written as numbers
+# so the source never contains an invisible or easily mistaken character.
+_SINGLE_CHAR_ITEMS: dict[str, tuple[str, ...]] = {
+    # fathatan, dammatan, kasratan, fatha, damma, kasra, sukun (not the shadda U+0651)
+    "diacritics_without_shadda": tuple(
+        chr(c) for c in (0x064B, 0x064C, 0x064D, 0x064E, 0x064F, 0x0650, 0x0652)
+    ),
+    "shadda": (chr(0x0651),),
+    "tatweel": (chr(0x0640),),
+    "alef_plain": (chr(0x0627),),
+    "alef_hamza_above": (chr(0x0623),),
+    "alef_hamza_below": (chr(0x0625),),
+    "alef_madda": (chr(0x0622),),
+    "yeh": (chr(0x064A),),
+    "alef_maqsura": (chr(0x0649),),
+    "digits_ascii": tuple("0123456789"),
+    "digits_arabic_indic": tuple(chr(c) for c in range(0x0660, 0x066A)),
+    "digits_extended_arabic_indic": tuple(chr(c) for c in range(0x06F0, 0x06FA)),
+}
+_TEH_MARBUTA, _HEH = chr(0x0629), chr(0x0647)
+# Arabic combining marks (U+064B-065F), dagger alef (U+0670) and the tatweel: removed before
+# looking for word-final letters, so "مدرسةٌ" and "مدرسةـ" still end in the teh marbuta.
+_MARKS_AND_TATWEEL = re.compile(f"[{chr(0x064B)}-{chr(0x065F)}{chr(0x0670)}{chr(0x0640)}]")
+_TEH_MARBUTA_FINAL = re.compile(_TEH_MARBUTA + r"(?!\w)")
+_HEH_FINAL = re.compile(_HEH + r"(?!\w)")
+_ITEM_ORDER = (
+    "diacritics_without_shadda",
+    "shadda",
+    "tatweel",
+    "alef_plain",
+    "alef_hamza_above",
+    "alef_hamza_below",
+    "alef_madda",
+    "yeh",
+    "alef_maqsura",
+    "teh_marbuta_final",
+    "heh_final",
+    "digits_ascii",
+    "digits_arabic_indic",
+    "digits_extended_arabic_indic",
+)
+
+
 class SurfaceVariation:
     """EDA question #4: how inconsistently is Arabic spelled? (decides the normalization rules)
 
-    Count, over the whole sample, how often each variant appears, so we can decide which ones to
-    unify. For every item below report two numbers: `docs_with` (documents containing it at least
-    once) and `per_1000_letters` (occurrences per 1,000 Arabic letters in the sample).
+    Counts, over the whole sample, how often each spelling variant appears, so we can decide
+    which ones to unify. For every item it reports `docs_with` (documents containing it at least
+    once) and `per_1000_letters` (occurrences per 1,000 Arabic letters in the whole sample;
+    0.0 when the sample has no Arabic letters). An Arabic letter is what `letter_script` calls
+    one, the same definition ScriptMix uses.
 
-    Items (result()["items"] maps each name to {"docs_with": int, "per_1000_letters": float}):
-      diacritics_without_shadda    the short-vowel marks and tanween, EXCLUDING the shadda
-      shadda                       reported on its own: dialect spelling uses it, so it must not
-                                   be lumped with the other diacritics
-      tatweel                      the elongation character
+    result() keys:
+      docs                    number of documents seen
+      arabic_letters          total Arabic letters counted (the denominator of every rate)
+      items                   maps each name below to {"docs_with": int, "per_1000_letters": float}
+      pair_shares             how split the spelling is within a pair (None if the pair is absent)
+
+    Items:
+      diacritics_without_shadda   fathatan, dammatan, kasratan, fatha, damma, kasra, sukun
+                                  (U+064B-0650 and U+0652). Other marks, e.g. the dagger alef, are
+                                  not counted here.
+      shadda                      reported on its own: dialect spelling uses it, so it must not be
+                                  lumped with the other diacritics
+      tatweel                     the elongation character
       alef_plain, alef_hamza_above, alef_hamza_below, alef_madda      the alef forms
-      yeh, alef_maqsura            ي versus ى
-      teh_marbuta_final, heh_final ة versus ه as the LAST letter of a word
+      yeh, alef_maqsura           ي versus ى
+      teh_marbuta_final, heh_final   ة versus ه as the LAST letter of a word. Marks and tatweel
+                                  after the letter are ignored; a following letter or digit
+                                  means the letter is inside the word. Note that ه is also the
+                                  last letter of legitimate words such as "الله", so heh_final is
+                                  an upper bound on how often ه stands where ة could.
       digits_ascii, digits_arabic_indic, digits_extended_arabic_indic
 
-    Also return result()["arabic_letters"]: the total number of Arabic letters counted.
+    pair_shares (each is the second member's share of the pair; 0.5 means evenly split):
+      alef_maqsura_among_yeh_like        alef_maqsura / (yeh + alef_maqsura)
+      heh_among_final_teh_heh            heh_final / (teh_marbuta_final + heh_final)
+      alef_plain_among_alef_forms        alef_plain / all four alef forms
+      shadda_among_all_diacritics        shadda / (shadda + diacritics_without_shadda)
 
     Why it matters: the same word spelled two ways becomes two different tokens. If the rates
     are high and the variants are interchangeable, normalizing them lowers tokenizer fertility;
@@ -155,11 +217,64 @@ class SurfaceVariation:
 
     name = "surface_variation"
 
+    def __init__(self) -> None:
+        self.docs = 0
+        self.arabic_letters = 0
+        self._occurrences = dict.fromkeys(_ITEM_ORDER, 0)
+        self._docs_with = dict.fromkeys(_ITEM_ORDER, 0)
+        self._is_arabic_letter: dict[str, bool] = {}  # classify each distinct character once
+
+    def _add(self, item: str, occurrences: int) -> None:
+        self._occurrences[item] += occurrences
+        self._docs_with[item] += occurrences > 0
+
     def update(self, doc: dict[str, Any]) -> None:
-        raise NotImplementedError("SurfaceVariation.update is yours to write")
+        self.docs += 1
+        text = doc["text"]
+        counts = Counter(text)  # C-speed; the per-character questions below are dictionary lookups
+        for ch, n in counts.items():
+            if ch not in self._is_arabic_letter:
+                self._is_arabic_letter[ch] = letter_script(ch) == "arabic"
+            if self._is_arabic_letter[ch]:
+                self.arabic_letters += n
+        for item, chars in _SINGLE_CHAR_ITEMS.items():
+            self._add(item, sum(counts.get(c, 0) for c in chars))
+        teh_or_heh = counts.get(_TEH_MARBUTA, 0) or counts.get(_HEH, 0)
+        stripped = _MARKS_AND_TATWEEL.sub("", text) if teh_or_heh else ""
+        self._add("teh_marbuta_final", len(_TEH_MARBUTA_FINAL.findall(stripped)))
+        self._add("heh_final", len(_HEH_FINAL.findall(stripped)))
+
+    def _share(self, part: str, *whole: str) -> float | None:
+        total = sum(self._occurrences[w] for w in whole)
+        return round(self._occurrences[part] / total, 4) if total else None
 
     def result(self) -> dict[str, Any]:
-        raise NotImplementedError("SurfaceVariation.result is yours to write")
+        letters = self.arabic_letters
+        return {
+            "docs": self.docs,
+            "arabic_letters": letters,
+            "items": {
+                item: {
+                    "docs_with": self._docs_with[item],
+                    "per_1000_letters": round(1000 * self._occurrences[item] / letters, 3)
+                    if letters
+                    else 0.0,
+                }
+                for item in _ITEM_ORDER
+            },
+            "pair_shares": {
+                "alef_maqsura_among_yeh_like": self._share("alef_maqsura", "yeh", "alef_maqsura"),
+                "heh_among_final_teh_heh": self._share(
+                    "heh_final", "teh_marbuta_final", "heh_final"
+                ),
+                "alef_plain_among_alef_forms": self._share(
+                    "alef_plain", "alef_plain", "alef_hamza_above", "alef_hamza_below", "alef_madda"
+                ),
+                "shadda_among_all_diacritics": self._share(
+                    "shadda", "shadda", "diacritics_without_shadda"
+                ),
+            },
+        }
 
 
 class NearDuplicates:

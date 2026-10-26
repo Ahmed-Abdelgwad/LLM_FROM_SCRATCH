@@ -7,7 +7,7 @@ import pytest
 
 from scratchllm.data.sampling import SampleSpec, manifest_path, text_hash, write_sample
 from scratchllm.data.sources import get_source
-from scratchllm.eda.checks_learner import ScriptMix, letter_script
+from scratchllm.eda.checks_learner import ScriptMix, SurfaceVariation, letter_script
 from scratchllm.eda.runner import analyze_source
 
 
@@ -162,3 +162,119 @@ def test_runs_inside_the_eda_runner(tmp_path: Path):
     result = analyze_source(six_english_docs_manifest(tmp_path), [ScriptMix()])
     r = result["checks"]["script_mix"]
     assert r["status"] == "ok" and r["docs"] == 6 and r["docs_latin_share_ge_0_9"] == 6
+
+
+# =====================================================================================
+# SurfaceVariation. Marks are written as escapes so no invisible character hides in a literal.
+# =====================================================================================
+
+FATHA, SUKUN, FATHATAN, DAMMATAN = "َ", "ْ", "ً", "ٌ"
+SHADDA, TATWEEL = "ّ", "ـ"
+
+
+def sv(*texts: str) -> dict:
+    check = SurfaceVariation()
+    for t in texts:
+        check.update(doc(t))
+    return check.result()
+
+
+def item(result: dict, name: str) -> dict:
+    return result["items"][name]
+
+
+def test_vowel_marks_are_counted_without_the_shadda():
+    # م fatha ر sukun ح fatha ب fathatan ا  -> 5 letters, 4 marks
+    r = sv("م" + FATHA + "ر" + SUKUN + "ح" + FATHA + "ب" + FATHATAN + "ا")
+    assert r["arabic_letters"] == 5
+    assert item(r, "diacritics_without_shadda") == {"docs_with": 1, "per_1000_letters": 800.0}
+    assert item(r, "shadda")["docs_with"] == 0
+
+
+def test_shadda_is_reported_on_its_own():
+    r = sv("شد" + SHADDA + "ة")  # 3 letters, one shadda, no other mark
+    assert item(r, "shadda") == {"docs_with": 1, "per_1000_letters": 333.333}
+    assert item(r, "diacritics_without_shadda")["docs_with"] == 0
+    assert r["pair_shares"]["shadda_among_all_diacritics"] == 1.0
+
+
+def test_tatweel_is_counted_and_is_not_a_letter():
+    r = sv("م" + TATWEEL * 3 + "رحبا")  # 5 letters and 3 tatweels
+    assert r["arabic_letters"] == 5
+    assert item(r, "tatweel")["per_1000_letters"] == 600.0
+
+
+def test_alef_forms():
+    r = sv("أإآا")  # hamza above, hamza below, madda, plain: one each of 4 letters
+    for name in ("alef_plain", "alef_hamza_above", "alef_hamza_below", "alef_madda"):
+        assert item(r, name) == {"docs_with": 1, "per_1000_letters": 250.0}
+    assert r["pair_shares"]["alef_plain_among_alef_forms"] == 0.25
+
+
+def test_yeh_versus_alef_maqsura():
+    r = sv("على في")  # ع ل ى ف ي: one maqsura, one yeh, 5 letters
+    assert item(r, "yeh")["per_1000_letters"] == 200.0
+    assert item(r, "alef_maqsura")["per_1000_letters"] == 200.0
+    assert r["pair_shares"]["alef_maqsura_among_yeh_like"] == 0.5
+
+
+@pytest.mark.parametrize(
+    "text,teh_final,heh_final",
+    [
+        ("مدرسة", 1, 0),
+        ("مدرسه", 0, 1),
+        ("مدرسة" + DAMMATAN, 1, 0),  # a mark after the letter does not hide that it is final
+        ("مدرسة" + TATWEEL, 1, 0),  # neither does a tatweel
+        ("مدرسة، ثم", 1, 0),  # punctuation ends the word
+        ("الله", 0, 1),  # a legitimate word-final heh
+        ("ه", 0, 1),  # one-letter word
+        ("هل مهندس", 0, 0),  # heh inside words
+        ("ةب", 0, 0),  # teh marbuta followed by a letter is inside the word
+        ("مدرسة2", 0, 0),  # a following digit keeps it inside the token
+        ("مدرسة ومدرسه", 1, 1),
+        # a vowel mark between the heh and the next letter must not make the heh look final:
+        # هَذَا = heh, fatha, thal, fatha, alef  (the mark is not \w, so only stripping it is safe)
+        ("\u0647\u064e\u0630\u064e\u0627", 0, 0),
+        ("\u062a\u0627\u0647\u064e\u0644", 0, 0),
+    ],
+)
+def test_word_final_teh_marbuta_and_heh(text: str, teh_final: int, heh_final: int):
+    r = sv(text)
+    occurrences = lambda name: round(item(r, name)["per_1000_letters"] * r["arabic_letters"] / 1000)  # noqa: E731
+    assert (occurrences("teh_marbuta_final"), occurrences("heh_final")) == (teh_final, heh_final)
+
+
+def test_digit_systems_are_counted_separately():
+    r = sv("123 ١٢٣ ۱۲۳")  # three ASCII, three Arabic-Indic, three Extended Arabic-Indic digits
+    assert r["arabic_letters"] == 0
+    for name in ("digits_ascii", "digits_arabic_indic", "digits_extended_arabic_indic"):
+        assert item(r, name) == {"docs_with": 1, "per_1000_letters": 0.0}  # no letters, rate is 0.0
+
+
+def test_docs_with_counts_documents_while_the_rate_counts_occurrences():
+    r = sv("م" + TATWEEL * 4 + "ر", "مر", "مر")  # one document has four tatweels, 6 letters in all
+    assert item(r, "tatweel") == {"docs_with": 1, "per_1000_letters": round(1000 * 4 / 6, 3)}
+
+
+def test_rates_use_arabic_letters_only():
+    r = sv("abc defgh مرحبا" + FATHA)  # 8 Latin letters are not in the denominator
+    assert r["arabic_letters"] == 5
+    assert item(r, "diacritics_without_shadda")["per_1000_letters"] == 200.0
+
+
+def test_empty_result_and_exact_keys():
+    r = SurfaceVariation().result()
+    assert set(r) == {"docs", "arabic_letters", "items", "pair_shares"}
+    assert list(r["items"]) == [
+        "diacritics_without_shadda", "shadda", "tatweel",
+        "alef_plain", "alef_hamza_above", "alef_hamza_below", "alef_madda",
+        "yeh", "alef_maqsura", "teh_marbuta_final", "heh_final",
+        "digits_ascii", "digits_arabic_indic", "digits_extended_arabic_indic",
+    ]  # fmt: skip
+    assert all(v == {"docs_with": 0, "per_1000_letters": 0.0} for v in r["items"].values())
+    assert all(v is None for v in r["pair_shares"].values())  # undefined pairs are None, not 0
+
+
+def test_surface_variation_runs_inside_the_eda_runner(tmp_path: Path):
+    r = analyze_source(six_english_docs_manifest(tmp_path), [SurfaceVariation()])["checks"]
+    assert r["surface_variation"]["status"] == "ok" and r["surface_variation"]["docs"] == 6
