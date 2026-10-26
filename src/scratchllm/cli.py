@@ -46,7 +46,7 @@ def sample(
     rows_per_group: Annotated[
         int, typer.Option(help="Rows taken from each sampled row group.")
     ] = 250,
-    workers: Annotated[int, typer.Option(help="Parallel row-group reads.")] = 8,
+    workers: Annotated[int, typer.Option(help="Parallel row-group reads.")] = 4,
     cache_dir: Annotated[
         Path, typer.Option(help="Where parquet footers are cached between draws.")
     ] = Path("data/cache/footers"),

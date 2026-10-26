@@ -33,9 +33,15 @@ import pyarrow.parquet as pq
 T = TypeVar("T")
 
 
+# fsspec's default read block is 5 MB with read-ahead, so each column read pulls ~5 MB. Measured
+# on fineweb-2 arb_Arab (8 row groups per setting, interleaved): the default fetched 4.1x the bytes
+# needed and took 11 s per group; 256 KB blocks fetched 1.2x and took 3.7 s (64 KB: 1.0x, 3.2 s).
+DEFAULT_BLOCK_SIZE = 256 * 1024
+
+
 class FileSystem(Protocol):
     def glob(self, path: str, **kwargs: Any) -> Any: ...
-    def open(self, path: str, mode: str = "rb") -> Any: ...
+    def open(self, path: str, mode: str = "rb", **kwargs: Any) -> Any: ...
 
 
 @dataclass(frozen=True, order=True)
@@ -158,9 +164,10 @@ def iter_sampled_rows(
     rows_per_group: int,
     seed: int,
     stats: Counter[str],
-    workers: int = 8,
+    workers: int = 4,
     retry_delay: float = 1.0,
     max_consecutive_failures: int = 20,
+    block_size: int | None = DEFAULT_BLOCK_SIZE,
 ) -> Iterator[dict[str, Any]]:
     """Yield up to `rows_per_group` random rows from each row group, in plan order.
 
@@ -176,7 +183,8 @@ def iter_sampled_rows(
             if len(cache) >= 8:  # keep per-thread handles bounded
                 cache.pop(next(iter(cache)))
             # passing the metadata means the footer is not downloaded again
-            cache[path] = pq.ParquetFile(fs.open(path, "rb"), metadata=footers.get(path))
+            opened = fs.open(path, "rb", **({"block_size": block_size} if block_size else {}))
+            cache[path] = pq.ParquetFile(opened, metadata=footers.get(path))
         return cache[path]
 
     def read(ref: RowGroupRef) -> tuple[list[dict[str, Any]], int]:

@@ -11,6 +11,7 @@ import pytest
 from fsspec.implementations.local import LocalFileSystem
 
 from scratchllm.data.rowgroups import (
+    DEFAULT_BLOCK_SIZE,
     FooterCache,
     iter_sampled_rows,
     list_row_groups,
@@ -66,19 +67,21 @@ class SpyFS:
         self.fail = fail or (lambda path, n: False)
         self.opens: Counter[str] = Counter()
         self.threads: set[int] = set()
+        self.open_kwargs: list[dict[str, Any]] = []
         self._lock = threading.Lock()
 
     def glob(self, path: str, **kwargs: Any) -> Any:
         return self.inner.glob(path, **kwargs)
 
-    def open(self, path: str, mode: str = "rb") -> Any:
+    def open(self, path: str, mode: str = "rb", **kwargs: Any) -> Any:
         with self._lock:
             self.opens[path] += 1
             n = self.opens[path]
             self.threads.add(threading.get_ident())
+            self.open_kwargs.append(dict(kwargs))
         if self.fail(path, n):
             raise OSError("injected failure")
-        return self.inner.open(path, mode)
+        return self.inner.open(path, mode, **kwargs)
 
 
 def prepare(fs, corpus: Path, cache_dir: Path, keep: int = 32):
@@ -436,10 +439,10 @@ class RecordingFS:
     def glob(self, path: str, **kwargs: Any) -> Any:
         return self.inner.glob(path, **kwargs)
 
-    def open(self, path: str, mode: str = "rb") -> Any:
+    def open(self, path: str, mode: str = "rb", **kwargs: Any) -> Any:
         with self._lock:
             log = self.logs.setdefault(path, [])
-        return Recorder(self.inner.open(path, mode), log)
+        return Recorder(self.inner.open(path, mode, **kwargs), log)
 
 
 def test_our_reader_never_downloads_a_footer_during_reads(corpus: Path, cache_dir: Path):
@@ -453,3 +456,22 @@ def test_our_reader_never_downloads_a_footer_during_reads(corpus: Path, cache_di
         footer_bytes = sum(max(0, min(e, size) - max(s, footer_start)) for s, e in log)
         assert footer_bytes == 0, f"{Path(path).name}: footer was downloaded again during reads"
         assert any(e > s for s, e in log)  # and data was read
+
+
+# ---------- read block size ----------
+
+
+def test_reader_opens_files_with_the_small_block_size(corpus: Path, cache_dir: Path):
+    footers, groups = prepare(LocalFileSystem(), corpus, cache_dir)
+    fs = SpyFS()
+    sample(fs, footers, groups, workers=2)
+    assert fs.open_kwargs  # the reader did open files through this filesystem
+    assert all(kw == {"block_size": DEFAULT_BLOCK_SIZE} for kw in fs.open_kwargs)
+    assert DEFAULT_BLOCK_SIZE == 256 * 1024
+
+
+def test_block_size_can_be_switched_off(corpus: Path, cache_dir: Path):
+    footers, groups = prepare(LocalFileSystem(), corpus, cache_dir)
+    fs = SpyFS()
+    rows, _ = sample(fs, footers, groups, workers=2, block_size=None)
+    assert len(rows) == 90 and all(kw == {} for kw in fs.open_kwargs)

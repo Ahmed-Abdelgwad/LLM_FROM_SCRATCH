@@ -52,7 +52,7 @@ class SampleSpec:
     test_frac: float = 0.02
     min_chars: int = 50  # drops empty/trivial rows only; real quality filtering comes after EDA
     rows_per_group: int = 250  # rows taken from each sampled row group (raised for small sources)
-    read_workers: int = 8
+    read_workers: int = 4  # best of 1/4/16 measured on fineweb-2 arb_Arab; more did not help
 
 
 def text_hash(text: str) -> str:
