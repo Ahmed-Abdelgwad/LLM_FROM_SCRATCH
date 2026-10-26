@@ -1,45 +1,132 @@
-"""The three EDA checks that are yours to write.
+"""The three EDA checks about Arabic text.
 
-Each is a contract, not a solution. Implement `update` and `result` so that `result()` returns
-exactly the keys listed in the class docstring (the report and the later decisions read them).
-Until a check is implemented its `update` raises NotImplementedError, and the runner reports it
-as "not_implemented" instead of failing.
+Each is a contract: `result()` returns exactly the keys listed in the class docstring (the
+report and the later decisions read them). Until a check is implemented its `update` raises
+NotImplementedError, and the runner reports it as "not_implemented" instead of failing.
 
-Suggested order: ScriptMix (smallest), SurfaceVariation, then NearDuplicates (needs the most
-thinking). Write the tests in tests/test_eda_learner.py first, with a few hand-made strings
-whose answers you know, then make them pass.
+Status: ScriptMix is implemented (written by the assistant at the owner's request, with the
+decisions explained in `letter_script` and the class docstring). SurfaceVariation and
+NearDuplicates are still contracts. Write the tests first, with hand-made strings whose answers
+you know (see tests/test_eda_learner.py for the style), then make them pass.
 """
 
 from __future__ import annotations
 
+import unicodedata
+from collections import Counter
 from typing import Any
+
+# Unicode blocks whose letters belong to the Arabic script: the main block, its supplement,
+# extended-A, and the two presentation-form blocks (what copy-pasted PDF text often contains,
+# e.g. the ligature U+FEFB).
+_ARABIC_BLOCKS = (
+    (0x0600, 0x06FF),
+    (0x0750, 0x077F),
+    (0x08A0, 0x08FF),
+    (0xFB50, 0xFDFF),
+    (0xFE70, 0xFEFF),
+)
+_TATWEEL = "ـ"
+
+
+def letter_script(ch: str) -> str | None:
+    """'arabic', 'latin' or 'other' for a letter; None for anything that is not a letter.
+
+    Decisions, all deliberate:
+    - "Letter" means str.isalpha(). Digits, spaces, punctuation and the combining marks
+      (harakat, shadda) are not letters, so a vowelled word has the same letter count as an
+      unvowelled one.
+    - The tatweel (U+0640) is NOT counted. isalpha() says it is a letter, but it is a spacing
+      stretch with no letter identity, and counting it would let "مـــــرحبا" outweigh "مرحبا".
+    - The script is decided by Unicode block, so Persian and Urdu letters (پ چ گ ک) count as
+      Arabic *script*. This measures script, not language.
+    - A non-ASCII letter is Latin if its Unicode name starts with "LATIN" (é, ñ, ß ...).
+    """
+    if not ch.isalpha() or ch == _TATWEEL:
+        return None
+    code = ord(ch)
+    if any(lo <= code <= hi for lo, hi in _ARABIC_BLOCKS):
+        return "arabic"
+    if code < 0x80 or unicodedata.name(ch, "").startswith("LATIN"):
+        return "latin"
+    return "other"
 
 
 class ScriptMix:
     """EDA question #1 / acceptance criteria A3 and A4: which scripts do the letters use?
 
-    For each document, count its *letters* (not digits, spaces or punctuation) and split them by
-    script into Arabic, Latin and other. A document's share is letters-in-that-script divided by
-    all its letters. A document with no letters at all is counted separately.
+    For each document, count its *letters* (see `letter_script` for exactly what that means) and
+    split them by script into Arabic, Latin and other. A document's share is letters-in-that-
+    script divided by all its letters. A document with no letters at all is counted separately and
+    is left out of every share and count below, because its shares are undefined.
 
     result() keys:
       docs                         number of documents seen
       docs_without_letters         documents with no letters
+      docs_with_letters            docs - docs_without_letters (the denominator of the means)
       mean_arabic_share            average of the per-document Arabic share
       mean_latin_share             average of the per-document Latin share
       mean_other_share             average of the per-document share of every other script
+      letters_total                pooled letter counts {"arabic", "latin", "other"}; long documents
+                                   dominate these, which is why the means above are per document
       docs_arabic_share_ge_0_8     count with Arabic share >= 0.8       (A3, Arabic sources)
       docs_latin_share_ge_0_9      count with Latin share  >= 0.9       (A4, English sources)
       docs_mixed                   count with Arabic share >= 0.2 AND Latin share >= 0.2
+
+    The threshold comparisons use integers (e.g. arabic * 5 >= letters * 4 for 0.8), so a
+    document at exactly 80% is counted and float rounding can never move it across the line.
     """
 
     name = "script_mix"
 
+    def __init__(self) -> None:
+        self.docs = 0
+        self.docs_without_letters = 0
+        self.letters_total: Counter[str] = Counter()
+        self._share_sums = {"arabic": 0.0, "latin": 0.0, "other": 0.0}
+        self._arabic_ge_08 = self._latin_ge_09 = self._mixed = 0
+        self._script_of_char: dict[str, str | None] = {}  # classify each distinct character once
+
     def update(self, doc: dict[str, Any]) -> None:
-        raise NotImplementedError("ScriptMix.update is yours to write")
+        self.docs += 1
+        per_script: Counter[str] = Counter()
+        # Counter(text) counts at C speed; only the ~100 distinct characters get classified
+        for ch, n in Counter(doc["text"]).items():
+            if ch not in self._script_of_char:
+                self._script_of_char[ch] = letter_script(ch)
+            script = self._script_of_char[ch]
+            if script is not None:
+                per_script[script] += n
+        letters = sum(per_script.values())
+        if letters == 0:
+            self.docs_without_letters += 1
+            return
+        self.letters_total.update(per_script)
+        for script in self._share_sums:
+            self._share_sums[script] += per_script[script] / letters
+        arabic, latin = per_script["arabic"], per_script["latin"]
+        self._arabic_ge_08 += arabic * 5 >= letters * 4  # arabic / letters >= 0.8
+        self._latin_ge_09 += latin * 10 >= letters * 9  # latin / letters >= 0.9
+        self._mixed += arabic * 5 >= letters and latin * 5 >= letters  # both >= 0.2
 
     def result(self) -> dict[str, Any]:
-        raise NotImplementedError("ScriptMix.result is yours to write")
+        with_letters = self.docs - self.docs_without_letters
+        mean = {
+            s: (total / with_letters if with_letters else 0.0)
+            for s, total in self._share_sums.items()
+        }
+        return {
+            "docs": self.docs,
+            "docs_without_letters": self.docs_without_letters,
+            "docs_with_letters": with_letters,
+            "mean_arabic_share": round(mean["arabic"], 4),
+            "mean_latin_share": round(mean["latin"], 4),
+            "mean_other_share": round(mean["other"], 4),
+            "letters_total": {s: self.letters_total[s] for s in ("arabic", "latin", "other")},
+            "docs_arabic_share_ge_0_8": self._arabic_ge_08,
+            "docs_latin_share_ge_0_9": self._latin_ge_09,
+            "docs_mixed": self._mixed,
+        }
 
 
 class SurfaceVariation:

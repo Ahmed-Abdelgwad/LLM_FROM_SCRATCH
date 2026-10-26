@@ -9,7 +9,6 @@ from scratchllm.cli import app
 from scratchllm.data.sampling import SampleSpec, manifest_path, text_hash, write_sample
 from scratchllm.data.sources import get_source
 from scratchllm.eda.checks_basic import LengthStats, PersonalData
-from scratchllm.eda.checks_learner import ScriptMix
 from scratchllm.eda.runner import analyze_source, iter_train_docs, run_eda
 
 SRC = get_source("fw2_arz")
@@ -110,10 +109,23 @@ def test_only_the_train_split_is_analysed(tmp_path: Path):
     assert result["checks"]["length"]["docs"] == 6  # the val and test documents were not seen
 
 
+class NotYetWritten:
+    """A stand-in for a check that is still a contract (kept local so this test does not
+    depend on which real checks happen to be implemented)."""
+
+    name = "not_yet_written"
+
+    def update(self, doc: dict) -> None:
+        raise NotImplementedError("still to write")
+
+    def result(self) -> dict:
+        raise NotImplementedError("still to write")
+
+
 def test_unimplemented_checks_are_reported_not_fatal(tmp_path: Path):
-    result = analyze_source(write_fixture(tmp_path), [LengthStats(), ScriptMix()])
+    result = analyze_source(write_fixture(tmp_path), [LengthStats(), NotYetWritten()])
     assert result["checks"]["length"]["status"] == "ok"
-    assert result["checks"]["script_mix"]["status"] == "not_implemented"
+    assert result["checks"]["not_yet_written"]["status"] == "not_implemented"
 
 
 def test_report_files_record_provenance(tmp_path: Path):
