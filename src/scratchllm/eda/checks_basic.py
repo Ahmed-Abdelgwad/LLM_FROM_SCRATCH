@@ -7,6 +7,7 @@ from typing import Any
 
 # Arabic-Indic (U+0660-0669) and Extended Arabic-Indic (U+06F0-06F9) digits -> ASCII
 _DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
+_NON_ASCII_DIGIT = re.compile("[٠-٩۰-۹]")
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 # A phone-like number has one of these shapes. The first draft accepted ANY 8-15 digits with
 # optional separators, and on real samples ~90% of its hits were year ranges ("2002-2003"), year
@@ -79,8 +80,10 @@ class PersonalData:
         self.phones = 0
 
     def update(self, doc: dict[str, Any]) -> None:
-        text = doc["text"].translate(_DIGITS)
-        emails = len(_EMAIL.findall(text))
+        text = doc["text"]
+        if _NON_ASCII_DIGIT.search(text):  # translating every document costs ~6 s per 100M chars
+            text = text.translate(_DIGITS)
+        emails = len(_EMAIL.findall(text)) if "@" in text else 0  # no '@', no email
         phones = len(_PHONE.findall(_DATE.sub(" ", text)))
         self.docs += 1
         self.with_email += emails > 0

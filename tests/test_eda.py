@@ -137,3 +137,50 @@ def test_a_sample_that_drifted_from_its_manifest_is_refused(tmp_path: Path):
 def test_cli_exposes_the_analyze_command():
     result = CliRunner().invoke(app, ["data", "analyze", "--help"])
     assert result.exit_code == 0 and "report.json" in result.output
+
+
+# ---------- progress, timing and the personal-data speed-ups ----------
+
+
+def test_progress_lines_and_per_check_seconds(tmp_path: Path, monkeypatch):
+    import scratchllm.eda.runner as runner
+
+    monkeypatch.setattr(runner, "PROGRESS_EVERY", 2)  # the fixture has 6 train docs
+    lines: list[str] = []
+    result = analyze_source(write_fixture(tmp_path), [LengthStats()], progress=lines.append)
+    assert lines[0].startswith("fw2_arz: verified")
+    assert [ln for ln in lines if ln.endswith("documents")] == [
+        "fw2_arz: 2 documents",
+        "fw2_arz: 4 documents",
+        "fw2_arz: 6 documents",
+    ]
+    assert "length " in lines[-1] and lines[-1].startswith("fw2_arz: done, 6 documents")
+    assert result["checks"]["length"]["seconds"] >= 0
+
+
+def _reference_personal_data(text: str) -> tuple[int, int]:
+    """The straightforward version: always translate digits, always run both patterns."""
+    from scratchllm.eda import checks_basic as cb
+
+    t = text.translate(cb._DIGITS)
+    return len(cb._EMAIL.findall(t)), len(cb._PHONE.findall(cb._DATE.sub(" ", t)))
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "no digits and no at-sign",
+        "mail a@b.co and 01102106655",
+        "اتصل ٠١١٠٢١٠٦٦٥٥ أو on@x.org",  # Arabic-Indic digits and an email in one document
+        "٠١١٠٢١٠٦٦٥٥ فقط",
+        "۰۱۱۰۲۱۰۶۶۵۵ بالأرقام الفارسية",  # Extended Arabic-Indic digits
+        "ahmed@ with nothing after it",
+        "2002-2003 و 24 11 2019 و +20 112 074 0067",
+        "",
+    ],
+)
+def test_speedups_give_exactly_the_reference_counts(text: str):
+    pd = PersonalData()
+    pd.update(doc(0, text))
+    r = pd.result()
+    assert (r["email_matches"], r["phone_like_matches"]) == _reference_personal_data(text)

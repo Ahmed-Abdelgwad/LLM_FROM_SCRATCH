@@ -106,7 +106,7 @@ def analyze(
     """Run the EDA checks on the train split of each sample and write report.json / report.md."""
     from scratchllm.eda.runner import run_eda
 
-    typer.echo(f"report written to {run_eda(manifests, out_dir)}")
+    typer.echo(f"report written to {run_eda(manifests, out_dir, progress=typer.echo)}")
 
 
 @data_app.command("verify")
