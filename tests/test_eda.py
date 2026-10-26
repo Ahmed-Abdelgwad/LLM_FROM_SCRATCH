@@ -196,3 +196,14 @@ def test_speedups_give_exactly_the_reference_counts(text: str):
     pd.update(doc(0, text))
     r = pd.result()
     assert (r["email_matches"], r["phone_like_matches"]) == _reference_personal_data(text)
+
+
+def test_cli_analyze_names_the_report_folder(tmp_path: Path):
+    m = write_fixture(tmp_path)
+    out = tmp_path / "reports"
+    result = CliRunner().invoke(
+        app, ["data", "analyze", str(m), "--out-dir", str(out), "--run-id", "final-demo"]
+    )
+    assert result.exit_code == 0, result.output
+    assert (out / "final-demo" / "report.json").exists()
+    assert "fw2_arz: done, 6 documents" in result.output  # progress lines reach the user

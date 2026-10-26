@@ -102,11 +102,19 @@ def _exit_now(code: int) -> NoReturn:
 def analyze(
     manifests: list[Path],
     out_dir: Annotated[Path, typer.Option(help="Where reports are written.")] = Path("reports/eda"),
+    run_id: Annotated[
+        str | None,
+        typer.Option(
+            help="Report folder name (default: UTC timestamp). Use final-<name> for a "
+            "report that should be tracked in git."
+        ),
+    ] = None,
 ) -> None:
     """Run the EDA checks on the train split of each sample and write report.json / report.md."""
     from scratchllm.eda.runner import run_eda
 
-    typer.echo(f"report written to {run_eda(manifests, out_dir, progress=typer.echo)}")
+    target = run_eda(manifests, out_dir, run_id=run_id, progress=typer.echo)
+    typer.echo(f"report written to {target}")
 
 
 @data_app.command("verify")

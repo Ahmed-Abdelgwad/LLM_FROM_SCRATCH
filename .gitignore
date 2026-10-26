@@ -23,3 +23,7 @@ runs/
 *.bin
 trackio/
 .vscode/
+
+# EDA reports: working runs are ignored; a report worth keeping is named final-<something>
+reports/eda/*
+!reports/eda/final-*/
