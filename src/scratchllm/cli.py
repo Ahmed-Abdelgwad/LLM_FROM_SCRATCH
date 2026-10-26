@@ -47,6 +47,9 @@ def sample(
         int, typer.Option(help="Rows taken from each sampled row group.")
     ] = 250,
     workers: Annotated[int, typer.Option(help="Parallel row-group reads.")] = 8,
+    cache_dir: Annotated[
+        Path, typer.Option(help="Where parquet footers are cached between draws.")
+    ] = Path("data/cache/footers"),
     revision: Annotated[
         str | None, typer.Option(help="Pin a dataset commit; default is latest.")
     ] = None,
@@ -67,7 +70,8 @@ def sample(
         typer.echo(f"{src.name}: {src.repo} @ {rev[:10]}, drawing {n_docs} docs (seed {seed})")
         stats: Counter[str] = Counter()
         fs, root = open_hf(src, rev)
-        docs = build_docs(iter_source_rows(src, spec, stats, fs, root), src, spec, stats)
+        rows = iter_source_rows(src, spec, stats, fs, root, cache_dir)
+        docs = build_docs(rows, src, spec, stats)
         m = write_sample(docs, out_dir, src, spec, rev, stats)
         typer.echo(f"wrote {m.n_docs} docs {m.docs_per_split}; sha256 {m.sha256[:12]}")
         typer.echo(f"stats: {m.stats}")

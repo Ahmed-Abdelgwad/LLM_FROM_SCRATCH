@@ -23,7 +23,13 @@ from pathlib import Path
 from typing import Any
 
 import scratchllm
-from scratchllm.data.rowgroups import FileSystem, iter_sampled_rows, list_row_groups, plan_order
+from scratchllm.data.rowgroups import (
+    FileSystem,
+    FooterCache,
+    iter_sampled_rows,
+    list_row_groups,
+    plan_order,
+)
 from scratchllm.data.sources import Source
 from scratchllm.data.split import assign_split, split_key
 
@@ -86,14 +92,25 @@ def effective_rows_per_group(n_docs: int, n_groups: int, base: int) -> int:
 
 
 def iter_source_rows(
-    source: Source, spec: SampleSpec, stats: Counter[str], fs: FileSystem, root: str
+    source: Source,
+    spec: SampleSpec,
+    stats: Counter[str],
+    fs: FileSystem,
+    root: str,
+    cache_dir: Path,
 ) -> Iterator[dict[str, Any]]:
-    """Lazily yield sampled raw rows of `source`; records what it found in `stats`."""
+    """Lazily yield sampled raw rows of `source`; records what it found in `stats`.
+
+    `cache_dir` holds the parquet footers (downloaded once per file, reused by later draws).
+    """
     if not source.data_glob:
         raise ValueError(f"source {source.name!r} has no data_glob")
     started = time.perf_counter()
-    groups = list_row_groups(fs, f"{root}/{source.data_glob}", workers=spec.read_workers)
+    footers = FooterCache(fs, cache_dir)
+    groups = list_row_groups(fs, f"{root}/{source.data_glob}", footers, workers=spec.read_workers)
     stats["ms_listing"] = int((time.perf_counter() - started) * 1000)
+    stats["footers_from_cache"] = footers.hits  # counted during listing only
+    stats["footers_downloaded"] = footers.fetched
     per_group = effective_rows_per_group(spec.n_docs, len(groups), spec.rows_per_group)
     stats["files_total"] = len({g.path for g in groups})
     stats["row_groups_total"] = len(groups)
@@ -102,6 +119,7 @@ def iter_source_rows(
     columns = [c for c in (source.text_field, source.id_field, source.url_field) if c]
     yield from iter_sampled_rows(
         fs,
+        footers,
         plan_order(groups, spec.seed),
         columns,
         per_group,

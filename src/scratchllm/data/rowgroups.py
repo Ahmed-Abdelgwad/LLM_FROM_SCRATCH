@@ -6,19 +6,26 @@ has 25 shards of ~4.8 GB) open many big files at once over a slow link. Here we 
 footers, pick row groups uniformly at random across *all* shards, and fetch only those, one
 small range request each (row groups in our sources hold ~1000 rows, a few MB).
 
+A footer is large for these files (~11 MB for an `arb_Arab` shard) and needed twice: to plan
+(row counts) and to read (column offsets). `FooterCache` fetches each file's footer at most once,
+keeps it on disk, and hands the same metadata to the readers, so no footer is downloaded again.
+
 Everything that touches the network goes through a minimal `FileSystem` (fsspec-style), so the
 logic is tested on local parquet files.
 """
 
 from __future__ import annotations
 
+import hashlib
+import os
 import random
 import threading
 import time
-from collections import Counter, deque
+from collections import Counter, OrderedDict, deque
 from collections.abc import Callable, Iterator
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Protocol, TypeVar
 
 import pyarrow.parquet as pq
@@ -27,7 +34,7 @@ T = TypeVar("T")
 
 
 class FileSystem(Protocol):
-    def glob(self, path: str) -> list[str]: ...
+    def glob(self, path: str, **kwargs: Any) -> Any: ...
     def open(self, path: str, mode: str = "rb") -> Any: ...
 
 
@@ -51,26 +58,89 @@ def retry(fn: Callable[[], T], attempts: int = 4, base_delay: float = 1.0) -> T:
     raise AssertionError("unreachable")
 
 
+class FooterCache:
+    """Parquet file metadata, downloaded at most once per file and kept on disk.
+
+    The cache key includes the file size, so a changed file is not served from a stale entry
+    (files on the Hub are immutable per revision; the size guards local files). A damaged cache
+    entry is discarded and fetched again. Writes are atomic. `keep` bounds the metadata held in
+    memory; the rest is re-read from the local cache file.
+    """
+
+    def __init__(
+        self, fs: FileSystem, cache_dir: Path, retry_delay: float = 1.0, keep: int = 32
+    ) -> None:
+        self.fs, self.cache_dir, self.retry_delay, self.keep = fs, cache_dir, retry_delay, keep
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.hits = 0  # served from the on-disk cache
+        self.fetched = 0  # downloaded from the filesystem
+        self._sizes: dict[str, int] = {}
+        self._lru: OrderedDict[str, Any] = OrderedDict()
+        self._lock = threading.Lock()
+
+    def track(self, sizes: dict[str, int]) -> None:
+        self._sizes.update(sizes)
+
+    def _cache_file(self, path: str) -> Path:
+        key = hashlib.sha256(f"{path}|{self._sizes[path]}".encode()).hexdigest()[:24]
+        return self.cache_dir / f"{key}.metadata"
+
+    def get(self, path: str) -> Any:
+        with self._lock:
+            md = self._lru.get(path)
+            if md is not None:
+                self._lru.move_to_end(path)
+                return md
+        # Disk and network work happens outside the lock so footers download in parallel.
+        cache_file, from_cache = self._cache_file(path), False
+        md = None
+        if cache_file.exists():
+            try:
+                md, from_cache = pq.read_metadata(cache_file), True
+            except Exception:
+                cache_file.unlink(missing_ok=True)  # damaged entry: fetch it again
+        if md is None:
+            md = retry(lambda: self._fetch(path), base_delay=self.retry_delay)
+            self._store(cache_file, md)
+        with self._lock:
+            if from_cache:
+                self.hits += 1
+            else:
+                self.fetched += 1
+            self._lru[path] = md
+            while len(self._lru) > self.keep:
+                self._lru.popitem(last=False)
+        return md
+
+    def _fetch(self, path: str) -> Any:
+        with self.fs.open(path, "rb") as f:
+            return pq.ParquetFile(f).metadata
+
+    @staticmethod
+    def _store(cache_file: Path, md: Any) -> None:
+        tmp = cache_file.with_name(f"{cache_file.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+        try:
+            md.write_metadata_file(str(tmp))
+            os.replace(tmp, cache_file)
+        except OSError:
+            tmp.unlink(missing_ok=True)  # a cache we cannot write only costs a later re-download
+
+
 def list_row_groups(
-    fs: FileSystem, pattern: str, workers: int = 8, retry_delay: float = 1.0
+    fs: FileSystem, pattern: str, footers: FooterCache, workers: int = 8
 ) -> list[RowGroupRef]:
-    """Read every matching file's footer (small) and return all its row groups, sorted."""
-    paths = sorted(fs.glob(pattern))
-    if not paths:
+    """Every row group of every file matching `pattern`, sorted."""
+    files = fs.glob(pattern, detail=True)
+    if not files:
         raise FileNotFoundError(f"no parquet files match {pattern!r}")
+    footers.track({path: int(info["size"]) for path, info in files.items()})
 
-    def footer(path: str) -> list[RowGroupRef]:
-        def read() -> list[RowGroupRef]:
-            with fs.open(path, "rb") as f:
-                md = pq.ParquetFile(f).metadata
-            return [
-                RowGroupRef(path, i, md.row_group(i).num_rows) for i in range(md.num_row_groups)
-            ]
-
-        return retry(read, base_delay=retry_delay)
+    def groups_of(path: str) -> list[RowGroupRef]:
+        md = footers.get(path)
+        return [RowGroupRef(path, i, md.row_group(i).num_rows) for i in range(md.num_row_groups)]
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        return sorted(g for part in pool.map(footer, paths) for g in part)
+        return sorted(g for part in pool.map(groups_of, sorted(files)) for g in part)
 
 
 def plan_order(groups: list[RowGroupRef], seed: int) -> list[RowGroupRef]:
@@ -82,6 +152,7 @@ def plan_order(groups: list[RowGroupRef], seed: int) -> list[RowGroupRef]:
 
 def iter_sampled_rows(
     fs: FileSystem,
+    footers: FooterCache,
     order: list[RowGroupRef],
     columns: list[str],
     rows_per_group: int,
@@ -104,7 +175,8 @@ def iter_sampled_rows(
         if path not in cache:
             if len(cache) >= 8:  # keep per-thread handles bounded
                 cache.pop(next(iter(cache)))
-            cache[path] = pq.ParquetFile(fs.open(path, "rb"))
+            # passing the metadata means the footer is not downloaded again
+            cache[path] = pq.ParquetFile(fs.open(path, "rb"), metadata=footers.get(path))
         return cache[path]
 
     def read(ref: RowGroupRef) -> tuple[list[dict[str, Any]], int]:

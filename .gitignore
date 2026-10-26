@@ -15,6 +15,7 @@ htmlcov/
 # Data and run artifacts live outside git (track provenance in docs/data/ instead)
 data/raw/*
 data/processed/*
+data/cache/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 runs/
