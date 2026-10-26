@@ -475,3 +475,38 @@ def test_block_size_can_be_switched_off(corpus: Path, cache_dir: Path):
     fs = SpyFS()
     rows, _ = sample(fs, footers, groups, workers=2, block_size=None)
     assert len(rows) == 90 and all(kw == {} for kw in fs.open_kwargs)
+
+
+# ---------- revision lookup ----------
+
+
+def test_revision_lookup_survives_a_transient_failure(monkeypatch):
+    import huggingface_hub
+
+    from scratchllm.data.sampling import latest_revision
+
+    calls = []
+
+    class FlakyApi:
+        def dataset_info(self, repo: str):
+            calls.append(repo)
+            if len(calls) < 3:
+                raise OSError("Temporary failure in name resolution")
+            return type("Info", (), {"sha": "abc123"})()
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", FlakyApi)
+    assert latest_revision("x/y", retry_delay=0.0) == "abc123" and len(calls) == 3
+
+
+def test_revision_lookup_gives_up_after_repeated_failures(monkeypatch):
+    import huggingface_hub
+
+    from scratchllm.data.sampling import latest_revision
+
+    class DeadApi:
+        def dataset_info(self, repo: str):
+            raise OSError("no route")
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", DeadApi)
+    with pytest.raises(OSError, match="no route"):
+        latest_revision("x/y", retry_delay=0.0)

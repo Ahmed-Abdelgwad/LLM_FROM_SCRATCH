@@ -29,6 +29,7 @@ from scratchllm.data.rowgroups import (
     iter_sampled_rows,
     list_row_groups,
     plan_order,
+    retry,
 )
 from scratchllm.data.sources import Source
 from scratchllm.data.split import assign_split, split_key
@@ -60,11 +61,15 @@ def text_hash(text: str) -> str:
     return hashlib.sha256(_WS.sub(" ", text).strip().encode("utf-8")).hexdigest()
 
 
-def latest_revision(repo: str) -> str:
-    """Resolve the current commit hash of a dataset repo so the sample can be re-fetched."""
+def latest_revision(repo: str, retry_delay: float = 2.0) -> str:
+    """Resolve the current commit hash of a dataset repo so the sample can be re-fetched.
+
+    This is the first network call of every draw, so a momentary DNS or connection failure here
+    used to end the whole run; it is retried like the row-group reads are.
+    """
     from huggingface_hub import HfApi
 
-    sha = HfApi().dataset_info(repo).sha
+    sha = retry(lambda: HfApi().dataset_info(repo).sha, base_delay=retry_delay)
     if sha is None:
         raise RuntimeError(f"could not resolve a revision for {repo}")
     return sha
