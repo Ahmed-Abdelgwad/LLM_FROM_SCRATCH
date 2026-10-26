@@ -144,7 +144,7 @@ def test_short_stream_is_recorded(tmp_path: Path):
 def test_manifest_json_is_valid_and_records_method(tmp_path: Path):
     _write(tmp_path, WEB, [_doc(0, "train")])
     raw = json.loads(manifest_path(tmp_path, WEB.name).read_text(encoding="utf-8"))
-    assert "shuffle" in raw["selection_method"] and raw["revision"] == "rev0"
+    assert "row groups" in raw["selection_method"] and raw["revision"] == "rev0"
 
 
 # ---------- leakage ----------

@@ -15,8 +15,9 @@ from scratchllm.data.leakage import collect_eval_hashes, count_train_leaks, purg
 from scratchllm.data.sampling import (
     SampleSpec,
     build_docs,
+    iter_source_rows,
     latest_revision,
-    stream_raw,
+    open_hf,
     verify_manifest,
     write_sample,
 )
@@ -42,19 +43,31 @@ def sample(
     val_frac: float = 0.02,
     test_frac: float = 0.02,
     out_dir: Path = Path("data/raw/eda"),
+    rows_per_group: Annotated[
+        int, typer.Option(help="Rows taken from each sampled row group.")
+    ] = 250,
+    workers: Annotated[int, typer.Option(help="Parallel row-group reads.")] = 8,
     revision: Annotated[
         str | None, typer.Option(help="Pin a dataset commit; default is latest.")
     ] = None,
 ) -> None:
-    """Stream a seeded sample, label each doc train/val/test, and write it with a manifest."""
+    """Draw a seeded sample spread over the whole source, label splits, write with a manifest."""
     code = 0
     try:
         src = get_source(source)
-        spec = SampleSpec(n_docs=n_docs, seed=seed, val_frac=val_frac, test_frac=test_frac)
+        spec = SampleSpec(
+            n_docs=n_docs,
+            seed=seed,
+            val_frac=val_frac,
+            test_frac=test_frac,
+            rows_per_group=rows_per_group,
+            read_workers=workers,
+        )
         rev = revision or latest_revision(src.repo)
         typer.echo(f"{src.name}: {src.repo} @ {rev[:10]}, drawing {n_docs} docs (seed {seed})")
         stats: Counter[str] = Counter()
-        docs = build_docs(stream_raw(src, spec, rev), src, spec, stats)
+        fs, root = open_hf(src, rev)
+        docs = build_docs(iter_source_rows(src, spec, stats, fs, root), src, spec, stats)
         m = write_sample(docs, out_dir, src, spec, rev, stats)
         typer.echo(f"wrote {m.n_docs} docs {m.docs_per_split}; sha256 {m.sha256[:12]}")
         typer.echo(f"stats: {m.stats}")
@@ -68,11 +81,13 @@ def sample(
 def _exit_now(code: int) -> NoReturn:
     """End the process without interpreter finalization.
 
-    We stop reading the HF stream early, which can leave an Arrow I/O worker running Python
-    code (e.g. a download retry sleeping). At normal exit Arrow's thread pool waits for that
-    worker while the worker waits for the finalizing interpreter's GIL: a deadlock that hangs
-    the CLI forever (confirmed with gdb: main thread in arrow::internal::ThreadPool::Shutdown).
-    Output is already fsynced and atomically renamed by write_sample, so exiting here is safe.
+    We stop reading early, which can leave remote reads in flight. With the old HF streaming
+    reader this deadlocked at exit: an Arrow I/O worker was running Python code (a download
+    retry sleeping) while the main thread sat in arrow::internal::ThreadPool::Shutdown waiting
+    for it, and the worker waited for the finalizing interpreter's GIL (confirmed with gdb).
+    The row-group reader is a different code path and has not been shown to hang, but it also
+    abandons in-flight reads, so we keep the hard exit. Output is already fsynced and atomically
+    renamed by write_sample, so exiting here is safe.
     """
     sys.stdout.flush()
     sys.stderr.flush()

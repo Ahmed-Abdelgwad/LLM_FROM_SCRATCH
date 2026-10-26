@@ -18,6 +18,7 @@ class Source:
     text_field: str = "text"
     id_field: str = "id"
     url_field: str | None = "url"
+    data_glob: str = ""  # parquet files inside the repo, e.g. "data/arz_Arab/train/*.parquet"
 
 
 _FW2 = "HuggingFaceFW/fineweb-2"
@@ -25,7 +26,16 @@ _WIKI = "wikimedia/wikipedia"
 
 
 def _fw2(config: str, variety: str) -> Source:
-    return Source(f"fw2_{config[:3]}", _FW2, config, "ar", variety, "ODC-By", "web")
+    return Source(
+        f"fw2_{config[:3]}",
+        _FW2,
+        config,
+        "ar",
+        variety,
+        "ODC-By",
+        "web",
+        data_glob=f"data/{config}/train/*.parquet",
+    )
 
 
 def _wiki(code: str, language: str, variety: str) -> Source:
@@ -37,6 +47,7 @@ def _wiki(code: str, language: str, variety: str) -> Source:
         variety,
         "CC-BY-SA-3.0 + GFDL",
         "wiki",
+        data_glob=f"20231101.{code}/*.parquet",
     )
 
 
@@ -61,6 +72,7 @@ SOURCES: dict[str, Source] = {
             "en",
             "ODC-By",
             "web",
+            data_glob="sample/10BT/*.parquet",
         ),
     ]
 }

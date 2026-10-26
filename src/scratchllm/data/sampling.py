@@ -1,15 +1,16 @@
-"""Streaming, seeded document sampling with split assignment and a verifiable manifest.
+"""Seeded document sampling with split assignment and a verifiable manifest.
 
-Selection method (recorded in every manifest, because it is not a uniform sample):
-Hugging Face streaming `shuffle(seed, buffer_size)` shuffles the order of source shards and
-then shuffles within a rolling buffer. It spreads the draw across shards, but documents that
-sit close together inside a shard remain correlated. Treat the sample as "diverse", not "iid".
+Selection method (recorded in every manifest): row groups are drawn uniformly at random across
+all parquet shards of a source (see rowgroups.py), then up to `rows_per_group` random rows are
+taken from each. Rows from one row group are neighbours in the source file and can be
+correlated (same crawl, same site), so the sample is spread out, not strictly iid.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 from collections import Counter
@@ -21,10 +22,15 @@ from pathlib import Path
 from typing import Any
 
 import scratchllm
+from scratchllm.data.rowgroups import FileSystem, iter_sampled_rows, list_row_groups, plan_order
 from scratchllm.data.sources import Source
 from scratchllm.data.split import assign_split, split_key
 
-SELECTION_METHOD = "hf-streaming shuffle(seed, buffer_size): shuffled shard order + rolling buffer"
+SELECTION_METHOD = (
+    "uniform random row groups across all parquet shards (seeded), "
+    "up to rows_per_group random rows from each"
+)
+OVERSAMPLE = 1.25  # margin for rows later dropped (short, duplicate) so n_docs is still reached
 HASH_NORMALIZATION = "sha256 of utf-8 text after collapsing whitespace runs and stripping"
 ID_POLICY = "missing/blank source id -> 'h' + first 16 hex of text hash; counted in stats"
 
@@ -38,7 +44,8 @@ class SampleSpec:
     val_frac: float = 0.02
     test_frac: float = 0.02
     min_chars: int = 50  # drops empty/trivial rows only; real quality filtering comes after EDA
-    shuffle_buffer: int = 10_000
+    rows_per_group: int = 250  # rows taken from each sampled row group (raised for small sources)
+    read_workers: int = 8
 
 
 def text_hash(text: str) -> str:
@@ -56,13 +63,49 @@ def latest_revision(repo: str) -> str:
     return sha
 
 
-def stream_raw(source: Source, spec: SampleSpec, revision: str) -> Iterator[dict[str, Any]]:
-    from datasets import load_dataset
+def open_hf(source: Source, revision: str) -> tuple[FileSystem, str]:
+    """Filesystem and root path for a pinned revision of the source's Hugging Face repo."""
+    from huggingface_hub import HfFileSystem
 
-    ds = load_dataset(
-        source.repo, source.config, split=source.split, streaming=True, revision=revision
+    return HfFileSystem(), f"datasets/{source.repo}@{revision}"
+
+
+def effective_rows_per_group(n_docs: int, n_groups: int, base: int) -> int:
+    """Rows to take per row group so that `n_docs` can be reached from `n_groups` groups.
+
+    With enough groups this is just `base`. A small source (few groups) would otherwise stop far
+    short of `n_docs`, so we take more rows from each group, spreading evenly over all of them.
+    """
+    if n_groups < 1:
+        raise ValueError("source has no row groups")
+    groups_needed = math.ceil(OVERSAMPLE * n_docs / base)
+    if n_groups >= groups_needed:
+        return base
+    return math.ceil(OVERSAMPLE * n_docs / n_groups)
+
+
+def iter_source_rows(
+    source: Source, spec: SampleSpec, stats: Counter[str], fs: FileSystem, root: str
+) -> Iterator[dict[str, Any]]:
+    """Lazily yield sampled raw rows of `source`; records what it found in `stats`."""
+    if not source.data_glob:
+        raise ValueError(f"source {source.name!r} has no data_glob")
+    groups = list_row_groups(fs, f"{root}/{source.data_glob}", workers=spec.read_workers)
+    per_group = effective_rows_per_group(spec.n_docs, len(groups), spec.rows_per_group)
+    stats["files_total"] = len({g.path for g in groups})
+    stats["row_groups_total"] = len(groups)
+    stats["rows_total"] = sum(g.n_rows for g in groups)
+    stats["rows_per_group_effective"] = per_group
+    columns = [c for c in (source.text_field, source.id_field, source.url_field) if c]
+    yield from iter_sampled_rows(
+        fs,
+        plan_order(groups, spec.seed),
+        columns,
+        per_group,
+        spec.seed,
+        stats,
+        workers=spec.read_workers,
     )
-    yield from ds.shuffle(seed=spec.seed, buffer_size=spec.shuffle_buffer)
 
 
 def build_docs(
