@@ -26,6 +26,7 @@ def default_checks() -> list[Check]:
 
 
 PROGRESS_EVERY = 10_000
+TRACKED_PREFIX = "final-"  # reports with this run id are committed to git (see .gitignore)
 
 
 def _read_train_docs(manifest_path: Path, data_file: str) -> Iterator[dict[str, Any]]:
@@ -121,6 +122,19 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def drop_raw_snippets(report: dict[str, Any]) -> None:
+    """Remove web-page text from a report that will be committed.
+
+    The near-duplicate check keeps the first characters of each large cluster so a person can
+    read what the template is. In a local report that is useful; in a tracked one it would put
+    raw web text (spam, phone numbers, adult pages were all seen in the samples) into git. The
+    document ids stay, so the page can still be found in the sample.
+    """
+    for src in report["sources"]:
+        for example in src["checks"].get("near_duplicates", {}).get("largest_cluster_examples", []):
+            example.pop("first_text", None)
+
+
 def run_eda(
     manifests: Sequence[Path],
     out_dir: Path,
@@ -135,6 +149,8 @@ def run_eda(
         "scratchllm_version": scratchllm.__version__,
         "sources": [analyze_source(m, make_checks(), progress) for m in manifests],
     }
+    if run_id.startswith(TRACKED_PREFIX):
+        drop_raw_snippets(report)
     target = out_dir / run_id
     target.mkdir(parents=True, exist_ok=True)
     (target / "report.json").write_text(

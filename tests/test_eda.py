@@ -9,6 +9,7 @@ from scratchllm.cli import app
 from scratchllm.data.sampling import SampleSpec, manifest_path, text_hash, write_sample
 from scratchllm.data.sources import get_source
 from scratchllm.eda.checks_basic import LengthStats, PersonalData
+from scratchllm.eda.checks_learner import NearDuplicates
 from scratchllm.eda.runner import analyze_source, iter_train_docs, run_eda
 
 SRC = get_source("fw2_arz")
@@ -146,6 +147,27 @@ def test_report_files_record_provenance(tmp_path: Path):
     assert report["run_id"] == "r1" and src["revision"] == "rev0" and len(src["data_sha256"]) == 64
     md = (out / "report.md").read_text(encoding="utf-8")
     assert "## fw2_arz" in md and "### length" in md and "chars_median" in md
+
+
+def cluster_examples(report_dir: Path) -> list[dict]:
+    report = json.loads((report_dir / "report.json").read_text(encoding="utf-8"))
+    return report["sources"][0]["checks"]["near_duplicates"]["largest_cluster_examples"]
+
+
+def test_tracked_reports_carry_no_raw_text_but_local_reports_do(tmp_path: Path):
+    base = " ".join(f"w{i}" for i in range(60))  # 60 distinct words, so 56 shared shingles
+    docs = [doc(i, f"template page {i} " + base) for i in range(4)]
+    out = tmp_path / "s"
+    write_sample(iter(docs), out, SRC, SampleSpec(n_docs=len(docs)), "rev0", Counter())
+    m = manifest_path(out, SRC.name)
+    local = run_eda([m], tmp_path / "r", make_checks=lambda: [NearDuplicates()], run_id="local")
+    tracked = run_eda([m], tmp_path / "r", make_checks=lambda: [NearDuplicates()], run_id="final-x")
+    kept, dropped = cluster_examples(local), cluster_examples(tracked)
+    assert kept and kept[0]["first_text"].startswith("template page")
+    assert dropped and "first_text" not in dropped[0]
+    assert dropped[0]["size"] == kept[0]["size"] and dropped[0]["ids"] == kept[0]["ids"]
+    assert "template page" not in (tracked / "report.json").read_text(encoding="utf-8")
+    assert "template page" not in (tracked / "report.md").read_text(encoding="utf-8")
 
 
 def test_a_sample_that_drifted_from_its_manifest_is_refused(tmp_path: Path):
