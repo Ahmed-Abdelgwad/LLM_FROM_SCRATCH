@@ -117,6 +117,29 @@ def analyze(
     typer.echo(f"report written to {target}")
 
 
+@data_app.command("read")
+def read(
+    manifest: Path,
+    kind: Annotated[str, typer.Option(help="all, mixed (Arabic and Latin) or short.")] = "all",
+    n: Annotated[int, typer.Option(help="Documents to draw.")] = 50,
+    seed: int = 0,
+    chars: Annotated[int, typer.Option(help="Characters shown per document.")] = 300,
+    out: Annotated[Path | None, typer.Option(help="Write here instead of the screen.")] = None,
+) -> None:
+    """Draw train documents at random to read by hand (same arguments, same documents)."""
+    from scratchllm.eda.reading import KINDS, read_sample, render
+
+    if kind not in KINDS:
+        raise typer.BadParameter(f"kind must be one of {', '.join(KINDS)}")
+    docs, total = read_sample(manifest, kind, n, seed)
+    text = render(docs, total, chars, f"{manifest.name}: {kind}, seed {seed}")
+    if out is None:
+        typer.echo(text)
+    else:
+        out.write_text(text + "\n", encoding="utf-8")
+        typer.echo(f"wrote {out}")
+
+
 @data_app.command("verify")
 def verify(manifests: list[Path]) -> None:
     """Check data files still match their manifests (hash and counts)."""
