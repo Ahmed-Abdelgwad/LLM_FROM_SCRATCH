@@ -1,0 +1,571 @@
+# EDA report final-v1
+
+scratchllm 0.1.0; train split only.
+
+## fw2_arb
+
+- dataset revision: `af9c13333eb981300149d5ca60a8e9d659b276b9`
+- data sha256: `bd52c626629cf711`, seed 0
+- train documents analysed: 48,269
+
+### length
+- docs: 48269
+- chars_total: 136400626
+- words_total: 23169057
+- chars_p10: 529
+- chars_median: 1564
+- chars_p90: 5656
+- chars_max: 407998
+- share_shorter_than: {"300": 0.00393627379891856}
+- seconds: 1.27
+
+### personal_data
+- docs: 48269
+- docs_with_email: 539
+- docs_with_phone_like: 659
+- email_matches: 663
+- phone_like_matches: 1190
+- docs_with_pii: 1125
+- docs_with_pii_per_1000: 23.31
+- hits_per_1000_docs: 38.39
+- seconds: 16.92
+
+### script_mix
+- docs: 48269
+- docs_without_letters: 0
+- docs_with_letters: 48269
+- mean_arabic_share: 0.9783
+- mean_latin_share: 0.0216
+- mean_other_share: 0.0001
+- letters_total: {"arabic": 105021114, "latin": 2466661, "other": 25483}
+- docs_arabic_share_ge_0_8: 47101
+- docs_latin_share_ge_0_9: 0
+- docs_mixed: 1160
+- seconds: 7.9
+
+### surface_variation
+- docs: 48269
+- arabic_letters: 105021114
+- items: {"diacritics_without_shadda": {"docs_with": 32946, "per_1000_letters": 8.382}, "shadda": {"docs_with": 14005, "per_1000_letters": 1.697}, "tatweel": {"docs_with": 12634, "per_1000_letters": 0.815}, "alef_plain": {"docs_with": 48269, "per_1000_letters": 150.907}, "alef_hamza_above": {"docs_with": 47795, "per_1000_letters": 18.944}, "alef_hamza_below": {"docs_with": 45765, "per_1000_letters": 7.994}, "alef_madda": {"docs_with": 27595, "per_1000_letters": 1.163}, "yeh": {"docs_with": 48269, "per_1000_letters": 74.013}, "alef_maqsura": {"docs_with": 47177, "per_1000_letters": 8.89}, "teh_marbuta_final": {"docs_with": 48257, "per_1000_letters": 32.867}, "heh_final": {"docs_with": 45292, "per_1000_letters": 6.933}, "digits_ascii": {"docs_with": 37973, "per_1000_letters": 11.734}, "digits_arabic_indic": {"docs_with": 2483, "per_1000_letters": 0.286}, "digits_extended_arabic_indic": {"docs_with": 67, "per_1000_letters": 0.014}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.1072, "heh_among_final_teh_heh": 0.1742, "alef_plain_among_alef_forms": 0.843, "shadda_among_all_diacritics": 0.1684}
+- seconds: 8.98
+
+### near_duplicates
+- docs: 48269
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "5e64e01ffdb9dc12"
+- near_duplicate_docs: 0
+- near_duplicate_rate: 0.0
+- clusters: 0
+- largest_cluster_sizes: []
+- largest_cluster_examples: []
+- seconds: 30.34
+
+## fw2_arz
+
+- dataset revision: `af9c13333eb981300149d5ca60a8e9d659b276b9`
+- data sha256: `28d6a57ee3a62d44`, seed 0
+- train documents analysed: 47,983
+
+### length
+- docs: 47983
+- chars_total: 98212151
+- words_total: 17702986
+- chars_p10: 516
+- chars_median: 1166
+- chars_p90: 3844
+- chars_max: 442593
+- share_shorter_than: {"300": 0.007794427192964175}
+- seconds: 0.88
+
+### personal_data
+- docs: 47983
+- docs_with_email: 168
+- docs_with_phone_like: 853
+- email_matches: 212
+- phone_like_matches: 3338
+- docs_with_pii: 978
+- docs_with_pii_per_1000: 20.38
+- hits_per_1000_docs: 73.98
+- seconds: 12.02
+
+### script_mix
+- docs: 47983
+- docs_without_letters: 0
+- docs_with_letters: 47983
+- mean_arabic_share: 0.9667
+- mean_latin_share: 0.0332
+- mean_other_share: 0.0001
+- letters_total: {"arabic": 74197709, "latin": 2520840, "other": 9318}
+- docs_arabic_share_ge_0_8: 46108
+- docs_latin_share_ge_0_9: 0
+- docs_mixed: 1871
+- seconds: 5.42
+
+### surface_variation
+- docs: 47983
+- arabic_letters: 74197709
+- items: {"diacritics_without_shadda": {"docs_with": 20356, "per_1000_letters": 3.069}, "shadda": {"docs_with": 5079, "per_1000_letters": 0.453}, "tatweel": {"docs_with": 13374, "per_1000_letters": 1.975}, "alef_plain": {"docs_with": 47983, "per_1000_letters": 149.367}, "alef_hamza_above": {"docs_with": 43740, "per_1000_letters": 13.679}, "alef_hamza_below": {"docs_with": 34686, "per_1000_letters": 3.887}, "alef_madda": {"docs_with": 16690, "per_1000_letters": 0.697}, "yeh": {"docs_with": 47956, "per_1000_letters": 70.116}, "alef_maqsura": {"docs_with": 46665, "per_1000_letters": 18.345}, "teh_marbuta_final": {"docs_with": 47161, "per_1000_letters": 23.185}, "heh_final": {"docs_with": 46281, "per_1000_letters": 15.391}, "digits_ascii": {"docs_with": 36850, "per_1000_letters": 11.621}, "digits_arabic_indic": {"docs_with": 4415, "per_1000_letters": 0.415}, "digits_extended_arabic_indic": {"docs_with": 64, "per_1000_letters": 0.008}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.2074, "heh_among_final_teh_heh": 0.399, "alef_plain_among_alef_forms": 0.891, "shadda_among_all_diacritics": 0.1288}
+- seconds: 6.14
+
+### near_duplicates
+- docs: 47983
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "e7601865de02b540"
+- near_duplicate_docs: 10
+- near_duplicate_rate: 0.0002
+- clusters: 5
+- largest_cluster_sizes: [2, 2, 2, 2, 2]
+- largest_cluster_examples: [{"size": 2, "ids": ["<urn:uuid:a6f8c0fa-dc05-4b61-9483-60217e34647e>", "<urn:uuid:42ac9b78-89ca-4b37-9019-2eda367a5f21>"]}, {"size": 2, "ids": ["<urn:uuid:2c69fec8-b553-4616-8e2f-468e91850ea2>", "<urn:uuid:a454df24-46e8-4890-b31f-b9828b5050eb>"]}, {"size": 2, "ids": ["<urn:uuid:321a1c93-167b-45c4-a209-42a9b538863f>", "<urn:uuid:5ed2cd41-e1d6-4cfd-b351-67a6c81b8574>"]}, {"size": 2, "ids": ["<urn:uuid:f75a5d20-25e1-4844-9123-73d1b9e7108b>", "<urn:uuid:322b359d-beb4-4132-919b-6a46b8710ae7>"]}, {"size": 2, "ids": ["<urn:uuid:f14ee75d-5849-4e15-8f7e-1f706c93c8c7>", "<urn:uuid:1f65f5b9-7d34-4a43-8332-4ee2c5951610>"]}]
+- seconds: 21.21
+
+## fw2_ary
+
+- dataset revision: `af9c13333eb981300149d5ca60a8e9d659b276b9`
+- data sha256: `456df7694a69ee74`, seed 0
+- train documents analysed: 9,650
+
+### length
+- docs: 9650
+- chars_total: 19374225
+- words_total: 3183270
+- chars_p10: 507
+- chars_median: 1094
+- chars_p90: 3400
+- chars_max: 123270
+- share_shorter_than: {"300": 0.00383419689119171}
+- seconds: 0.17
+
+### personal_data
+- docs: 9650
+- docs_with_email: 24
+- docs_with_phone_like: 31
+- email_matches: 25
+- phone_like_matches: 48
+- docs_with_pii: 54
+- docs_with_pii_per_1000: 5.6
+- hits_per_1000_docs: 7.56
+- seconds: 2.25
+
+### script_mix
+- docs: 9650
+- docs_without_letters: 0
+- docs_with_letters: 9650
+- mean_arabic_share: 0.9938
+- mean_latin_share: 0.0062
+- mean_other_share: 0.0
+- letters_total: {"arabic": 15394488, "latin": 89571, "other": 564}
+- docs_arabic_share_ge_0_8: 9620
+- docs_latin_share_ge_0_9: 0
+- docs_mixed: 29
+- seconds: 1.08
+
+### surface_variation
+- docs: 9650
+- arabic_letters: 15394488
+- items: {"diacritics_without_shadda": {"docs_with": 3324, "per_1000_letters": 1.395}, "shadda": {"docs_with": 1554, "per_1000_letters": 0.455}, "tatweel": {"docs_with": 2731, "per_1000_letters": 0.669}, "alef_plain": {"docs_with": 9650, "per_1000_letters": 156.17}, "alef_hamza_above": {"docs_with": 9549, "per_1000_letters": 15.876}, "alef_hamza_below": {"docs_with": 9074, "per_1000_letters": 6.912}, "alef_madda": {"docs_with": 3921, "per_1000_letters": 0.639}, "yeh": {"docs_with": 9650, "per_1000_letters": 80.009}, "alef_maqsura": {"docs_with": 9425, "per_1000_letters": 7.052}, "teh_marbuta_final": {"docs_with": 9649, "per_1000_letters": 35.906}, "heh_final": {"docs_with": 9062, "per_1000_letters": 6.056}, "digits_ascii": {"docs_with": 7763, "per_1000_letters": 9.948}, "digits_arabic_indic": {"docs_with": 115, "per_1000_letters": 0.046}, "digits_extended_arabic_indic": {"docs_with": 2, "per_1000_letters": 0.001}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.081, "heh_among_final_teh_heh": 0.1443, "alef_plain_among_alef_forms": 0.8696, "shadda_among_all_diacritics": 0.246}
+- seconds: 1.24
+
+### near_duplicates
+- docs: 9650
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "934a1111290f7b7d"
+- near_duplicate_docs: 0
+- near_duplicate_rate: 0.0
+- clusters: 0
+- largest_cluster_sizes: []
+- largest_cluster_examples: []
+- seconds: 3.85
+
+## fw2_ars
+
+- dataset revision: `af9c13333eb981300149d5ca60a8e9d659b276b9`
+- data sha256: `22a466510fc12d08`, seed 0
+- train documents analysed: 9,526
+
+### length
+- docs: 9526
+- chars_total: 41012189
+- words_total: 7435254
+- chars_p10: 397
+- chars_median: 1363
+- chars_p90: 7443
+- chars_max: 476889
+- share_shorter_than: {"300": 0.02131009867730422}
+- seconds: 0.36
+
+### personal_data
+- docs: 9526
+- docs_with_email: 129
+- docs_with_phone_like: 382
+- email_matches: 182
+- phone_like_matches: 699
+- docs_with_pii: 488
+- docs_with_pii_per_1000: 51.23
+- hits_per_1000_docs: 92.48
+- seconds: 5.28
+
+### script_mix
+- docs: 9526
+- docs_without_letters: 0
+- docs_with_letters: 9526
+- mean_arabic_share: 0.9726
+- mean_latin_share: 0.0273
+- mean_other_share: 0.0001
+- letters_total: {"arabic": 30300729, "latin": 773512, "other": 2468}
+- docs_arabic_share_ge_0_8: 9389
+- docs_latin_share_ge_0_9: 0
+- docs_mixed: 138
+- seconds: 2.2
+
+### surface_variation
+- docs: 9526
+- arabic_letters: 30300729
+- items: {"diacritics_without_shadda": {"docs_with": 4473, "per_1000_letters": 2.143}, "shadda": {"docs_with": 1419, "per_1000_letters": 0.342}, "tatweel": {"docs_with": 4006, "per_1000_letters": 5.657}, "alef_plain": {"docs_with": 9526, "per_1000_letters": 150.186}, "alef_hamza_above": {"docs_with": 8031, "per_1000_letters": 9.228}, "alef_hamza_below": {"docs_with": 5459, "per_1000_letters": 1.902}, "alef_madda": {"docs_with": 4070, "per_1000_letters": 2.454}, "yeh": {"docs_with": 9526, "per_1000_letters": 84.364}, "alef_maqsura": {"docs_with": 9014, "per_1000_letters": 6.408}, "teh_marbuta_final": {"docs_with": 9015, "per_1000_letters": 11.544}, "heh_final": {"docs_with": 9396, "per_1000_letters": 25.003}, "digits_ascii": {"docs_with": 7721, "per_1000_letters": 15.806}, "digits_arabic_indic": {"docs_with": 818, "per_1000_letters": 0.321}, "digits_extended_arabic_indic": {"docs_with": 4, "per_1000_letters": 0.0}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.0706, "heh_among_final_teh_heh": 0.6841, "alef_plain_among_alef_forms": 0.9171, "shadda_among_all_diacritics": 0.1376}
+- seconds: 2.49
+
+### near_duplicates
+- docs: 9526
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "c46ebbeb77268695"
+- near_duplicate_docs: 0
+- near_duplicate_rate: 0.0
+- clusters: 0
+- largest_cluster_sizes: []
+- largest_cluster_examples: []
+- seconds: 10.19
+
+## fw2_apc
+
+- dataset revision: `af9c13333eb981300149d5ca60a8e9d659b276b9`
+- data sha256: `7c9c4b120c2de63c`, seed 0
+- train documents analysed: 9,670
+
+### length
+- docs: 9670
+- chars_total: 13083186
+- words_total: 2493718
+- chars_p10: 350
+- chars_median: 747
+- chars_p90: 2362
+- chars_max: 107823
+- share_shorter_than: {"300": 0.04301964839710445}
+- seconds: 0.12
+
+### personal_data
+- docs: 9670
+- docs_with_email: 25
+- docs_with_phone_like: 57
+- email_matches: 32
+- phone_like_matches: 81
+- docs_with_pii: 77
+- docs_with_pii_per_1000: 7.96
+- hits_per_1000_docs: 11.69
+- seconds: 1.58
+
+### script_mix
+- docs: 9670
+- docs_without_letters: 0
+- docs_with_letters: 9670
+- mean_arabic_share: 0.9584
+- mean_latin_share: 0.0412
+- mean_other_share: 0.0004
+- letters_total: {"arabic": 9924903, "latin": 342504, "other": 2358}
+- docs_arabic_share_ge_0_8: 8996
+- docs_latin_share_ge_0_9: 0
+- docs_mixed: 667
+- seconds: 0.73
+
+### surface_variation
+- docs: 9670
+- arabic_letters: 9924903
+- items: {"diacritics_without_shadda": {"docs_with": 2584, "per_1000_letters": 2.07}, "shadda": {"docs_with": 1905, "per_1000_letters": 1.833}, "tatweel": {"docs_with": 945, "per_1000_letters": 0.681}, "alef_plain": {"docs_with": 9670, "per_1000_letters": 140.514}, "alef_hamza_above": {"docs_with": 7226, "per_1000_letters": 7.102}, "alef_hamza_below": {"docs_with": 4362, "per_1000_letters": 2.089}, "alef_madda": {"docs_with": 2188, "per_1000_letters": 0.523}, "yeh": {"docs_with": 9663, "per_1000_letters": 86.525}, "alef_maqsura": {"docs_with": 8080, "per_1000_letters": 5.686}, "teh_marbuta_final": {"docs_with": 8924, "per_1000_letters": 15.941}, "heh_final": {"docs_with": 8822, "per_1000_letters": 14.202}, "digits_ascii": {"docs_with": 4811, "per_1000_letters": 8.273}, "digits_arabic_indic": {"docs_with": 977, "per_1000_letters": 0.417}, "digits_extended_arabic_indic": {"docs_with": 0, "per_1000_letters": 0.0}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.0617, "heh_among_final_teh_heh": 0.4712, "alef_plain_among_alef_forms": 0.9353, "shadda_among_all_diacritics": 0.4697}
+- seconds: 0.82
+
+### near_duplicates
+- docs: 9670
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "fd69e6fa16f1a812"
+- near_duplicate_docs: 2
+- near_duplicate_rate: 0.0002
+- clusters: 1
+- largest_cluster_sizes: [2]
+- largest_cluster_examples: [{"size": 2, "ids": ["<urn:uuid:1e160e5e-367d-4ed0-bc58-9f506e8b85f1>", "<urn:uuid:ffbd4d7a-7a82-4412-895b-3965bc87e5eb>"]}]
+- seconds: 2.82
+
+## fw2_acm
+
+- dataset revision: `af9c13333eb981300149d5ca60a8e9d659b276b9`
+- data sha256: `ffbf788f0888f69c`, seed 0
+- train documents analysed: 6,441
+
+### length
+- docs: 6441
+- chars_total: 13212216
+- words_total: 2460510
+- chars_p10: 408
+- chars_median: 991
+- chars_p90: 3667
+- chars_max: 175039
+- share_shorter_than: {"300": 0.02126998913212234}
+- seconds: 0.12
+
+### personal_data
+- docs: 6441
+- docs_with_email: 46
+- docs_with_phone_like: 159
+- email_matches: 76
+- phone_like_matches: 356
+- docs_with_pii: 198
+- docs_with_pii_per_1000: 30.74
+- hits_per_1000_docs: 67.07
+- seconds: 1.74
+
+### script_mix
+- docs: 6441
+- docs_without_letters: 0
+- docs_with_letters: 6441
+- mean_arabic_share: 0.9797
+- mean_latin_share: 0.0201
+- mean_other_share: 0.0002
+- letters_total: {"arabic": 9979393, "latin": 179722, "other": 3661}
+- docs_arabic_share_ge_0_8: 6351
+- docs_latin_share_ge_0_9: 0
+- docs_mixed: 90
+- seconds: 0.72
+
+### surface_variation
+- docs: 6441
+- arabic_letters: 9979393
+- items: {"diacritics_without_shadda": {"docs_with": 1987, "per_1000_letters": 2.006}, "shadda": {"docs_with": 897, "per_1000_letters": 0.441}, "tatweel": {"docs_with": 1672, "per_1000_letters": 3.75}, "alef_plain": {"docs_with": 6441, "per_1000_letters": 145.251}, "alef_hamza_above": {"docs_with": 4351, "per_1000_letters": 4.714}, "alef_hamza_below": {"docs_with": 1694, "per_1000_letters": 0.816}, "alef_madda": {"docs_with": 1429, "per_1000_letters": 0.596}, "yeh": {"docs_with": 6439, "per_1000_letters": 90.309}, "alef_maqsura": {"docs_with": 5584, "per_1000_letters": 4.633}, "teh_marbuta_final": {"docs_with": 5888, "per_1000_letters": 16.11}, "heh_final": {"docs_with": 6228, "per_1000_letters": 23.432}, "digits_ascii": {"docs_with": 4052, "per_1000_letters": 14.434}, "digits_arabic_indic": {"docs_with": 649, "per_1000_letters": 0.745}, "digits_extended_arabic_indic": {"docs_with": 4, "per_1000_letters": 0.001}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.0488, "heh_among_final_teh_heh": 0.5926, "alef_plain_among_alef_forms": 0.9595, "shadda_among_all_diacritics": 0.1803}
+- seconds: 0.81
+
+### near_duplicates
+- docs: 6441
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "877928d3d7a5766b"
+- near_duplicate_docs: 18
+- near_duplicate_rate: 0.0028
+- clusters: 9
+- largest_cluster_sizes: [2, 2, 2, 2, 2, 2, 2, 2, 2]
+- largest_cluster_examples: [{"size": 2, "ids": ["<urn:uuid:9177d140-e360-4e13-b326-138d42b44640>", "<urn:uuid:fc960549-a9c8-43cf-ba86-9d86c238bbcf>"]}, {"size": 2, "ids": ["<urn:uuid:1abf8596-ba57-4e35-a920-88c6b5e6bcae>", "<urn:uuid:90634eff-bb61-4869-ad70-00c4346d4f4f>"]}, {"size": 2, "ids": ["<urn:uuid:db099c3f-de06-4a2e-a5c5-17ea6cb53749>", "<urn:uuid:651908db-d81d-47bc-8e35-4a7561eac700>"]}, {"size": 2, "ids": ["<urn:uuid:259d26fd-02ae-427a-b73b-3afc0cf0b0b3>", "<urn:uuid:8a18d4d4-7e3f-4dd8-bbe2-e4907d942b0b>"]}, {"size": 2, "ids": ["<urn:uuid:70ed4ced-d090-440d-b701-482f23563dd3>", "<urn:uuid:ef6b90c5-617b-4eaa-9957-d811d4547675>"]}, {"size": 2, "ids": ["<urn:uuid:92a750bc-be97-49b9-a491-9c0e9844d21f>", "<urn:uuid:13d9d169-0aac-458e-8be6-25e3890167c6>"]}, {"size": 2, "ids": ["<urn:uuid:527b7a99-4814-4af5-869a-cce989de7402>", "<urn:uuid:7aad3f43-74b4-4806-8fa0-a7601b19c197>"]}, {"size": 2, "ids": ["<urn:uuid:3a6d99d2-2617-4b8f-b768-5ace736c7d09>", "<urn:uuid:e5abc54e-f9cf-4d0b-af63-5ca05d2d967f>"]}, {"size": 2, "ids": ["<urn:uuid:ff525967-64da-4f6a-869e-55bea935b5a6>", "<urn:uuid:a583661b-8605-4ea1-b219-6c776916a769>"]}]
+- seconds: 2.81
+
+## wiki_ar
+
+- dataset revision: `b04c8d1ceb2f5cd4588862100d08de323dccfbaa`
+- data sha256: `81627499ce89e962`, seed 0
+- train documents analysed: 47,987
+
+### length
+- docs: 47987
+- chars_total: 63326215
+- words_total: 10440299
+- chars_p10: 177
+- chars_median: 436
+- chars_p90: 3233
+- chars_max: 128493
+- share_shorter_than: {"300": 0.28561902181840915}
+- seconds: 0.54
+
+### personal_data
+- docs: 47987
+- docs_with_email: 2
+- docs_with_phone_like: 12
+- email_matches: 4
+- phone_like_matches: 18
+- docs_with_pii: 14
+- docs_with_pii_per_1000: 0.29
+- hits_per_1000_docs: 0.46
+- seconds: 7.2
+
+### script_mix
+- docs: 47987
+- docs_without_letters: 0
+- docs_with_letters: 47987
+- mean_arabic_share: 0.9827
+- mean_latin_share: 0.0168
+- mean_other_share: 0.0005
+- letters_total: {"arabic": 47565414, "latin": 1145501, "other": 23878}
+- docs_arabic_share_ge_0_8: 46934
+- docs_latin_share_ge_0_9: 11
+- docs_mixed: 1027
+- seconds: 3.63
+
+### surface_variation
+- docs: 47987
+- arabic_letters: 47565414
+- items: {"diacritics_without_shadda": {"docs_with": 22940, "per_1000_letters": 5.781}, "shadda": {"docs_with": 9306, "per_1000_letters": 1.171}, "tatweel": {"docs_with": 9559, "per_1000_letters": 0.484}, "alef_plain": {"docs_with": 47984, "per_1000_letters": 143.852}, "alef_hamza_above": {"docs_with": 43895, "per_1000_letters": 19.893}, "alef_hamza_below": {"docs_with": 35535, "per_1000_letters": 7.18}, "alef_madda": {"docs_with": 13386, "per_1000_letters": 0.984}, "yeh": {"docs_with": 47984, "per_1000_letters": 87.949}, "alef_maqsura": {"docs_with": 32721, "per_1000_letters": 6.524}, "teh_marbuta_final": {"docs_with": 47407, "per_1000_letters": 35.906}, "heh_final": {"docs_with": 24684, "per_1000_letters": 4.935}, "digits_ascii": {"docs_with": 42864, "per_1000_letters": 33.431}, "digits_arabic_indic": {"docs_with": 64, "per_1000_letters": 0.013}, "digits_extended_arabic_indic": {"docs_with": 0, "per_1000_letters": 0.0}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.0691, "heh_among_final_teh_heh": 0.1208, "alef_plain_among_alef_forms": 0.8368, "shadda_among_all_diacritics": 0.1684}
+- seconds: 4.17
+
+### near_duplicates
+- docs: 47987
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "02ccdfacd8f32895"
+- near_duplicate_docs: 960
+- near_duplicate_rate: 0.02
+- clusters: 325
+- largest_cluster_sizes: [25, 15, 14, 14, 13, 10, 8, 8, 8, 8]
+- largest_cluster_examples: [{"size": 25, "ids": ["2662358", "2662369", "2662387"]}, {"size": 15, "ids": ["2514515", "2514557", "2514605"]}, {"size": 14, "ids": ["7367893", "7367896", "7368013"]}, {"size": 14, "ids": ["3742348", "3742352", "3742359"]}, {"size": 13, "ids": ["3742003", "3504010", "3504079"]}, {"size": 10, "ids": ["8424387", "8424390", "8424394"]}, {"size": 8, "ids": ["7802508", "7802538", "7802557"]}, {"size": 8, "ids": ["3741996", "3492628", "3492633"]}, {"size": 8, "ids": ["3496904", "3496910", "3496939"]}, {"size": 8, "ids": ["3493156", "3493167", "3493180"]}]
+- seconds: 12.2
+
+## wiki_ary
+
+- dataset revision: `b04c8d1ceb2f5cd4588862100d08de323dccfbaa`
+- data sha256: `a185d3327bd00c50`, seed 0
+- train documents analysed: 7,661
+
+### length
+- docs: 7661
+- chars_total: 6034450
+- words_total: 1089097
+- chars_p10: 214
+- chars_median: 565
+- chars_p90: 1345
+- chars_max: 31323
+- share_shorter_than: {"300": 0.20650045685941784}
+- seconds: 0.05
+
+### personal_data
+- docs: 7661
+- docs_with_email: 0
+- docs_with_phone_like: 2
+- email_matches: 0
+- phone_like_matches: 3
+- docs_with_pii: 2
+- docs_with_pii_per_1000: 0.26
+- hits_per_1000_docs: 0.39
+- seconds: 0.68
+
+### script_mix
+- docs: 7661
+- docs_without_letters: 0
+- docs_with_letters: 7661
+- mean_arabic_share: 0.9875
+- mean_latin_share: 0.0114
+- mean_other_share: 0.0011
+- letters_total: {"arabic": 4290727, "latin": 82166, "other": 5511}
+- docs_arabic_share_ge_0_8: 7611
+- docs_latin_share_ge_0_9: 0
+- docs_mixed: 49
+- seconds: 0.36
+
+### surface_variation
+- docs: 7661
+- arabic_letters: 4290727
+- items: {"diacritics_without_shadda": {"docs_with": 803, "per_1000_letters": 1.693}, "shadda": {"docs_with": 6206, "per_1000_letters": 13.591}, "tatweel": {"docs_with": 375, "per_1000_letters": 0.184}, "alef_plain": {"docs_with": 7661, "per_1000_letters": 138.477}, "alef_hamza_above": {"docs_with": 7032, "per_1000_letters": 7.641}, "alef_hamza_below": {"docs_with": 5395, "per_1000_letters": 4.457}, "alef_madda": {"docs_with": 2036, "per_1000_letters": 0.807}, "yeh": {"docs_with": 7661, "per_1000_letters": 102.372}, "alef_maqsura": {"docs_with": 4676, "per_1000_letters": 2.941}, "teh_marbuta_final": {"docs_with": 7652, "per_1000_letters": 34.461}, "heh_final": {"docs_with": 2528, "per_1000_letters": 1.678}, "digits_ascii": {"docs_with": 6997, "per_1000_letters": 52.823}, "digits_arabic_indic": {"docs_with": 1, "per_1000_letters": 0.0}, "digits_extended_arabic_indic": {"docs_with": 0, "per_1000_letters": 0.0}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.0279, "heh_among_final_teh_heh": 0.0464, "alef_plain_among_alef_forms": 0.9148, "shadda_among_all_diacritics": 0.8892}
+- seconds: 0.42
+
+### near_duplicates
+- docs: 7661
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "b634028808576680"
+- near_duplicate_docs: 119
+- near_duplicate_rate: 0.0155
+- clusters: 29
+- largest_cluster_sizes: [15, 10, 8, 7, 7, 6, 6, 6, 5, 4]
+- largest_cluster_examples: [{"size": 15, "ids": ["63006", "63007", "63008"]}, {"size": 10, "ids": ["62904", "62905", "62906"]}, {"size": 8, "ids": ["62992", "62993", "62994"]}, {"size": 7, "ids": ["63027", "63028", "63029"]}, {"size": 7, "ids": ["63082", "63083", "63085"]}, {"size": 6, "ids": ["62943", "62945", "62947"]}, {"size": 6, "ids": ["62973", "62974", "62975"]}, {"size": 6, "ids": ["63060", "63061", "63062"]}, {"size": 5, "ids": ["63109", "63110", "63111"]}, {"size": 4, "ids": ["62925", "62926", "62927"]}]
+- seconds: 1.28
+
+## fineweb_edu_10bt
+
+- dataset revision: `87f09149ef4734204d70ed1d046ddc9ca3f2b8f9`
+- data sha256: `f4694d7f9393dbba`, seed 0
+- train documents analysed: 47,939
+
+### length
+- docs: 47939
+- chars_total: 226540015
+- words_total: 36805142
+- chars_p10: 978
+- chars_median: 2933
+- chars_p90: 8884
+- chars_max: 447137
+- share_shorter_than: {"300": 0.0006049354387867915}
+- seconds: 1.54
+
+### personal_data
+- docs: 47939
+- docs_with_email: 1058
+- docs_with_phone_like: 1183
+- email_matches: 1370
+- phone_like_matches: 1867
+- docs_with_pii: 1992
+- docs_with_pii_per_1000: 41.55
+- hits_per_1000_docs: 67.52
+- seconds: 24.16
+
+### script_mix
+- docs: 47939
+- docs_without_letters: 0
+- docs_with_letters: 47939
+- mean_arabic_share: 0.0
+- mean_latin_share: 0.9997
+- mean_other_share: 0.0003
+- letters_total: {"arabic": 3094, "latin": 180751769, "other": 55889}
+- docs_arabic_share_ge_0_8: 0
+- docs_latin_share_ge_0_9: 47909
+- docs_mixed: 1
+- seconds: 6.64
+
+### surface_variation
+- docs: 47939
+- arabic_letters: 3094
+- items: {"diacritics_without_shadda": {"docs_with": 13, "per_1000_letters": 87.266}, "shadda": {"docs_with": 7, "per_1000_letters": 10.019}, "tatweel": {"docs_with": 2, "per_1000_letters": 0.97}, "alef_plain": {"docs_with": 67, "per_1000_letters": 144.15}, "alef_hamza_above": {"docs_with": 11, "per_1000_letters": 7.111}, "alef_hamza_below": {"docs_with": 4, "per_1000_letters": 3.555}, "alef_madda": {"docs_with": 3, "per_1000_letters": 2.262}, "yeh": {"docs_with": 28, "per_1000_letters": 37.492}, "alef_maqsura": {"docs_with": 8, "per_1000_letters": 4.525}, "teh_marbuta_final": {"docs_with": 22, "per_1000_letters": 18.423}, "heh_final": {"docs_with": 17, "per_1000_letters": 16.484}, "digits_ascii": {"docs_with": 41789, "per_1000_letters": 742255.979}, "digits_arabic_indic": {"docs_with": 0, "per_1000_letters": 0.0}, "digits_extended_arabic_indic": {"docs_with": 0, "per_1000_letters": 0.0}}
+- pair_shares: {"alef_maqsura_among_yeh_like": 0.1077, "heh_among_final_teh_heh": 0.4722, "alef_plain_among_alef_forms": 0.9177, "shadda_among_all_diacritics": 0.103}
+- seconds: 6.31
+
+### near_duplicates
+- docs: 47939
+- docs_without_signature: 0
+- threshold: 0.8
+- num_perm: 128
+- shingle_words: 5
+- rows_per_band: 8
+- signatures_sha256: "cd92f88668cf2934"
+- near_duplicate_docs: 12
+- near_duplicate_rate: 0.0003
+- clusters: 6
+- largest_cluster_sizes: [2, 2, 2, 2, 2, 2]
+- largest_cluster_examples: [{"size": 2, "ids": ["<urn:uuid:d64fdabf-8d9c-43ab-a495-8556b66299ae>", "<urn:uuid:01192afa-993e-44cf-8b79-f608a059d752>"]}, {"size": 2, "ids": ["<urn:uuid:69097fad-d884-4c7b-9bb4-1a942184cfdb>", "<urn:uuid:011157d3-9642-461f-97b7-0967a74865f9>"]}, {"size": 2, "ids": ["<urn:uuid:19d6b03e-c550-4fd3-bb27-6627a89b0b85>", "<urn:uuid:a5863aa4-4999-4192-8665-c2eeae304084>"]}, {"size": 2, "ids": ["<urn:uuid:a5e2f411-58d2-4aa6-9074-366524677c11>", "<urn:uuid:737a4b32-f1cd-4118-9897-d78a7c950bae>"]}, {"size": 2, "ids": ["<urn:uuid:740ec5c4-1d1b-484f-af86-226c24625daa>", "<urn:uuid:8782c6d5-7643-485b-992c-cdd1aa352c36>"]}, {"size": 2, "ids": ["<urn:uuid:caa80531-4977-4ec3-80ee-819f9f1b2d90>", "<urn:uuid:de334720-02e3-4556-98c9-a0ab835a34d2>"]}]
+- seconds: 38.94
+
