@@ -28,7 +28,7 @@ from __future__ import annotations
 import hashlib
 import json
 import zlib
-from collections import defaultdict
+from collections import Counter, defaultdict
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -106,6 +106,8 @@ class Index:
     signatures: Any = None  # (n, NUM_PERM) uint64, built by `sign`
     cleaned_away: dict[str, int] = field(default_factory=dict)  # documents the rules removed
     no_words: int = 0
+    # per source: what its manifest says and what was read, for the reconciliation in the report
+    sources: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def sign(self, a: Any, b: Any) -> None:
         if not self.hashes:
@@ -143,13 +145,22 @@ def build_index(
         rules = rules_for(source) if apply_rules else []
         stats = CleaningStats()
         say(f"{source.name}: reading and fingerprinting")
+        read_per_split: Counter[str] = Counter()
+        without_words = 0
+
+        def counted(docs: Iterable[dict[str, Any]], tally: Counter[str] = read_per_split) -> Any:
+            for d in docs:
+                tally[d["split"]] += 1
+                yield d
+
         n_in = 0
-        for doc in clean_docs(iter_all_docs(path), rules, stats):
+        for doc in clean_docs(counted(iter_all_docs(path)), rules, stats):
             n_in += 1
             text = doc["text"]
             hashes = shingle_hashes(text)
             if hashes.size == 0:
                 index.no_words += 1
+                without_words += 1
                 continue
             index.entries.append(
                 Entry(
@@ -166,6 +177,14 @@ def build_index(
             if n_in % 10_000 == 0:
                 say(f"{source.name}: {n_in:,} documents")
         index.cleaned_away[source.name] = stats.docs_in - stats.docs_out
+        index.sources[source.name] = {
+            "manifest_docs_per_split": dict(manifest.docs_per_split),
+            "manifest_rows_in_source": manifest.stats.get("rows_total"),
+            "manifest_n_docs": manifest.n_docs,
+            "read_per_split": dict(read_per_split),
+            "removed_by_cleaning": stats.docs_in - stats.docs_out,
+            "without_words": without_words,
+        }
     say(f"signing {len(index.entries):,} documents")
     index.sign(a, b)
     return index
@@ -261,6 +280,38 @@ def summarize(
     for e in index.entries:
         if e.role == TRAIN:
             pool_by_source[e.source] += 1
+    in_index: dict[str, Counter[str]] = defaultdict(Counter)
+    for e in index.entries:
+        in_index[e.source][e.split] += 1
+    reconciliation: dict[str, Any] = {}
+    for name, info in index.sources.items():
+        read = info["read_per_split"]
+        kept = dict(in_index[name])
+        reconciliation[name] = {
+            **info,
+            "in_index_per_split": kept,
+            "manifest_matches_read": info["manifest_docs_per_split"] == read,
+            "read_minus_removed_equals_in_index": sum(read.values())
+            - info["removed_by_cleaning"]
+            - info["without_words"]
+            == sum(kept.values()),
+        }
+    roles = [e.role for e in index.entries]
+    totals = {
+        "training_pool": roles.count(TRAIN),
+        "evaluation_val_test": roles.count(EVAL),
+        "evaluation_only_sources": roles.count(EVAL_ONLY),
+    }
+    coverage = {
+        name: {
+            "rows_in_source": info["manifest_rows_in_source"],
+            "sampled": info["manifest_n_docs"],
+            "share": round(info["manifest_n_docs"] / info["manifest_rows_in_source"], 6)
+            if info["manifest_rows_in_source"]
+            else None,
+        }
+        for name, info in index.sources.items()
+    }
     return {
         "parameters": {
             "threshold": THRESHOLD,
@@ -271,7 +322,14 @@ def summarize(
             "estimate_floor": ESTIMATE_FLOOR,
             "bucket_cap": bucket_cap,
         },
+        "totals": totals,
         "training_pool_documents": dict(pool_by_source),
+        "reconciliation": reconciliation,
+        "all_counts_reconcile": all(
+            r["manifest_matches_read"] and r["read_minus_removed_equals_in_index"]
+            for r in reconciliation.values()
+        ),
+        "sample_coverage": coverage,
         "removed_by_cleaning": index.cleaned_away,
         "documents_without_words": index.no_words,
         "groups": groups,
@@ -302,6 +360,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         "Training pool (train split, after the cleaning rules): "
         + ", ".join(f"{k} {v:,}" for k, v in report["training_pool_documents"].items()),
         "",
+        f"Training pool {report['totals']['training_pool']:,} documents; evaluation "
+        f"{report['totals']['evaluation_val_test']:,} (val+test of the training sources) + "
+        f"{report['totals']['evaluation_only_sources']:,} (evaluation-only sources). "
+        f"Counts reconcile with the manifests: {report['all_counts_reconcile']}.",
+        "",
         "| evaluation group | documents | exact dup | near >= 0.8 | share | near >= 0.6 | "
         "best in same source | best in other source |",
         "|---|---|---|---|---|---|---|---|",
@@ -324,6 +387,15 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines.append(f"  - training {tr['source']} `{tr['id']}` {tr['url']}: "
                          f"{_one_line(tr.get('start'))}")  # fmt: skip
         lines.append("")
+    lines += [
+        "## Sample coverage (a twin in the full corpus is in the sample with this chance)",
+        "",
+    ]
+    lines += ["| source | rows in source | sampled | share |", "|---|---|---|---|"]
+    for name, c in report["sample_coverage"].items():
+        share = f"{c['share']:.4%}" if c["share"] is not None else "?"
+        rows = f"{c['rows_in_source']:,}" if c["rows_in_source"] is not None else "?"
+        lines.append(f"| {name} | {rows} | {c['sampled']:,} | {share} |")
     return "\n".join(lines)
 
 

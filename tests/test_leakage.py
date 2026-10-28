@@ -181,3 +181,35 @@ def test_a_neighbour_between_0_6_and_0_8_is_counted_loosely_but_not_as_a_near_du
     index = build_index([manifest_path(out, "fw2_arz")], apply_rules=False)
     group = summarize(index, find_neighbours(index), bucket_cap=50)["groups"]["fw2_arz (val+test)"]
     assert group["near_0_6"] == 1 and group["near_0_8"] == 0
+
+
+def test_totals_are_counted_and_reconcile_with_the_manifest(tmp_path: Path):
+    index = build_planted(tmp_path, rates=[0.01, 0.3])
+    report = summarize(index, find_neighbours(index), bucket_cap=50)
+    manifest_counts = report["reconciliation"]["fw2_arz"]["manifest_docs_per_split"]
+    assert report["totals"]["training_pool"] == manifest_counts["train"]
+    assert (
+        report["totals"]["evaluation_val_test"] == manifest_counts["val"] + manifest_counts["test"]
+    )
+    assert report["totals"]["evaluation_only_sources"] == 0
+    assert report["all_counts_reconcile"] is True
+    assert "fw2_arz" in report["sample_coverage"]
+
+
+def test_a_count_that_disagrees_with_the_manifest_is_flagged(tmp_path: Path):
+    index = build_planted(tmp_path, rates=[0.01])
+    index.sources["fw2_arz"]["manifest_docs_per_split"]["train"] += 1  # as if a doc went missing
+    report = summarize(index, find_neighbours(index), bucket_cap=50)
+    assert report["all_counts_reconcile"] is False
+    assert report["reconciliation"]["fw2_arz"]["manifest_matches_read"] is False
+
+
+def test_documents_removed_by_the_rules_are_accounted_for(tmp_path: Path):
+    stub = " ".join(["What people are saying - Write a review", "Try this search over all volumes"])
+    docs = [doc(1, stub, "fw2_apc", "train"), doc(2, "نص عادي " * 30, "fw2_apc", "train")]
+    out = tmp_path / "s"
+    write_sample(iter(docs), out, get_source("fw2_apc"), SampleSpec(n_docs=2), "r", Counter())
+    index = build_index([manifest_path(out, "fw2_apc")])  # the Google Books rule is on
+    info = summarize(index, find_neighbours(index), 50)["reconciliation"]["fw2_apc"]
+    assert info["removed_by_cleaning"] == 1 and info["in_index_per_split"] == {"train": 1}
+    assert info["read_minus_removed_equals_in_index"] is True
