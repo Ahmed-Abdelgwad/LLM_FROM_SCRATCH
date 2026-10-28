@@ -242,3 +242,80 @@ apart. Perplexity per token is also not comparable across tokenizers.
   why it measures what we care about. None is chosen yet.
 - Tokenizer fertility is reported for every normalization tried, labelled as a description of the
   tokenizer on its own normalized text, not as evidence that one normalization is better.
+
+## D-008 (2026-10-28): review of the wiki_footer rule and of the short Wikipedia documents
+
+Follows D-005. Instruction followed: A1 and A5 keep their definition and their limit, and no
+300-character filter is added to wiki_ar before the samples were read.
+
+**What wiki_footer removes** (train split; all documents checked by pattern, then read):
+
+- It cut 46,406 of 47,986 wiki_ar documents and 7,405 of 7,654 wiki_ary documents.
+- 538 wiki_ar documents (1.2%) and 11 wiki_ary documents lost a line longer than 120 characters.
+  Of those I read, most were bibliography entries in other languages (7 of 8 in wiki_ar, 5 of 6
+  in wiki_ary); the exceptions were an Arabic dictionary entry and a paragraph about the Tahdar
+  reserve. On eight and six documents this only supports a rough bound of about 0.1% to 0.2% of
+  documents losing a real paragraph; it is not a precise rate.
+- 75 wiki_ar documents (0.2%) have a short heading followed by a long line inside the removed part
+  (for example "discussions", "further reading"); the ones read were citations.
+- Left in place, not caused by the rule: 12.3% of cut wiki_ar documents and 14.0% of wiki_ary end
+  in a short heading with nothing under it ("gallery", "medals", "season results", the wiki_ary
+  day-of-year pages), because the tables and images were lost in the dump. 301 wiki_ar documents
+  (0.6%, about 0.6% of the kept characters) and 24 wiki_ary documents contain raw wiki table
+  markup (`{| class="wikitable"`, `|-`, `|}`).
+
+**Decision:** keep `wiki_footer` as written. Its measured cost (about 0.1% to 0.2% of documents
+losing a paragraph) is small next to what it removes. The empty trailing headings and the table
+markup are recorded as possible later rules; neither is written, because each is under 15% of
+documents and under 30 characters per document (headings) or 0.6% of characters (markup).
+
+**The short documents after the footer is removed** (documents under 300 characters):
+
+| | documents | median | in template clusters* | in clusters of 5 or more |
+|---|---|---|---|---|
+| wiki_ar | 28,635 (59.7% of train) | 130 chars | 30.2% | 24.4% |
+| wiki_ary | 2,317 (30.3%) | 210 chars | 26.0% | 23.7% |
+
+\* MinHash on 3-word shingles, Jaccard >= 0.5, cluster of 2 or more, inside a sample of 50,000
+(wiki_ar) and 8,000 (wiki_ary) documents. A full corpus has more members per template, so these
+are lower bounds.
+
+What reading 22 of each showed:
+
+- wiki_ar: generated stubs that differ only in the name and numbers (villages of Yemen, Morocco and
+  Egypt with a census figure, footballers, politicians, minor planets, species), and one-fact
+  stubs that are not templates (a film, a bilateral-relations page, an animal order). The largest
+  clusters hold 900, 661 and 470 documents.
+- About 8.4% of wiki_ar documents (7.1% of the short ones) show a **missing template value**:
+  "born on 15 October 1964 in  in Mexico. He was elected ." The count comes from a regular
+  expression, so it is an estimate. The stub is grammatical Arabic with the facts removed.
+- wiki_ary: year pages ("1782 is a year in the Gregorian calendar ..."), day-of-year pages,
+  village stubs, disambiguation pages ("this is a disambiguation page, the word X can mean"),
+  and real one-sentence definitions of people, bands and events.
+
+**What this changes in the three open questions:**
+
+- The 300-character threshold would remove the one-fact stubs and the genuine short definitions
+  together with the generated pages, so a length filter does not separate what we want to
+  separate. The template clusters do: at least a quarter of the short documents.
+- Removing train documents that duplicate an evaluation document is still mandatory (D-005), and
+  most of the largest clusters are the same templates.
+- Not decided, with the options: (1) no length filter, report A5 for wiki_ar as failing; (2) cap
+  the documents kept per template cluster, then look at A5 and A1 again (not yet measured);
+  (3) the 300-character filter, which keeps 40.3% of wiki_ar documents and 92.3% of its
+  characters.
+
+**A1 and A5 re-measured with the rules written so far** (`scratchllm data clean-report`; only
+the Google Books and footer rules exist, so every A1 figure is provisional and can only fall as
+more rules arrive):
+
+| | A1 retention | A5 median after | A5 (>= 300) |
+|---|---|---|---|
+| fw2_arb, arz, ary, ars, acm | 100% | 1564, 1166, 1094, 1363, 991 | pass |
+| fw2_apc | 96.0% | 773 | pass |
+| fineweb_edu_10bt | 100.0% | 2933 | pass |
+| wiki_ar | 100.0% | **216** | **fail** |
+| wiki_ary | 99.9% | 499 | pass (evaluation-only, D-002) |
+
+Nothing changed from the previous measurement because the rules did not change; the table is
+here as the baseline against which the next rule is judged.
