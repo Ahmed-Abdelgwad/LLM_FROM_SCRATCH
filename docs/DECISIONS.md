@@ -319,3 +319,46 @@ more rules arrive):
 
 Nothing changed from the previous measurement because the rules did not change; the table is
 here as the baseline against which the next rule is judged.
+
+## D-009 (2026-10-28): capping template clusters does not fix A5, and what it does buy
+
+Follows D-008, option 2. Measured on the cleaned (footer removed) train split: documents are
+clustered by MinHash on 3-word shingles at Jaccard >= 0.5; each cluster keeps its `cap` longest
+documents (ties by text hash, so the choice does not depend on file order).
+
+wiki_ar (47,986 documents; 990 clusters holding 21.1% of documents; largest clusters 1,029, 900,
+694, 470; 114 clusters of 10 or more):
+
+| cap per cluster | documents kept (A1) | characters kept | median | under 300 | A5 |
+|---|---|---|---|---|---|
+| none | 100.0% | 100.0% | 216 | 59.7% | fail |
+| 50 | 90.5% | 96.7% | 221 | 57.7% | fail |
+| 10 | 87.1% | 95.9% | 226 | 56.5% | fail |
+| 5 | 85.5% | 95.6% | 231 | 55.8% | fail |
+| 3 | 84.2% | 95.4% | 235 | 55.2% | fail |
+| 1 | 81.0% | 94.9% | 251 | 53.7% | fail |
+
+(wiki_ary, evaluation-only: 29.0% of documents in 82 clusters, one of 1,233 documents; with cap 5,
+74.2% of documents and 85.2% of characters kept, median 549, A5 passes either way.)
+
+**Correction of the earlier recommendation.** D-008 said capping targets the real cause. It
+targets the generated duplicates, but they are not why wiki_ar fails A5: even keeping one document
+per cluster the median is 251 and 53.7% of documents are still under 300 characters. Most short
+documents are one-fact stubs that are not templates (D-008).
+
+**What the cap does buy:** the clusters hold 14.5% of documents but only 4.4% of characters at
+cap 5, because they are short. So it barely changes how much text the model sees. It matters for
+evaluation hygiene (the same templates sit in train and evaluation, D-005) and for not teaching
+the model one sentence shape a thousand times, and that is the case for it, not A5.
+
+**What this leaves for A5:** the three honest options are (1) keep A5 failing for wiki_ar and say
+so in every result; (2) change what A5 measures for Wikipedia, which needs its own dated decision
+because it changes a pre-registered criterion; (3) the 300-character filter (40.3% of documents,
+92.3% of characters). A5's purpose was to avoid wasting the context window on short documents;
+if documents are packed end to end with a separator (the choice question 2 of the EDA plan
+leaves open), a short document costs nothing in padding, which is an argument for (1) or (2) and
+against (3). That packing choice has not been made.
+
+**Decision recorded now:** none on A5 or on a cap value. The cap is not implemented. Whether to
+implement it at all, and at which value, is decided together with the purge of train documents
+that duplicate evaluation documents.
