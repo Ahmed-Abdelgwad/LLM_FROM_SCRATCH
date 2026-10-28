@@ -362,3 +362,52 @@ against (3). That packing choice has not been made.
 **Decision recorded now:** none on A5 or on a cap value. The cap is not implemented. Whether to
 implement it at all, and at which value, is decided together with the purge of train documents
 that duplicate evaluation documents.
+
+## D-010 (2026-10-28): A5 for wiki_ar is settled with the pre-registered remedy, and A1 fails by exception
+
+Follows D-008 and D-009. A5 and A1 keep their wording and their limits.
+
+**Decision:**
+
+- `wiki_ar` gets a minimum length of 300 characters of prose, measured after the footer rule
+  (`min_length` in `src/scratchllm/data/cleaning.py`, value in `MIN_PROSE_CHARS`). This is the
+  remedy A5 names for a failing median, applied as written.
+- It applies to the training use of `wiki_ar`, and to its validation and test splits, so that
+  perplexity is measured on the kind of text the model is trained on. `wiki_ary` and the other
+  evaluation-only sources (D-002) get no length filter, as D-005 said.
+- A1 for `wiki_ar` fails by document count and stays recorded as failing. It is not redefined.
+  What A1 prescribes for a failure ("inspect by hand, drop unless a cleaning rule fixes it") was
+  done in D-008: the removed documents are generated pages and one-fact stubs, about 8% of them
+  with missing template values, not junk text, and the source is not dropped. This is an
+  **exception to A1's consequence**, written here, not a change to A1.
+
+**Measured** (`scratchllm data clean-report`, train split of the sample):
+
+| wiki_ar | before the rules | after footer + min_length |
+|---|---|---|
+| documents | 47,987 | 19,351 (A1 retention **40.3%**, below 50%: fail) |
+| median length | 436 | **1,259** (A5 >= 300: pass) |
+| under 300 characters | 28.6% | 0.0% |
+| characters | 63.3 M | 49.1 M (92.3% of what remained after the footer rule) |
+
+The length rule alone removes 28,635 documents and 4.1 million characters (7.7% of the prose that
+was left).
+
+**Why this and not the alternatives of D-009:**
+
+- Keeping A5 failing would have left in the stubs with missing template values for the sake of a
+  packing argument; packing removes the padding cost of short documents, not their quality problem.
+- Redefining A5 or A1 for Wikipedia would be changing a pre-registered criterion after seeing the
+  result for one source.
+- The cost is small: 7.7% of the characters of a source that is secondary to fw2_arb.
+
+**What this does not settle:**
+
+- Whether 300 is the right value, and whether the filter helps at all. A data filter can be
+  tested, unlike a lossy normalization (D-007): train with and without it and compare held-out loss
+  on one fixed evaluation set. Until a model exists the value is a default, not a finding.
+- It also removes real one-sentence definitions (a film, a band, an animal order) with the
+  generated pages. That is the cost accepted above.
+- The cap per template cluster (D-009) and the purge of training documents that duplicate
+  evaluation documents (D-005) are separate and still open; the purge is mandatory.
+- The packing decision (question 2 of the EDA plan) is still open; it no longer decides A5.
