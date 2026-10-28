@@ -411,3 +411,72 @@ was left).
 - The cap per template cluster (D-009) and the purge of training documents that duplicate
   evaluation documents (D-005) are separate and still open; the purge is mandatory.
 - The packing decision (question 2 of the EDA plan) is still open; it no longer decides A5.
+
+## D-011 (2026-10-28): personal-data masking is implemented, and A7 is corrected for placeholder emails
+
+Follows D-001 and D-003. Report `final-v2` replaces `final-v1` for A7; `final-v1` stays in git as
+the earlier measurement. Every other number in the two reports is identical, including the
+near-duplicate fingerprints.
+
+**A measurement error found while reading the masked spans.** 89% to 100% of the emails the check
+found are `email@example.com` and `firstname.lastname@example.org`: the FineWeb pipelines already
+replaced real emails by these. The domains example.com, .org and .net are reserved (RFC 2606) and
+cannot be a person's address, so they are not personal data and were wrongly counted. They are now
+reported apart (`email_placeholder_matches`) and are in no A7 figure. This is a correction of what
+was counted, not a relaxation of the limit, but it changes a measured value of a pre-registered
+criterion, so it is recorded here.
+
+A7, documents with a real email or phone-like number per 1,000 (limit 5):
+
+| | D-003 (final-v1) | corrected (final-v2) | A7 |
+|---|---|---|---|
+| fw2_arb | 23.3 | 13.7 | fail |
+| fw2_arz | 20.4 | 17.8 | fail |
+| fw2_ary | 5.6 | **3.2** | **pass** (was fail) |
+| fw2_ars | 51.2 | 40.8 | fail |
+| fw2_apc | 8.0 | 6.0 | fail |
+| fw2_acm | 30.7 | 25.3 | fail |
+| fineweb_edu_10bt | 41.6 | 26.4 | fail |
+| wiki_ar, wiki_ary | 0.3, 0.3 | 0.3, 0.3 | pass |
+
+What is left is almost all phone numbers. Real emails are 0 to 8 per source (3 in fw2_arz, 6 in
+fw2_arb), 145 in fineweb_edu_10bt, whose pipeline anonymized differently.
+
+**Decision (D-003 stands, as code):** `pii` in `src/scratchllm/data/cleaning.py`, with detection in
+`src/scratchllm/data/pii.py` shared with the A7 check. Each email or phone-like number becomes
+`<email>` or `<phone>`; a page with five or more real matches is dropped; placeholder emails are
+masked too (one token for "an email") but do not count towards the five. Web sources only. It is
+applied to fw2_ary as well although that source now passes A7, so that all web sources are cleaned
+the same way (53 of its documents change, 1 is dropped).
+
+**Measured effect** (`scratchllm data clean-report`, train split; retention is documents kept):
+
+| | retention | documents masked | dropped as spam | characters removed |
+|---|---|---|---|---|
+| fw2_arb | 99.9% | 1,088 | 37 | 464,842 |
+| fw2_arz | 99.8% | 895 | 83 | 533,215 |
+| fw2_ary | 100.0% | 53 | 1 | 2,490 |
+| fw2_ars | 99.8% | 469 | 19 | 204,755 |
+| fw2_apc | 96.0% (382 are Google Books stubs, D-004) | 77 | 0 | 900 |
+| fw2_acm | 99.8% | 188 | 10 | 71,448 |
+| fineweb_edu_10bt | 99.9% | 1,947 | 45 | 1,004,818 |
+
+The median length moves by 4 characters at most. A7 after masking is 0 in every source, which is
+true by construction and proves nothing about what the patterns miss.
+
+**What reading showed** (the check D-003 named as the real test):
+
+- Precision: 80 random masked spans, 20 from each of fw2_arz, fw2_ars, fw2_arb and
+  fineweb_edu_10bt. About 5 were not phone numbers: two ISBN-10 numbers after "ISBN" (fineweb_edu),
+  a photo id inside a URL, "03 2011 450" from a date and time, and a row of zeros. One more was a
+  bank account number. Many of the correct hits are business numbers (hotlines, shops), which are
+  masked too. Five of 80 is roughly 6%, from a small sample.
+- Recall is not estimated. Of 30 digit runs of 8 or more digits that were not matched, most were
+  dates, post timestamps, year ranges and Facebook or image ids, which should stay, and 2 looked
+  like phone numbers: a landline written without its leading zero ("112658888") and an
+  eight-plus-eight grouping ("22601858- 22601859"). The sample cannot give a rate.
+
+**Decision on the known errors:** none are patched now. Changing the patterns changes the A7
+measurement again and means another report; candidates, in the order of their likely gain, are
+excluding numbers after "ISBN", excluding digit runs inside URLs, and a rule for landlines without
+a leading zero when a word such as "phone" or "call" precedes them. They are listed, not written.
