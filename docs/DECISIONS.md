@@ -177,6 +177,29 @@ near-duplicate removal for the Wikipedia sources):**
   towards longer articles.
 - A1 (retention >= 50%) is not assumed to hold; it is measured once the rules exist.
 
+**Measured after the footer rule** (`scratchllm data clean-report`, rules in
+`src/scratchllm/data/cleaning.py`, train split of the samples):
+
+| | median chars before -> after | documents under 300 chars | documents >= 300 chars after | characters held by those |
+|---|---|---|---|---|
+| wiki_ar | 436 -> 216 | 28.6% -> 59.7% | 40.3% | 92.3% |
+| wiki_ary | 565 -> 499 | 20.6% -> 30.3% | 69.7% | 91.6% |
+
+The footer rule removes 10.1 million characters of wiki_ar (16%) and 0.56 million of wiki_ary
+(9%). Four consequences, none yet decided:
+
+- A5 (median length after cleaning >= 300) is **not met by wiki_ar** (216) without a length
+  filter.
+- A length filter at 300 would keep 40.3% of wiki_ar documents, below A1's 50%, but 92.3% of its
+  characters. A1 counts documents, so for Wikipedia it measures the number of stubs rather than
+  how much text is lost. A criterion is not changed here: whether to also report retention in
+  characters, or to treat stubs differently, is an open decision.
+- The rule does not remove empty section headings that sit above the references (the wiki_ary
+  day-of-year pages keep "ناس تزادو", "ناس توفاو"); 48 wiki_ar and 2 wiki_ary documents with a long
+  line after a footer heading are left uncut on purpose.
+- The Google Books stub rule (D-004) drops 382 fw2_apc and 14 fineweb_edu_10bt documents; the 14
+  other fineweb_edu pages with one stub sentence have a real book description and are kept.
+
 ## D-006 (2026-10-27, amended 2026-10-28): lossy Arabic normalization is a requirement, not a tuned setting
 
 **Evidence** (`final-v1`, per 1,000 Arabic letters unless stated): the diacritic and spelling rates
