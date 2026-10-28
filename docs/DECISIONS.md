@@ -485,7 +485,7 @@ a leading zero when a word such as "phone" or "call" precedes them. They are lis
 
 Follows D-005 (A8, A9). Nothing was removed or rewritten; the data files were hashed before and
 after the run and are identical. Tool: `scratchllm data leakage-report`
-(`src/scratchllm/eda/leakage.py`). Reports are local (`reports/eda/leakage/leakage-v1`).
+(`src/scratchllm/eda/leakage.py`). The report is tracked as `reports/eda/final-leakage-v1` (no raw text in it).
 
 **Review of the earlier measurement.** The 38 of 2,013 wiki_ar evaluation documents (1.9%) in
 D-005 came from `NearDuplicates`, which (a) accepts a pair on the 128-number signature estimate
@@ -512,21 +512,24 @@ on raw text) stands.
   a slight undercount. This validation uses the same signatures and bands as the tool, not the
   tool itself.
 
-**Result** (all nine samples, text after the cleaning rules; train pool = the train split of
-fw2_arb, fw2_arz, fw2_ary, fw2_ars, wiki_ar, fineweb_edu_10bt, 173,519 documents; evaluation =
-val and test of those, and every document of fw2_acm, fw2_apc, wiki_ary, 37,x documents counted
-below):
+**Result** (report `reports/eda/final-leakage-v1`, all nine samples, text after the cleaning rules; every count below is taken from `leakage.json`, which also checks each source against its manifest: `all_counts_reconcile` is true). The training pool is the train split of fw2_arb (48,232), fw2_arz (47,900), fw2_ary (9,649), fw2_ars (9,507), wiki_ar (19,351), fineweb_edu_10bt (47,880), 182,519 documents. Evaluation is the val and test of those sources, 7,449 documents, and every document of fw2_acm, fw2_apc and wiki_ary, 24,601 documents.
 
 | evaluation group | documents | exact duplicates (A8) | Jaccard >= 0.8 (A9) | >= 0.6 |
 |---|---|---|---|---|
-| fw2_arb, fw2_ary, fw2_ars, fineweb_edu (val+test) | 1,730, 350, 473, 2,059 | 0 | 0 | 0 |
+| fw2_arb (val+test) | 1,730 | 0 | 0 | 0 |
 | fw2_arz (val+test) | 2,014 | 0 | 0 | 1 |
-| wiki_ar (val+test) | 823 | 0 | 0 | 3 (0.36%) |
-| fw2_acm, fw2_apc (whole source) | 6,990, 9,618 | 0 | 0 | 0 |
-| wiki_ary (whole source) | 7,993 | 0 | 0 | 2 |
+| fw2_ary (val+test) | 350 | 0 | 0 | 0 |
+| fw2_ars (val+test) | 473 | 0 | 0 | 0 |
+| wiki_ar (val+test) | 823 | 0 | 0 | 3 |
+| fineweb_edu_10bt (val+test) | 2,059 | 0 | 0 | 0 |
+| fw2_acm (evaluation-only source) | 6,990 | 0 | 0 | 0 |
+| fw2_apc (evaluation-only source) | 9,618 | 0 | 0 | 0 |
+| wiki_ary (evaluation-only source) | 7,993 | 0 | 0 | 2 |
 
 Same measurement on wiki_ar with the cleaning rules switched on one at a time (evaluation
-documents with a neighbour at Jaccard >= 0.8 / >= 0.6):
+documents with a neighbour at Jaccard >= 0.8 / >= 0.6). The first two rows come from a separate
+run of the same tool, not from the report, which always applies all the rules; the last row is the
+report's own wiki_ar line:
 
 | wiki_ar text | evaluation documents | >= 0.8 | >= 0.6 |
 |---|---|---|---|
@@ -545,14 +548,14 @@ perplexity measured on such documents partly measures a memorized template.
 | source | rows in the source | sampled | share |
 |---|---|---|---|
 | fw2_arb | 61,977,525 | 50,000 | 0.08% |
-| fineweb_edu_10bt | 9,672,101 | 50,000 | 0.52% |
 | fw2_ary | 2,365,405 | 10,000 | 0.42% |
-| wiki_ar | 1,219,201 | 50,000 | 4.1% |
-| fw2_arz | 853,290 | 50,000 | 5.9% |
-| fw2_ars | 298,167 | 10,000 | 3.4% |
-| fw2_apc | 69,740 | 10,000 | 14.3% |
-| fw2_acm | 7,382 | 7,000 | 94.8% |
-| wiki_ary | 8,087 | 8,000 | 98.9% |
+| fineweb_edu_10bt | 9,672,101 | 50,000 | 0.52% |
+| fw2_ars | 298,167 | 10,000 | 3.35% |
+| wiki_ar | 1,219,201 | 50,000 | 4.10% |
+| fw2_arz | 853,290 | 50,000 | 5.86% |
+| fw2_apc | 69,740 | 10,000 | 14.34% |
+| fw2_acm | 7,382 | 7,000 | 94.83% |
+| wiki_ary | 8,087 | 8,000 | 98.92% |
 
 An evaluation document whose twin sits in the full training corpus has about the share above as
 its chance that the twin is also in our sample (0.08% for fw2_arb). So the zero found between

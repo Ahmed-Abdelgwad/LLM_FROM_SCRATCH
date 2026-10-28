@@ -1,0 +1,416 @@
+{
+  "run_id": "final-leakage-v1",
+  "scratchllm_version": "0.1.0",
+  "manifest_sha256": {
+    "fw2_arb.manifest.json": "bd52c626629cf7113b366032b90516ebef92b650c3ed92924ef1499f575ff2ef",
+    "fw2_arz.manifest.json": "28d6a57ee3a62d44612306cfc5b6f75b8a5f254295d20502f5f0516462c928d4",
+    "fw2_ary.manifest.json": "456df7694a69ee74bf4ac2492e6abc1cfe8c7fa0f6b4b99bfdc737e6c9064f6e",
+    "fw2_ars.manifest.json": "22a466510fc12d0831b26ca82b89f58034a518236dcf075317654ca8aa3f667c",
+    "wiki_ar.manifest.json": "81627499ce89e962d03b867d1093e4a3f62b4a9a171b43d7640b90c9317896de",
+    "fineweb_edu_10bt.manifest.json": "f4694d7f9393dbbab801db5d1ec6e5543083c29adf7e25a0961086471025ca42",
+    "fw2_acm.manifest.json": "ffbf788f0888f69cc9f0690bbb8c11a5d73679c18327d35f3d4518f7fa854e2f",
+    "fw2_apc.manifest.json": "7c9c4b120c2de63c0be4a5ed513db524d9f7cb449d9d8370915fdc17abe2ca12",
+    "wiki_ary.manifest.json": "a185d3327bd00c5076efad4e09ca50b9eca51253dc8a49de3e9374e7f02ee730"
+  },
+  "parameters": {
+    "threshold": 0.8,
+    "loose_threshold": 0.6,
+    "num_perm": 128,
+    "rows_per_band": 8,
+    "shingle_words": 5,
+    "estimate_floor": 0.5,
+    "bucket_cap": 50
+  },
+  "totals": {
+    "training_pool": 182519,
+    "evaluation_val_test": 7449,
+    "evaluation_only_sources": 24601
+  },
+  "training_pool_documents": {
+    "fw2_arb": 48232,
+    "fw2_arz": 47900,
+    "fw2_ary": 9649,
+    "fw2_ars": 9507,
+    "wiki_ar": 19351,
+    "fineweb_edu_10bt": 47880
+  },
+  "reconciliation": {
+    "fw2_arb": {
+      "manifest_docs_per_split": {
+        "train": 48269,
+        "val": 814,
+        "test": 917
+      },
+      "manifest_rows_in_source": 61977525,
+      "manifest_n_docs": 50000,
+      "read_per_split": {
+        "train": 48269,
+        "val": 814,
+        "test": 917
+      },
+      "removed_by_cleaning": 38,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 48232,
+        "val": 814,
+        "test": 916
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "fw2_arz": {
+      "manifest_docs_per_split": {
+        "train": 47983,
+        "val": 904,
+        "test": 1113
+      },
+      "manifest_rows_in_source": 853290,
+      "manifest_n_docs": 50000,
+      "read_per_split": {
+        "train": 47983,
+        "val": 904,
+        "test": 1113
+      },
+      "removed_by_cleaning": 86,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 47900,
+        "val": 901,
+        "test": 1113
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "fw2_ary": {
+      "manifest_docs_per_split": {
+        "train": 9650,
+        "val": 125,
+        "test": 225
+      },
+      "manifest_rows_in_source": 2365405,
+      "manifest_n_docs": 10000,
+      "read_per_split": {
+        "train": 9650,
+        "val": 125,
+        "test": 225
+      },
+      "removed_by_cleaning": 1,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 9649,
+        "val": 125,
+        "test": 225
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "fw2_ars": {
+      "manifest_docs_per_split": {
+        "train": 9526,
+        "test": 192,
+        "val": 282
+      },
+      "manifest_rows_in_source": 298167,
+      "manifest_n_docs": 10000,
+      "read_per_split": {
+        "train": 9526,
+        "test": 192,
+        "val": 282
+      },
+      "removed_by_cleaning": 20,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 9507,
+        "test": 191,
+        "val": 282
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "wiki_ar": {
+      "manifest_docs_per_split": {
+        "train": 47987,
+        "val": 1003,
+        "test": 1010
+      },
+      "manifest_rows_in_source": 1219201,
+      "manifest_n_docs": 50000,
+      "read_per_split": {
+        "train": 47987,
+        "val": 1003,
+        "test": 1010
+      },
+      "removed_by_cleaning": 29826,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 19351,
+        "val": 416,
+        "test": 407
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "fineweb_edu_10bt": {
+      "manifest_docs_per_split": {
+        "train": 47939,
+        "test": 973,
+        "val": 1088
+      },
+      "manifest_rows_in_source": 9672101,
+      "manifest_n_docs": 50000,
+      "read_per_split": {
+        "train": 47939,
+        "test": 973,
+        "val": 1088
+      },
+      "removed_by_cleaning": 61,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 47880,
+        "test": 972,
+        "val": 1087
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "fw2_acm": {
+      "manifest_docs_per_split": {
+        "train": 6441,
+        "val": 88,
+        "test": 471
+      },
+      "manifest_rows_in_source": 7382,
+      "manifest_n_docs": 7000,
+      "read_per_split": {
+        "train": 6441,
+        "val": 88,
+        "test": 471
+      },
+      "removed_by_cleaning": 10,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 6431,
+        "val": 88,
+        "test": 471
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "fw2_apc": {
+      "manifest_docs_per_split": {
+        "train": 9670,
+        "test": 180,
+        "val": 150
+      },
+      "manifest_rows_in_source": 69740,
+      "manifest_n_docs": 10000,
+      "read_per_split": {
+        "train": 9670,
+        "test": 180,
+        "val": 150
+      },
+      "removed_by_cleaning": 382,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 9288,
+        "test": 180,
+        "val": 150
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    },
+    "wiki_ary": {
+      "manifest_docs_per_split": {
+        "train": 7661,
+        "test": 168,
+        "val": 171
+      },
+      "manifest_rows_in_source": 8087,
+      "manifest_n_docs": 8000,
+      "read_per_split": {
+        "train": 7661,
+        "test": 168,
+        "val": 171
+      },
+      "removed_by_cleaning": 7,
+      "without_words": 0,
+      "in_index_per_split": {
+        "train": 7654,
+        "test": 168,
+        "val": 171
+      },
+      "manifest_matches_read": true,
+      "read_minus_removed_equals_in_index": true
+    }
+  },
+  "all_counts_reconcile": true,
+  "sample_coverage": {
+    "fw2_arb": {
+      "rows_in_source": 61977525,
+      "sampled": 50000,
+      "share": 0.000807
+    },
+    "fw2_arz": {
+      "rows_in_source": 853290,
+      "sampled": 50000,
+      "share": 0.058597
+    },
+    "fw2_ary": {
+      "rows_in_source": 2365405,
+      "sampled": 10000,
+      "share": 0.004228
+    },
+    "fw2_ars": {
+      "rows_in_source": 298167,
+      "sampled": 10000,
+      "share": 0.033538
+    },
+    "wiki_ar": {
+      "rows_in_source": 1219201,
+      "sampled": 50000,
+      "share": 0.04101
+    },
+    "fineweb_edu_10bt": {
+      "rows_in_source": 9672101,
+      "sampled": 50000,
+      "share": 0.00517
+    },
+    "fw2_acm": {
+      "rows_in_source": 7382,
+      "sampled": 7000,
+      "share": 0.948253
+    },
+    "fw2_apc": {
+      "rows_in_source": 69740,
+      "sampled": 10000,
+      "share": 0.14339
+    },
+    "wiki_ary": {
+      "rows_in_source": 8087,
+      "sampled": 8000,
+      "share": 0.989242
+    }
+  },
+  "removed_by_cleaning": {
+    "fw2_arb": 38,
+    "fw2_arz": 86,
+    "fw2_ary": 1,
+    "fw2_ars": 20,
+    "wiki_ar": 29826,
+    "fineweb_edu_10bt": 61,
+    "fw2_acm": 10,
+    "fw2_apc": 382,
+    "wiki_ary": 7
+  },
+  "documents_without_words": 0,
+  "groups": {
+    "fw2_arb (val+test)": {
+      "documents": 1730,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 0,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "fw2_arz (val+test)": {
+      "documents": 2014,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 1,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0005,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "fw2_ary (val+test)": {
+      "documents": 350,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 0,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "fw2_ars (val+test)": {
+      "documents": 473,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 0,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "wiki_ar (val+test)": {
+      "documents": 823,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 3,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0036,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "fineweb_edu_10bt (val+test)": {
+      "documents": 2059,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 0,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "fw2_acm (evaluation-only source)": {
+      "documents": 6990,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 0,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "fw2_apc (evaluation-only source)": {
+      "documents": 9618,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 0,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0,
+      "share_exact": 0.0,
+      "examples": []
+    },
+    "wiki_ary (evaluation-only source)": {
+      "documents": 7993,
+      "exact_duplicates": 0,
+      "near_0_8": 0,
+      "near_0_6": 2,
+      "best_in_same_source": 0,
+      "best_in_other_source": 0,
+      "share_near_0_8": 0.0,
+      "share_near_0_6": 0.0003,
+      "share_exact": 0.0,
+      "examples": []
+    }
+  }
+}
