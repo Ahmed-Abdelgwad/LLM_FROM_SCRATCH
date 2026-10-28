@@ -158,9 +158,15 @@ def clean_report(manifests: list[Path]) -> None:
             f"under 300 characters {r['share_under_300_before']:.1%} -> "
             f"{r['share_under_300_after']:.1%}"
         )
+        per_1000 = 1000 / r["docs_in"] if r["docs_in"] else 0.0
+        typer.echo(
+            f"  documents with an email or phone-like number: {r['pii_docs_before']} -> "
+            f"{r['pii_docs_after']} (per 1,000 documents of the sample: "
+            f"{r['pii_docs_before'] * per_1000:.1f} -> {r['pii_docs_after'] * per_1000:.1f})"
+        )
         for name in r["rules"]:
             typer.echo(
-                f"  {name}: dropped {r['dropped'].get(name, 0)} documents, shortened "
+                f"  {name}: dropped {r['dropped'].get(name, 0)} documents, changed "
                 f"{r['changed'].get(name, 0)}, removed "
                 f"{r['chars_removed'].get(name, 0):,} characters"
             )

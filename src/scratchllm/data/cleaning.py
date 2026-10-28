@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from functools import partial
 from typing import Any
 
+from scratchllm.data.pii import find_matches, mask
 from scratchllm.data.sources import Source
 
 
@@ -133,11 +134,39 @@ def drop_if_shorter_than(text: str, minimum: int) -> str | None:
     return text if len(text) >= minimum else None
 
 
+# ---------------------------------------------------------------------------------------------
+# Rule 4: personal data in web pages (D-001, D-003)
+#
+# Purpose: 5.6 to 51.2 per 1,000 web documents contain an email or a phone-like number, against
+# the limit of 5 (A7). A model trained on them can reproduce a real person's number.
+# What it does: each email or phone-like number is replaced by `<email>` or `<phone>` (reserved as
+# tokenizer special tokens later, so each costs one token). A page with five or more matches is
+# dropped instead (placeholder emails at example.com do not count towards the five): those are
+# repeated-number spam pages (D-001), 0.1 to 2.3 per 1,000 documents,
+# and masking them would leave a page of placeholders.
+# Benefit: the model keeps the sentence ("call <phone> to book") and loses the number.
+# Limits: detection is the regular expressions of `scratchllm.data.pii`, so names, addresses and
+# unusual formats are not found; after masking, a second scan finding nothing proves nothing
+# about recall (D-003). Wikipedia is exempt: it passes A7 as measured.
+# ---------------------------------------------------------------------------------------------
+PII_SPAM_MATCHES = 5
+
+
+def scrub_pii(text: str) -> str | None:
+    matches = find_matches(text)
+    if not matches:
+        return text
+    if sum(not m.placeholder for m in matches) >= PII_SPAM_MATCHES:
+        return None  # placeholder emails do not make a page spam
+    return mask(text, matches)  # placeholders too, so the model sees one token for "an email"
+
+
 def rules_for(source: Source) -> list[Rule]:
     """The measured rules that apply to `source`; an empty list when none has been measured."""
     rules: list[Rule] = []
     if source.kind == "web":
         rules.append(Rule("books_stub", drop_books_stub))
+        rules.append(Rule("pii", scrub_pii))
     headings = WIKI_FOOTER_HEADINGS.get(source.name)
     if source.kind == "wiki" and headings is not None:
         rules.append(Rule("wiki_footer", partial(strip_wiki_footer, headings=headings)))
@@ -156,8 +185,10 @@ class CleaningStats:
     chars_in: int = 0
     chars_out: int = 0
     dropped: Counter[str] = field(default_factory=Counter)  # rule -> documents dropped
-    changed: Counter[str] = field(default_factory=Counter)  # rule -> documents shortened
-    chars_removed: Counter[str] = field(default_factory=Counter)  # rule -> characters removed
+    changed: Counter[str] = field(
+        default_factory=Counter
+    )  # rule -> documents whose text it changed
+    chars_removed: Counter[str] = field(default_factory=Counter)  # rule -> characters removed (net)
 
 
 def clean_docs(
@@ -176,9 +207,9 @@ def clean_docs(
                 stats.chars_removed[rule.name] += len(text)
                 dropped = True
                 break
-            if len(result) < len(text):
+            if result != text:
                 stats.changed[rule.name] += 1
-                stats.chars_removed[rule.name] += len(text) - len(result)
+                stats.chars_removed[rule.name] += len(text) - len(result)  # net; < 0 if longer
                 text = result
         if dropped:
             continue

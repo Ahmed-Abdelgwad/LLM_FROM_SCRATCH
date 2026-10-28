@@ -99,8 +99,8 @@ def test_the_content_before_the_heading_is_untouched_including_inner_blank_lines
 
 
 def test_rules_follow_source_kind_and_measured_headings():
-    assert [r.name for r in rules_for(get_source("fw2_apc"))] == ["books_stub"]
-    assert [r.name for r in rules_for(get_source("fineweb_edu_10bt"))] == ["books_stub"]
+    assert [r.name for r in rules_for(get_source("fw2_apc"))] == ["books_stub", "pii"]
+    assert [r.name for r in rules_for(get_source("fineweb_edu_10bt"))] == ["books_stub", "pii"]
     assert [r.name for r in rules_for(get_source("wiki_ar"))] == ["wiki_footer", "min_length"]
     assert [r.name for r in rules_for(get_source("wiki_ary"))] == ["wiki_footer"]  # eval-only
     assert rules_for(get_source("wiki_en")) == []  # headings not measured: no guess
@@ -176,6 +176,13 @@ def test_a_dropped_document_does_not_reach_later_rules():
     assert seen == []
 
 
+def test_a_rule_that_lengthens_the_text_still_counts_as_a_change():
+    stats = CleaningStats()
+    out = list(clean_docs([doc(1, "a@b.c")], [Rule("pii", lambda t: "<email> extra")], stats))
+    assert out[0]["text"] == "<email> extra" and stats.changed["pii"] == 1
+    assert stats.chars_removed["pii"] < 0  # net: the text grew
+
+
 def test_no_rules_leave_the_documents_alone():
     stats = CleaningStats()
     out = list(clean_docs([doc(1, PROSE)], [], stats))
@@ -196,5 +203,5 @@ def test_cli_clean_report_uses_the_train_split_only(tmp_path: Path):
     result = CliRunner().invoke(app, ["data", "clean-report", str(manifest_path(out, "wiki_ar"))])
     assert result.exit_code == 0, result.output
     assert "documents 4 -> 3" in result.output  # the val document is not counted
-    assert "wiki_footer: dropped 0 documents, shortened 4" in result.output
+    assert "wiki_footer: dropped 0 documents, changed 4" in result.output
     assert "min_length: dropped 1 documents" in result.output

@@ -2,27 +2,9 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
-# Arabic-Indic (U+0660-0669) and Extended Arabic-Indic (U+06F0-06F9) digits -> ASCII
-_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
-_NON_ASCII_DIGIT = re.compile("[٠-٩۰-۹]")
-_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
-# A phone-like number has one of these shapes. The first draft accepted ANY 8-15 digits with
-# optional separators, and on real samples ~90% of its hits were year ranges ("2002-2003"), year
-# pairs ("2018 2019"), dates, image ids and area codes, not phones.
-_PHONE = re.compile(
-    # 9-15 digits led by +, 00 or 0 (01102106655); not after a Latin letter, '.', '-' or '_'
-    # (decimals, ISBNs, catalogue ids), but allowed right after an Arabic letter, where spam
-    # glues numbers to words
-    r"(?<![\dA-Za-z_.-])(?:\+|00|0)\d{8,14}(?![\d_])"
-    r"|\+\d{1,3}(?:[\s.-]\d{2,4}){2,4}(?!\d)"  # international with groups: +20 112 074 0067
-    r"|(?<!\d)0\d{1,2}[\s.-]\d{3,4}[\s.-]\d{3,4}(?!\d)"  # local with groups: 010-1234-5678
-    r"|(?<!\d)\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}(?!\d)"  # North American: (555) 123-4567
-)
-# dates such as 2019-05-12 or 12/05/2019 are removed first so they cannot be read as phones
-_DATE = re.compile(r"(?<!\d)(?:\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{4})(?!\d)")
+from scratchllm.data.pii import find_matches
 
 
 def _quantile(sorted_values: list[int], q: float) -> int:
@@ -79,14 +61,15 @@ class PersonalData:
         self.with_any = 0
         self.emails = 0
         self.phones = 0
+        self.placeholders = 0
 
     def update(self, doc: dict[str, Any]) -> None:
-        text = doc["text"]
-        if _NON_ASCII_DIGIT.search(text):  # translating every document costs ~6 s per 100M chars
-            text = text.translate(_DIGITS)
-        emails = len(_EMAIL.findall(text)) if "@" in text else 0  # no '@', no email
-        phones = len(_PHONE.findall(_DATE.sub(" ", text)))
+        matches = find_matches(doc["text"])
+        real = [m for m in matches if not m.placeholder]
+        emails = sum(m.kind == "email" for m in real)
+        phones = len(real) - emails
         self.docs += 1
+        self.placeholders += len(matches) - len(real)
         self.with_email += emails > 0
         self.with_phone += phones > 0
         self.with_any += (emails + phones) > 0
@@ -101,6 +84,9 @@ class PersonalData:
             "docs_with_phone_like": self.with_phone,
             "email_matches": self.emails,
             "phone_like_matches": self.phones,
+            # emails at example.com/.org/.net were put there by the data source's own
+            # anonymization; they are not personal data and are in none of the figures here
+            "email_placeholder_matches": self.placeholders,
             # matches can pile up in a few long spam pages that repeat one number, so the rate of
             # documents with any hit is the figure to judge a source by
             "docs_with_pii": self.with_any,

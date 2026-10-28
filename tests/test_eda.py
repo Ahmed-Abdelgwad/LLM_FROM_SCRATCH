@@ -93,6 +93,17 @@ def test_a_few_spam_pages_inflate_matches_but_not_the_document_rate():
     assert r["docs_with_pii"] == 2 and r["docs_with_pii_per_1000"] == 2.0  # the honest figure
 
 
+def test_placeholder_emails_are_reported_apart_and_are_not_personal_data():
+    r = feed(
+        PersonalData(),
+        "write to email@example.com or firstname.lastname@example.org",
+        "write to real.person@gmail.com",
+        "no contact here",
+    )
+    assert r["email_placeholder_matches"] == 2
+    assert r["email_matches"] == 1 and r["docs_with_pii"] == 1
+
+
 def test_personal_data_rate_is_per_thousand_documents():
     pd = PersonalData()
     for i in range(1000):
@@ -204,10 +215,10 @@ def test_progress_lines_and_per_check_seconds(tmp_path: Path, monkeypatch):
 
 def _reference_personal_data(text: str) -> tuple[int, int]:
     """The straightforward version: always translate digits, always run both patterns."""
-    from scratchllm.eda import checks_basic as cb
+    from scratchllm.data import pii
 
-    t = text.translate(cb._DIGITS)
-    return len(cb._EMAIL.findall(t)), len(cb._PHONE.findall(cb._DATE.sub(" ", t)))
+    t = text.translate(pii.DIGITS)
+    return len(pii.EMAIL.findall(t)), len(pii.PHONE.findall(pii.DATE.sub(" ", t)))
 
 
 @pytest.mark.parametrize(
