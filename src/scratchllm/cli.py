@@ -172,6 +172,26 @@ def clean_report(manifests: list[Path]) -> None:
             )
 
 
+@data_app.command("leakage-report")
+def leakage_report(
+    manifests: list[Path],
+    out_dir: Annotated[Path, typer.Option(help="Where reports are written.")] = Path(
+        "reports/eda/leakage"
+    ),
+    run_id: Annotated[str | None, typer.Option(help="Report folder name.")] = None,
+    bucket_cap: Annotated[
+        int, typer.Option(help="Training documents offered per LSH bucket to each query.")
+    ] = 50,
+) -> None:
+    """Measure near-duplicates between evaluation and training text (removes nothing)."""
+    from scratchllm.eda.leakage import run_leakage
+
+    target = run_leakage(
+        manifests, out_dir, run_id=run_id, bucket_cap=bucket_cap, progress=typer.echo
+    )
+    typer.echo(f"report written to {target}")
+
+
 @data_app.command("verify")
 def verify(manifests: list[Path]) -> None:
     """Check data files still match their manifests (hash and counts)."""
