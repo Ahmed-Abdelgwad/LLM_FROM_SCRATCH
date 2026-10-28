@@ -140,6 +140,32 @@ def read(
         typer.echo(f"wrote {out}")
 
 
+@data_app.command("clean-report")
+def clean_report(manifests: list[Path]) -> None:
+    """Show what the cleaning rules would do to the train split of each sample (writes nothing)."""
+    from scratchllm.eda.cleaning_effect import measure
+
+    for path in manifests:
+        r = measure(path)
+        rules = ", ".join(r["rules"]) or "none measured yet"
+        typer.echo(f"{r['source']}: rules: {rules}")
+        typer.echo(
+            f"  documents {r['docs_in']} -> {r['docs_out']} (retention {r['retention']:.1%}); "
+            f"characters {r['chars_in']:,} -> {r['chars_out']:,}"
+        )
+        typer.echo(
+            f"  median length {r['median_chars_before']} -> {r['median_chars_after']}; "
+            f"under 300 characters {r['share_under_300_before']:.1%} -> "
+            f"{r['share_under_300_after']:.1%}"
+        )
+        for name in r["rules"]:
+            typer.echo(
+                f"  {name}: dropped {r['dropped'].get(name, 0)} documents, shortened "
+                f"{r['changed'].get(name, 0)}, removed "
+                f"{r['chars_removed'].get(name, 0):,} characters"
+            )
+
+
 @data_app.command("verify")
 def verify(manifests: list[Path]) -> None:
     """Check data files still match their manifests (hash and counts)."""
