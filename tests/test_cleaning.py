@@ -10,6 +10,7 @@ from scratchllm.data.cleaning import (
     Rule,
     clean_docs,
     drop_books_stub,
+    drop_if_shorter_than,
     is_books_stub,
     rules_for,
     strip_wiki_footer,
@@ -100,17 +101,44 @@ def test_the_content_before_the_heading_is_untouched_including_inner_blank_lines
 def test_rules_follow_source_kind_and_measured_headings():
     assert [r.name for r in rules_for(get_source("fw2_apc"))] == ["books_stub"]
     assert [r.name for r in rules_for(get_source("fineweb_edu_10bt"))] == ["books_stub"]
-    assert [r.name for r in rules_for(get_source("wiki_ar"))] == ["wiki_footer"]
-    assert [r.name for r in rules_for(get_source("wiki_ary"))] == ["wiki_footer"]
+    assert [r.name for r in rules_for(get_source("wiki_ar"))] == ["wiki_footer", "min_length"]
+    assert [r.name for r in rules_for(get_source("wiki_ary"))] == ["wiki_footer"]  # eval-only
     assert rules_for(get_source("wiki_en")) == []  # headings not measured: no guess
 
 
 def test_the_wiki_rule_uses_the_headings_of_its_own_source():
-    (ar,) = rules_for(get_source("wiki_ar"))
+    ar = next(r for r in rules_for(get_source("wiki_ar")) if r.name == "wiki_footer")
     (ary,) = rules_for(get_source("wiki_ary"))
     assert ar.run(PROSE + FOOTER) == PROSE
     assert ary.run(PROSE + FOOTER) == PROSE + FOOTER  # "مراجع" is not a wiki_ary heading
     assert ary.run(PROSE + "\n\nعيون لكلام\n\nتصنيف") == PROSE
+
+
+# ---------- minimum length ----------
+
+
+def test_the_minimum_is_measured_on_what_is_left_after_the_footer():
+    footer_heavy = "جملة قصيرة." + "\n\nمراجع\n\n" + "\n".join(["تصنيف طويل جدا " * 3] * 10)
+    assert len(footer_heavy) > 300  # long only because of the category list
+    ar_rules = rules_for(get_source("wiki_ar"))
+    text: str | None = footer_heavy
+    for rule in ar_rules:
+        text = rule.run(text) if text is not None else None
+    assert text is None
+
+
+def test_the_minimum_keeps_documents_at_the_limit_and_drops_those_below():
+    assert drop_if_shorter_than("ا" * 300, 300) == "ا" * 300
+    assert drop_if_shorter_than("ا" * 299, 300) is None
+
+
+def test_only_listed_sources_get_a_length_filter():
+    names = {
+        r.name
+        for s in ("fw2_arz", "fineweb_edu_10bt", "wiki_ary")
+        for r in rules_for(get_source(s))
+    }
+    assert "min_length" not in names
 
 
 # ---------- running the rules ----------
@@ -159,11 +187,14 @@ def test_no_rules_leave_the_documents_alone():
 
 def test_cli_clean_report_uses_the_train_split_only(tmp_path: Path):
     src = get_source("wiki_ar")
-    docs = [doc(i, PROSE + FOOTER, "wiki_ar") for i in range(3)]
-    docs += [doc(99, PROSE + FOOTER, "wiki_ar", "val")]
+    long_prose = " ".join([PROSE] * 8)  # over the 300-character minimum once the footer is cut
+    docs = [doc(i, long_prose + FOOTER, "wiki_ar") for i in range(3)]
+    docs += [doc(4, PROSE + FOOTER, "wiki_ar")]  # too short once the footer is cut
+    docs += [doc(99, long_prose + FOOTER, "wiki_ar", "val")]
     out = tmp_path / "s"
     write_sample(iter(docs), out, src, SampleSpec(n_docs=len(docs)), "rev0", Counter())
     result = CliRunner().invoke(app, ["data", "clean-report", str(manifest_path(out, "wiki_ar"))])
     assert result.exit_code == 0, result.output
-    assert "documents 3 -> 3" in result.output
-    assert "wiki_footer: dropped 0 documents, shortened 3" in result.output
+    assert "documents 4 -> 3" in result.output  # the val document is not counted
+    assert "wiki_footer: dropped 0 documents, shortened 4" in result.output
+    assert "min_length: dropped 1 documents" in result.output

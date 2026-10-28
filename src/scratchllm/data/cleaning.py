@@ -111,6 +111,28 @@ def strip_wiki_footer(
     return prose or None
 
 
+# ---------------------------------------------------------------------------------------------
+# Rule 3: minimum length of the prose that is left (D-010)
+#
+# Purpose: after the footer is gone, 59.7% of wiki_ar documents are under 300 characters. They are
+# one-fact stubs and generated pages, about 8% of them with template values missing ("born in
+# 1964 in  in Mexico"). A5 asks for a median of at least 300 characters, and names this filter as
+# its remedy.
+# Benefit: A5 holds by construction, and the model does not read broken sentences. Cost: 59.7% of
+# the documents but 7.7% of the characters of wiki_ar, a secondary source next to fw2_arb.
+#
+# Only sources listed here get it. An evaluation-only source (D-002) gets none, so that its
+# evaluation is not shifted towards longer articles. The value is a candidate for an ablation
+# once a model can be trained: a data filter, unlike a lossy normalization, can be compared on a
+# fixed held-out set (D-007).
+# ---------------------------------------------------------------------------------------------
+MIN_PROSE_CHARS: dict[str, int] = {"wiki_ar": 300}
+
+
+def drop_if_shorter_than(text: str, minimum: int) -> str | None:
+    return text if len(text) >= minimum else None
+
+
 def rules_for(source: Source) -> list[Rule]:
     """The measured rules that apply to `source`; an empty list when none has been measured."""
     rules: list[Rule] = []
@@ -119,6 +141,9 @@ def rules_for(source: Source) -> list[Rule]:
     headings = WIKI_FOOTER_HEADINGS.get(source.name)
     if source.kind == "wiki" and headings is not None:
         rules.append(Rule("wiki_footer", partial(strip_wiki_footer, headings=headings)))
+    minimum = MIN_PROSE_CHARS.get(source.name)
+    if minimum is not None:
+        rules.append(Rule("min_length", partial(drop_if_shorter_than, minimum=minimum)))
     return rules
 
 
