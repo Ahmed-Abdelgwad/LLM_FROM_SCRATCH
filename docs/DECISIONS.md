@@ -579,3 +579,25 @@ samples and **not established for the corpus**.
   50-document bucket cap, recall of about 95% right at 0.8, word-shingle similarity only (a
   rewritten or translated copy is not found).
 - A9 on a template family at 0.6 to 0.8 is not a criterion; whether to also report it stays open.
+
+## D-013 (2026-10-31): normalization = presentation forms, tatweel, whitespace (`tokenizer/normalize.py`)
+
+Implements the "applied to every source" part of D-006; nothing lossy was added.
+
+- **NFKC only on Arabic presentation forms** (U+FB50-FDFF, U+FE70-FEFF), not on the whole text.
+  Measured on the nine samples: those characters are 0.04% of fw2_arb but appear in 6% of
+  fw2_apc documents (616 of 9,670). NFKC on everything would also have changed over 59,000 "…",
+  1,500 "²" and 1,200 "™" in the English text for no gain.
+- **Order: NFKC, then tatweel, then whitespace.** NFKC of ten presentation forms contains a
+  tatweel (U+FE77 becomes tatweel + fatha), so removing the tatweel first leaves stray ones and
+  breaks idempotence (a deliberately reordered version fails two tests).
+- **Whitespace:** runs of spaces, tabs and no-break spaces become one space, spaces around a
+  newline go, three or more newlines become two, the ends are stripped. Line and paragraph
+  structure stay.
+- **Untouched:** digits (NFKC leaves Arabic-Indic digits as they are, so the digit decision of
+  D-006 stays open), diacritics, alef/yeh/teh-marbuta spellings.
+- **Checked on real text:** on 117,000 documents without presentation forms, the text differs from
+  the original only in whitespace and tatweel; no document became empty; applying it twice gives
+  the same result. It removes 0.00% to 0.73% of the characters of a source and changes 99% of the
+  Wikipedia documents (double spaces and spaces before newlines).
+- **Not decided (counted but not acted on):** zero-width and direction marks, and the BOM.
