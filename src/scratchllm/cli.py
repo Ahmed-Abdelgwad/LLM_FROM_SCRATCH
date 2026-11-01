@@ -26,6 +26,8 @@ from scratchllm.data.sources import SOURCES, get_source
 app = typer.Typer(no_args_is_help=True, help="scratchllm: bilingual GPT from scratch.")
 data_app = typer.Typer(no_args_is_help=True, help="Data acquisition and analysis.")
 app.add_typer(data_app, name="data")
+tokenizer_app = typer.Typer(no_args_is_help=True, help="Tokenizer training and measurement.")
+app.add_typer(tokenizer_app, name="tokenizer")
 
 
 @data_app.command("sources")
@@ -212,3 +214,64 @@ def leaks(
     if purge_to is not None:
         for name, r in purge_train_leaks(manifests, eval_hashes, purge_to).items():
             typer.echo(f"{name}: kept {r['kept']}, removed {r['removed_train_leaks']}")
+
+
+@tokenizer_app.command("train")
+def tokenizer_train(
+    out: Annotated[Path, typer.Option(help="Where the tokenizer file is written.")],
+    data_dir: Annotated[Path, typer.Option(help="Folder of the sampled .jsonl files.")] = Path(
+        "data/raw/eda"
+    ),
+    vocab_size: Annotated[
+        int, typer.Option(help="Bytes + merges + special tokens (D-014).")
+    ] = 16384,
+    chars_per_source: Annotated[
+        int, typer.Option(help="Characters of train text read from each training source.")
+    ] = 3_000_000,
+) -> None:
+    """Learn a byte-level BPE vocabulary from the cleaned, normalized training sources."""
+    import json
+
+    from scratchllm.tokenizer.report import train_tokenizer
+
+    tok, provenance = train_tokenizer(data_dir, vocab_size, chars_per_source, progress=typer.echo)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tok.save(out)
+    sidecar = out.with_suffix(".provenance.json")
+    sidecar.write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    typer.echo(f"tokenizer ({tok.vocab_size} ids) written to {out}; provenance in {sidecar}")
+
+
+@tokenizer_app.command("fertility")
+def tokenizer_fertility(
+    tokenizer: Path,
+    data_dir: Annotated[Path, typer.Option(help="Folder of the sampled .jsonl files.")] = Path(
+        "data/raw/eda"
+    ),
+    sizes: Annotated[
+        str, typer.Option(help="Comma-separated vocabulary sizes of our tokenizer to measure.")
+    ] = "16384",
+    compare: Annotated[
+        list[str] | None,
+        typer.Option(help="Hugging Face repo whose tokenizer.json is measured too (repeatable)."),
+    ] = None,
+    max_docs: Annotated[int, typer.Option(help="Held-out documents per source.")] = 600,
+    out_dir: Annotated[Path, typer.Option(help="Where reports are written.")] = Path(
+        "reports/tokenizer"
+    ),
+    run_id: Annotated[
+        str, typer.Option(help="Report folder name; final-<name> is tracked.")
+    ] = "run",
+) -> None:
+    """Measure tokens per word and characters per token on held-out text."""
+    from scratchllm.tokenizer.report import fertility_report, write_report
+
+    report = fertility_report(
+        tokenizer,
+        data_dir,
+        [int(x) for x in sizes.split(",")],
+        compare or [],
+        max_docs,
+        progress=typer.echo,
+    )
+    typer.echo(f"report written to {write_report(report, out_dir, run_id)}")

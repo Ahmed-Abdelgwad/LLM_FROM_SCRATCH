@@ -27,3 +27,7 @@ trackio/
 # EDA reports: working runs are ignored; a report worth keeping is named final-<something>
 reports/eda/*
 !reports/eda/final-*/
+
+# Tokenizer reports: same rule as EDA reports
+reports/tokenizer/*
+!reports/tokenizer/final-*/
