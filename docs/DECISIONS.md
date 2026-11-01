@@ -601,3 +601,114 @@ Implements the "applied to every source" part of D-006; nothing lossy was added.
   the same result. It removes 0.00% to 0.73% of the characters of a source and changes 99% of the
   Wikipedia documents (double spaces and spaces before newlines).
 - **Not decided (counted but not acted on):** zero-width and direction marks, and the BOM.
+
+## D-014 (2026-11-01): pre-tokenizer = GPT-2's pattern plus combining marks; byte-level BPE trainer
+
+`tokenizer/pretokenize.py` and `tokenizer/bpe.py`. The trainer does not encode or decode yet.
+
+- **Base units are bytes (256 ids), as in GPT-2.** Any text can be written; there is no unknown
+  token. The cost for Arabic is that a letter is two bytes, so the first merges rebuild letters.
+  Measured in a probe run (4,096 ids, 2M characters from each of six training sources after
+  cleaning and normalization): 11 of the 3,837 learned tokens (0.3%) are not valid UTF-8, so
+  this waste is small. Character-level BPE was not tried; this is a measurement of the byte
+  version, not a comparison.
+- **The pre-tokenizer is GPT-2's pattern with `\p{M}` added to what a word is.** GPT-2's `\p{L}+`
+  cuts a diacritized Arabic word at every diacritic. On 1,500 documents per source this adds
+  9.2% more pieces in fw2_arb, 3.8% in wiki_ar, 2.8% in fw2_arz and 0.02% in fineweb_edu.
+- **Kept as in GPT-2 on purpose:** a paragraph break ("\n\n") before a word is two pieces, because
+  only a space can be glued to a word. Treating a newline run as one piece would save 1.9% of
+  wiki_ar's pieces and nothing in fw2_arb or fineweb_edu (they have almost no "\n\n"). Digits are
+  runs of any length (GPT-2); splitting them one by one is not decided. The English contractions
+  are in the pattern; the curly apostrophe is not.
+- **Ties** between pairs with equal counts go to the smaller ids. Arbitrary, but the same corpus
+  always gives the same merges.
+- **Special tokens are cut out of the text before counting** (`<|endoftext|>`, `<email>`,
+  `<phone>`), so they never take part in a merge; their ids will be the last ones of the vocabulary.
+- **Correctness:** the incremental trainer (pair counts updated only for words that contained the
+  merged pair, a heap for the best pair) gives the same merges as a slow reference that recounts
+  everything, on 8 random corpora with a tiny alphabet (many ties) and on Arabic text. Three
+  deliberate breakages (new pairs not indexed, counts not pushed to the heap, ties to the larger
+  pair) each fail tests.
+- **Cost measured:** 275,512 unique pre-tokens from 12M characters; 3,837 merges in 19 seconds;
+  peak memory 474 MB. Memory grows with the number of unique pre-tokens, and the machine has
+  about 1 GB free, so the training sample for the 16k vocabulary must be chosen with this in mind.
+- **Not decided:** the vocabulary size (16k is a proposal, to be chosen by fertility and
+  bits-per-char), how many characters per source go into tokenizer training, and whether the
+  tokenizer sample should be weighted by source rather than equal per source.
+
+## D-015 (2026-11-01): encoding replays the merges in learned order; the tokenizer file (`tokenizer/tokenizer.py`)
+
+- **Id layout:** 0-255 the bytes, then one id per merge in the order learned, then the special
+  tokens in the order given. The vocabulary size is 256 + merges + specials.
+- **Encoding rule:** within a pre-token, apply the merge that was learned earliest among the pairs
+  present, until none is left. Not "the most frequent pair in this word": ranks come from the whole
+  corpus. Checked against the literal definition (apply merge 0, then merge 1, ...) on random text
+  with a trained tokenizer, and by a case where the leftmost pair loses to an earlier-learned one.
+- **Special tokens in text:** by default the strings `<email>`, `<phone>`, `<|endoftext|>` found in
+  the text become their reserved ids, because cleaned training text contains `<email>` and `<phone>`
+  (D-011). `parse_special=False` treats them as ordinary characters, for untrusted user input.
+- **No normalization inside the tokenizer.** The text given to `encode` is encoded as it is
+  (D-013). The data pipeline and any prompt must call `normalize` first; the tokenizer does not
+  enforce it.
+- **Decoding** returns the exact text for any ids made by `encode`. Ids a model generates can end
+  in the middle of a character (an Arabic letter is two bytes), so `decode` replaces such a
+  fragment with U+FFFD by default and can be made strict. An id outside the vocabulary raises.
+- **File:** JSON with format/version, the pre-tokenizer pattern, the merges and the special
+  tokens; same bytes every save; written to a temporary file and renamed. Loading refuses a file
+  whose pattern differs from the code's, because the same merges with another pre-tokenizer would
+  not reproduce the training.
+- **Checked on real text** with a 4,096-id probe tokenizer (2M characters per source for
+  training): 300 validation/test documents of each of the six training sources, and 300 documents
+  of each evaluation-only source it never saw (fw2_apc, fw2_acm, wiki_ary): 2,700 documents, cleaned and
+  normalized and also raw, 0 round-trip failures. Speed 1.0 to 3.0 million characters per second
+  in one Python process. Characters per token at this size: 2.2 to 2.9 across sources. That is a
+  probe of the code, not the fertility result of step 3; the vocabulary size is still open (D-014).
+
+## D-016 (2026-11-01): tokenizer fertility measured against GPT-2 and Qwen3; sample size and vocabulary options
+
+Code: `tokenizer/corpus.py`, `fertility.py`, `report.py`, commands `scratchllm tokenizer train` and
+`scratchllm tokenizer fertility`. The report is `reports/tokenizer/final-v1` (tables generated from
+`report.json`; sha256 of the tokenizer file `698bb54137491734`). Tokenizer file:
+`artifacts/tokenizer/bpe-32k.json` (not tracked in git yet).
+
+- **How it was measured.** Up to 600 held-out documents per source (val+test
+  of the six training sources; all documents of the three evaluation-only sources, which the
+  tokenizer never saw), cleaned and normalized, the same text for every tokenizer. Tokens per word
+  uses `str.split()` as the word; characters per token does not depend on that. GPT-2 and Qwen3
+  (`Qwen3-4B-Instruct-2507`) are measured on the same text with the `tokenizers` library.
+- **Training sample.** Equal budget per training source (fw2_arb, fw2_arz, fw2_ars, fw2_ary,
+  wiki_ar, fineweb_edu): 3,000,000 characters of train text each, 366,966 distinct pre-tokens, one
+  training to 32,768 ids, from which every smaller size is a prefix of the merges
+  (`Tokenizer.truncated`; the prefix property is a test). So English is 1/6 of the training
+  characters, and Arabic 5/6. No other weighting was tried.
+
+| tokenizer | vocab | Arabic tokens/word | Arabic chars/token | English tokens/word | English chars/token |
+|---|---:|---:|---:|---:|---:|
+| Qwen/Qwen3-4B-Instruct-2507 | 151669 | 2.39 | 2.35 | 1.31 | 4.55 |
+| openai-community/gpt2 | 50257 | 5.51 | 1.02 | 1.32 | 4.50 |
+| ours-16384 | 16384 | 1.78 | 3.17 | 1.78 | 3.33 |
+| ours-24576 | 24576 | 1.68 | 3.36 | 1.67 | 3.57 |
+| ours-32768 | 32768 | 1.62 | 3.48 | 1.60 | 3.72 |
+| ours-8192 | 8192 | 1.97 | 2.86 | 2.03 | 2.92 |
+
+- **Reading it.** On Arabic, GPT-2 needs about 3.1 times as many tokens as ours at 16,384 ids
+  (5.51 vs 1.78 per word, and 1.02 characters per token: essentially one token per letter), and
+  Qwen3, with a vocabulary 9 times larger, about 1.34 times as many (2.39 vs 1.78). On English the
+  order reverses: ours needs 1.78 tokens per word against 1.32 for GPT-2 and 1.31 for Qwen3.
+  The dialects the tokenizer never saw (fw2_acm, fw2_apc, wiki_ary) are 1.78 to 2.01 at 16,384
+  ids, somewhat higher than the trained ones (1.63 to 1.82) but still far below GPT-2 and Qwen3,
+  so most of what was learned carries over to dialects outside the training sources.
+- **Sample size.** A tokenizer with 16,384 ids trained on 1,000,000 characters per source instead of
+  3,000,000 differs by at most 0.03 tokens per word on any of the nine sources (scratch run, not
+  in the repo), so the sample size is not what limits quality. Peak memory was about 0.5 GB with
+  1M per source and 0.9 GB with 3M.
+- **Vocabulary size is NOT decided here.** Doubling 8,192 to 16,384 ids lowers the Arabic mean by
+  9.7%; doubling 16,384 to 32,768 by 8.7%: the gain does not flatten yet. The cost is the embedding
+  table: 6.3M parameters at 16,384 ids and d_model 384 (12.6M at 32,768), against a model of 10 to
+  30M parameters in total. Which size trains better per parameter and per token can only be
+  decided by training with each (bits per character, D-007), so 16,384 stays the proposal.
+- **Limits.** English is clearly worse than the outside tokenizers; whether to give English a
+  larger share of the tokenizer sample is untested. The special tokens `<email>` and `<phone>`
+  are 0.0028% of the evaluation tokens, so they do not explain any difference. "Word" is a rough
+  unit for Arabic. The held-out sample is the first 600 documents of each
+  file, not a random draw.
