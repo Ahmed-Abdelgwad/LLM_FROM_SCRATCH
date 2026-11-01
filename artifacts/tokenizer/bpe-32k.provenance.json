@@ -1,0 +1,39 @@
+{
+  "chars_per_source": 3000000,
+  "created_utc": "2026-11-01T18:25:13+00:00",
+  "distinct_pretokens": 366966,
+  "merges": 32509,
+  "pattern": "'s|'t|'re|'ve|'m|'ll|'d| ?[\\p{L}\\p{M}]+| ?\\p{N}+| ?[^\\s\\p{L}\\p{M}\\p{N}]+|\\s+(?!\\S)|\\s+",
+  "sources": {
+    "fineweb_edu_10bt": {
+      "chars": 3002972,
+      "docs": 662
+    },
+    "fw2_arb": {
+      "chars": 3002187,
+      "docs": 1046
+    },
+    "fw2_ars": {
+      "chars": 3379694,
+      "docs": 747
+    },
+    "fw2_ary": {
+      "chars": 3003044,
+      "docs": 1328
+    },
+    "fw2_arz": {
+      "chars": 3000367,
+      "docs": 1500
+    },
+    "wiki_ar": {
+      "chars": 3002437,
+      "docs": 844
+    }
+  },
+  "special_tokens": [
+    "<|endoftext|>",
+    "<email>",
+    "<phone>"
+  ],
+  "vocab_size": 32768
+}
