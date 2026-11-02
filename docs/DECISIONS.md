@@ -765,3 +765,34 @@ Wikipedia sources keep their pages); keep the 32k tokenizer and its provenance i
   167M tokens; a model of 20M parameters sees about 8.4
   tokens per parameter in one pass, against the rule of thumb of about 20 (Hoffmann et al. 2022,
   from memory, to be checked), so a run on this sample means several passes or more data.
+
+## D-018 (2026-11-02): causal multi-head self-attention (`model/attention.py`)
+
+Chapter 3 of the book. The explanation of the mechanism (query, key, value, scaling, mask, heads)
+is in the module's docstring; this entry records the choices.
+
+- **One fused matrix for the three maps** (`d_model x 3*d_model`), as in nanoGPT, instead of three
+  matrices as in the book. The same computation in one matrix product; a test checks that its
+  three thirds give q, k and v.
+- **Explicit math is the reference.** `softmax(q k^T / sqrt(head_dim))` with the future set to
+  -inf, then `weights v`, heads put side by side, one output map. It can return the attention
+  weights. It matches both the library kernel (`F.scaled_dot_product_attention`) and a plain
+  triple loop over examples, heads and positions, and changing the future never changes the past
+  (tested at three cut points).
+- **`fast=True` uses the library kernel** with the same parameters; the tests check the same
+  numbers, causality, gradients and that dropout acts only in training. Measured on the RTX 3050
+  for one attention layer (d_model 384, 6 heads, 512 tokens, forward and backward, bfloat16):
+  batch 16: 26.7 ms and 442 MiB explicit against 6.6 ms and 125 MiB with the kernel; batch 32:
+  45.3 ms and 862 MiB against 12.7 ms and 227 MiB. The explicit version builds a
+  batch x heads x T x T table, so stacking layers would not fit in 4 GiB at larger batches; the
+  model will use `fast=True` for training. These are one layer's numbers, not a model's.
+- **No bias by default** (GPT-2 has biases): fewer parameters, and the modern default. It is an
+  option, not a measured choice; `4 * d_model^2` parameters per layer without bias.
+- **The causal mask is a non-persistent buffer** (rebuilt from `context_length`, not saved in
+  checkpoints). A sequence longer than `context_length` is refused.
+- **Positions are not in this module.** Attention alone does not know token order. Learned
+  absolute position embeddings (GPT-2, the book) against rotary embeddings is the next
+  architecture decision, to be taken when the model is assembled (chapter 4).
+- Mutation checks: eight deliberate breakages (no mask, mask also hiding the diagonal, scaling by
+  `d_model`, softmax over the wrong axis, heads merged without transpose, values taken from the
+  keys, fast path not causal, fast path dropping out in eval) each fail tests.
