@@ -712,3 +712,56 @@ Code: `tokenizer/corpus.py`, `fertility.py`, `report.py`, commands `scratchllm t
   are 0.0028% of the evaluation tokens, so they do not explain any difference. "Word" is a rough
   unit for Arabic. The held-out sample is the first 600 documents of each
   file, not a random draw.
+
+## D-017 (2026-11-02): Wikipedia pages are excluded from the web sources; the 16,384-id tokenizer; token files and the window dataset
+
+Decided by the user: vocabulary 16,384; exclude `*.wikipedia.org` from the web sources only (the
+Wikipedia sources keep their pages); keep the 32k tokenizer and its provenance in git.
+
+- **Exclusion (`cleaning.py`, rule `wikipedia_page`, a new kind of rule that looks at the record's
+  url, `DocRule`).** Applied to every web source, evaluation-only ones included. Dropped in the
+  samples: fw2_arb 102 documents, fw2_arz 308, fw2_ary 22, fw2_apc 1, fineweb_edu 446 (441 of them
+  in train), fw2_ars 0, fw2_acm 0; retention stays at 99.0% to 99.8% for these sources except
+  fw2_apc (96.0%, from the books-stub rule of D-004). All but five of the 879 pages are on the
+  train side, because the split key of a web document is its domain.
+- **Why, and what is NOT shown.** It is a precaution against the same article being a training
+  document of a web source and an evaluation document of wiki_ar. It is not a measured problem:
+  none of the 122 `ar.wikipedia.org` pages in the web samples has the same title as a document
+  of the wiki_ar sample (which covers 4.1% of wiki_ar, so this cannot rule it out in the full
+  corpus), and the near-duplicate measurement of D-012 found none either. A copy of an article on
+  another site (a mirror) is not found by url.
+- **Tokenizer retrained with the exclusion.** The first 39 of 32,509 merges are the same, the rest
+  differ (different training text, so different counts and ties). Fertility changes by at most
+  0.003 tokens per word and 0.006 characters per token on the language means, for every
+  size of ours
+  (`reports/tokenizer/final-v2`, against `final-v1`; the evaluation text lost only the five
+  Wikipedia documents of fineweb_edu's val/test). At 16,384 ids: Arabic 1.78
+  tokens per word, English 1.78; the rest of D-016 holds.
+- **Files in git.** `artifacts/tokenizer/bpe-32k.json` and `.provenance.json` (final-v2; the
+  version measured in final-v1 is in the history, commit 0c56002), and `bpe-16k.json` with its
+  provenance. The 16k file has exactly the first 16,125 merges of the 32k file (checked), so the
+  32k file can produce any size up to 32,768 with `Tokenizer.truncated`.
+- **Token files (`data/tokens.py`, `scratchllm data tokenize`).** One uint16 file per source and
+  split in `data/processed/tokens-16k/` (not in git: 364 MB), the `<|endoftext|>` id after every
+  document, a `<source>.tokens.json` per source with counts, sha256 of each file, the tokenizer's
+  sha256, the cleaning rules and the sha256 of the sampling manifest. Training sources get train,
+  val and test; the three evaluation-only sources get one `eval` file. Totals: train
+  167,394,059 tokens in 181,648 documents; val 3,344,249
+  (3,620); test 3,647,361 (3,824); eval-only 12,175,680
+  (24,600). `scratchllm data verify-tokens` re-hashes the files.
+- **Checked.** Every id is below the vocabulary size; the number of end ids equals the number of
+  documents in every file; the three files of fw2_ary are identical, id for id, to an independent
+  re-encoding of the cleaned text with the plain tokenizer; 19.5 minutes and 152 MB of memory for
+  all nine sources. Six deliberate breakages of the writer and the dataset (target not shifted,
+  window count off by one, windows leaking into the next file, no end id, eval-only sources split,
+  wrong dtype) each fail tests.
+- **Dataset (`training/dataset.py`).** Book-style sliding windows: input = ids[s:s+T], target =
+  ids[s+1:s+T+1]; `stride` defaults to T (no overlap); a window never crosses from one file to the
+  next; files are read with `numpy.memmap`; the loader's order depends only on its seed.
+- **Not decided.** How sources are mixed during training (concatenating the files gives each
+  source a share proportional to its tokens: fineweb_edu is 39% of train tokens, fw2_arb 23%,
+  fw2_arz 18%, wiki_ar 9%, fw2_ars 8%, fw2_ary 3%); the context length and the stride; whether to
+  purge near-duplicates (measured only, D-012). **A fact for planning:** the train split is
+  167M tokens; a model of 20M parameters sees about 8.4
+  tokens per parameter in one pass, against the rule of thumb of about 20 (Hoffmann et al. 2022,
+  from memory, to be checked), so a run on this sample means several passes or more data.
