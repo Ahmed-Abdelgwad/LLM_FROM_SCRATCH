@@ -1,29 +1,29 @@
 {
   "chars_per_source": 3000000,
-  "created_utc": "2026-11-01T18:25:13+00:00",
-  "distinct_pretokens": 366966,
+  "created_utc": "2026-11-02T01:51:56+00:00",
+  "distinct_pretokens": 366670,
   "merges": 32509,
   "pattern": "'s|'t|'re|'ve|'m|'ll|'d| ?[\\p{L}\\p{M}]+| ?\\p{N}+| ?[^\\s\\p{L}\\p{M}\\p{N}]+|\\s+(?!\\S)|\\s+",
   "sources": {
     "fineweb_edu_10bt": {
-      "chars": 3002972,
-      "docs": 662
+      "chars": 3001934,
+      "docs": 673
     },
     "fw2_arb": {
-      "chars": 3002187,
-      "docs": 1046
+      "chars": 3000187,
+      "docs": 1063
     },
     "fw2_ars": {
       "chars": 3379694,
       "docs": 747
     },
     "fw2_ary": {
-      "chars": 3003044,
-      "docs": 1328
+      "chars": 3000539,
+      "docs": 1332
     },
     "fw2_arz": {
-      "chars": 3000367,
-      "docs": 1500
+      "chars": 3000400,
+      "docs": 1496
     },
     "wiki_ar": {
       "chars": 3002437,

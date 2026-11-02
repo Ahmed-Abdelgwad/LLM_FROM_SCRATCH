@@ -12,10 +12,11 @@ Every rule says why it exists; the evidence is in docs/DECISIONS.md (D-004, D-00
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from functools import partial
 from typing import Any
+from urllib.parse import urlsplit
 
 from scratchllm.data.pii import find_matches, mask
 from scratchllm.data.sources import Source
@@ -25,6 +26,15 @@ from scratchllm.data.sources import Source
 class Rule:
     name: str
     run: Callable[[str], str | None]  # new text; the same text if nothing applies; None = drop
+
+
+@dataclass(frozen=True)
+class DocRule:
+    """A rule that looks at the whole record (its url, say), not only at the text, and can only
+    drop it."""
+
+    name: str
+    drops: Callable[[dict[str, Any]], bool]
 
 
 # ---------------------------------------------------------------------------------------------
@@ -161,10 +171,38 @@ def scrub_pii(text: str) -> str | None:
     return mask(text, matches)  # placeholders too, so the model sees one token for "an email"
 
 
-def rules_for(source: Source) -> list[Rule]:
+# ---------------------------------------------------------------------------------------------
+# Rule 5: Wikipedia pages inside the web crawls (D-017)
+#
+# Purpose: the FineWeb crawls contain pages of wikipedia.org. Wikipedia is also a source of its own
+# (wiki_ar, evaluated on val/test), so the same article could be a training document of a web
+# source and an evaluation document of wiki_ar. This is a precaution, not a measured problem: in
+# the samples no web page is the same article as a wiki_ar document (matched by title), and the
+# near-duplicate measurement of D-012 found none either, but the samples cover 4.1% of wiki_ar,
+# which is too little to rule it out in the full corpus. The split key of a web document is its
+# domain, so all pages of ar.wikipedia.org fall on the same side, and in the samples that side is
+# always "train".
+# What it does: drops a web document whose url host is wikipedia.org or a subdomain of it
+# (ar., arz., ary., simple., en., and the mobile "m." hosts). Wikipedia sources are not touched.
+# Cost (samples): 0.00% to 0.89% of the documents of a web source; 1.97% of the characters of
+# fineweb_edu, where the pages are long.
+# Limit: a copy of a Wikipedia article on another site (a mirror) is not found by its url.
+# ---------------------------------------------------------------------------------------------
+def is_wikipedia_url(url: str | None) -> bool:
+    if not url:
+        return False
+    try:
+        host = urlsplit(url).hostname or ""
+    except ValueError:  # a malformed url is not a Wikipedia page we can recognise
+        return False
+    return host == "wikipedia.org" or host.endswith(".wikipedia.org")
+
+
+def rules_for(source: Source) -> list[Rule | DocRule]:
     """The measured rules that apply to `source`; an empty list when none has been measured."""
-    rules: list[Rule] = []
+    rules: list[Rule | DocRule] = []
     if source.kind == "web":
+        rules.append(DocRule("wikipedia_page", lambda doc: is_wikipedia_url(doc.get("url"))))
         rules.append(Rule("books_stub", drop_books_stub))
         rules.append(Rule("pii", scrub_pii))
     headings = WIKI_FOOTER_HEADINGS.get(source.name)
@@ -192,7 +230,7 @@ class CleaningStats:
 
 
 def clean_docs(
-    docs: Iterable[dict[str, Any]], rules: list[Rule], stats: CleaningStats
+    docs: Iterable[dict[str, Any]], rules: Sequence[Rule | DocRule], stats: CleaningStats
 ) -> Iterator[dict[str, Any]]:
     """Apply the rules in order. Yields new records; `text_sha256` still names the raw text."""
     for doc in docs:
@@ -201,6 +239,13 @@ def clean_docs(
         stats.chars_in += len(text)
         dropped = False
         for rule in rules:
+            if isinstance(rule, DocRule):
+                if rule.drops(doc):
+                    stats.dropped[rule.name] += 1
+                    stats.chars_removed[rule.name] += len(text)
+                    dropped = True
+                    break
+                continue
             result = rule.run(text)
             if result is None:
                 stats.dropped[rule.name] += 1

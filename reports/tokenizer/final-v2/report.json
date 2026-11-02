@@ -1,0 +1,768 @@
+{
+  "eval_sources": {
+    "fineweb_edu_10bt": {
+      "docs": 600,
+      "language": "en",
+      "role": "val+test"
+    },
+    "fw2_acm": {
+      "docs": 600,
+      "language": "ar",
+      "role": "evaluation-only (never seen)"
+    },
+    "fw2_apc": {
+      "docs": 600,
+      "language": "ar",
+      "role": "evaluation-only (never seen)"
+    },
+    "fw2_arb": {
+      "docs": 600,
+      "language": "ar",
+      "role": "val+test"
+    },
+    "fw2_ars": {
+      "docs": 473,
+      "language": "ar",
+      "role": "val+test"
+    },
+    "fw2_ary": {
+      "docs": 350,
+      "language": "ar",
+      "role": "val+test"
+    },
+    "fw2_arz": {
+      "docs": 600,
+      "language": "ar",
+      "role": "val+test"
+    },
+    "wiki_ar": {
+      "docs": 600,
+      "language": "ar",
+      "role": "val+test"
+    },
+    "wiki_ary": {
+      "docs": 600,
+      "language": "ar",
+      "role": "evaluation-only (never seen)"
+    }
+  },
+  "max_docs_per_source": 600,
+  "results": {
+    "Qwen/Qwen3-4B-Instruct-2507": {
+      "sources": {
+        "fineweb_edu_10bt": {
+          "bytes": 3590519,
+          "bytes_per_token": 4.575302544341525,
+          "chars": 3573119,
+          "chars_per_token": 4.553130188681649,
+          "docs": 600,
+          "special": 0,
+          "tokens": 784761,
+          "tokens_per_1000_chars": 219.62912514248757,
+          "tokens_per_word": 1.305869549662284,
+          "words": 600949
+        },
+        "fw2_acm": {
+          "bytes": 2625116,
+          "bytes_per_token": 3.758057635319886,
+          "chars": 1483842,
+          "chars_per_token": 2.1242351795914276,
+          "docs": 600,
+          "special": 0,
+          "tokens": 698530,
+          "tokens_per_1000_chars": 470.75766826926315,
+          "tokens_per_word": 2.515403257460362,
+          "words": 277701
+        },
+        "fw2_apc": {
+          "bytes": 1653914,
+          "bytes_per_token": 4.01846061145005,
+          "chars": 934687,
+          "chars_per_token": 2.2709783540948396,
+          "docs": 600,
+          "special": 0,
+          "tokens": 411579,
+          "tokens_per_1000_chars": 440.3388514015922,
+          "tokens_per_word": 2.362368917995902,
+          "words": 174223
+        },
+        "fw2_arb": {
+          "bytes": 3436023,
+          "bytes_per_token": 4.8303593645224,
+          "chars": 1921788,
+          "chars_per_token": 2.70164858105629,
+          "docs": 600,
+          "special": 0,
+          "tokens": 711339,
+          "tokens_per_1000_chars": 370.14436555957263,
+          "tokens_per_word": 2.1845008138070816,
+          "words": 325630
+        },
+        "fw2_ars": {
+          "bytes": 1865410,
+          "bytes_per_token": 4.053881961256449,
+          "chars": 1053390,
+          "chars_per_token": 2.2892118725470167,
+          "docs": 473,
+          "special": 0,
+          "tokens": 460154,
+          "tokens_per_1000_chars": 436.8315628589601,
+          "tokens_per_word": 2.3950387241838773,
+          "words": 192128
+        },
+        "fw2_ary": {
+          "bytes": 1865358,
+          "bytes_per_token": 4.656422008042956,
+          "chars": 1027179,
+          "chars_per_token": 2.564107748646402,
+          "docs": 350,
+          "special": 0,
+          "tokens": 400599,
+          "tokens_per_1000_chars": 389.9992114324767,
+          "tokens_per_word": 2.4396718675777396,
+          "words": 164202
+        },
+        "fw2_arz": {
+          "bytes": 2542148,
+          "bytes_per_token": 4.163203809879418,
+          "chars": 1441288,
+          "chars_per_token": 2.3603565538802176,
+          "docs": 600,
+          "special": 0,
+          "tokens": 610623,
+          "tokens_per_1000_chars": 423.66480536853146,
+          "tokens_per_word": 2.2656027960922978,
+          "words": 269519
+        },
+        "wiki_ar": {
+          "bytes": 2461878,
+          "bytes_per_token": 4.449429064055434,
+          "chars": 1387034,
+          "chars_per_token": 2.5068299048259357,
+          "docs": 600,
+          "special": 0,
+          "tokens": 553302,
+          "tokens_per_1000_chars": 398.9101925403415,
+          "tokens_per_word": 2.383710009564101,
+          "words": 232118
+        },
+        "wiki_ary": {
+          "bytes": 731771,
+          "bytes_per_token": 3.3495262507438093,
+          "chars": 432826,
+          "chars_per_token": 1.9811690392273538,
+          "docs": 600,
+          "special": 0,
+          "tokens": 218470,
+          "tokens_per_1000_chars": 504.7524871426393,
+          "tokens_per_word": 2.5874647653788756,
+          "words": 84434
+        }
+      },
+      "summary": {
+        "ar_chars_per_token": 2.349817154233685,
+        "ar_tokens_per_word": 2.3917201440075297,
+        "en_chars_per_token": 4.553130188681649,
+        "en_tokens_per_word": 1.305869549662284
+      },
+      "vocab_size": 151669
+    },
+    "openai-community/gpt2": {
+      "sources": {
+        "fineweb_edu_10bt": {
+          "bytes": 3590519,
+          "bytes_per_token": 4.526254152143357,
+          "chars": 3573119,
+          "chars_per_token": 4.504319489703945,
+          "docs": 600,
+          "special": 0,
+          "tokens": 793265,
+          "tokens_per_1000_chars": 222.00911864396343,
+          "tokens_per_word": 1.320020500907731,
+          "words": 600949
+        },
+        "fw2_acm": {
+          "bytes": 2625116,
+          "bytes_per_token": 1.7793958455484873,
+          "chars": 1483842,
+          "chars_per_token": 1.0058002352087902,
+          "docs": 600,
+          "special": 0,
+          "tokens": 1475285,
+          "tokens_per_1000_chars": 994.233213509255,
+          "tokens_per_word": 5.31249437344482,
+          "words": 277701
+        },
+        "fw2_apc": {
+          "bytes": 1653914,
+          "bytes_per_token": 1.7634714257992012,
+          "chars": 934687,
+          "chars_per_token": 0.9966018889531003,
+          "docs": 600,
+          "special": 0,
+          "tokens": 937874,
+          "tokens_per_1000_chars": 1003.4096975779057,
+          "tokens_per_word": 5.38318132508337,
+          "words": 174223
+        },
+        "fw2_arb": {
+          "bytes": 3436023,
+          "bytes_per_token": 1.8189197086783488,
+          "chars": 1921788,
+          "chars_per_token": 1.0173325583389712,
+          "docs": 600,
+          "special": 0,
+          "tokens": 1889046,
+          "tokens_per_1000_chars": 982.9627409474926,
+          "tokens_per_word": 5.801203820286829,
+          "words": 325630
+        },
+        "fw2_ars": {
+          "bytes": 1865410,
+          "bytes_per_token": 1.787094172096227,
+          "chars": 1053390,
+          "chars_per_token": 1.0091653469984854,
+          "docs": 473,
+          "special": 0,
+          "tokens": 1043823,
+          "tokens_per_1000_chars": 990.9178936576196,
+          "tokens_per_word": 5.432956154230513,
+          "words": 192128
+        },
+        "fw2_ary": {
+          "bytes": 1865358,
+          "bytes_per_token": 1.850953876929733,
+          "chars": 1027179,
+          "chars_per_token": 1.0192472181483694,
+          "docs": 350,
+          "special": 0,
+          "tokens": 1007782,
+          "tokens_per_1000_chars": 981.1162416677132,
+          "tokens_per_word": 6.137452649785021,
+          "words": 164202
+        },
+        "fw2_arz": {
+          "bytes": 2542148,
+          "bytes_per_token": 1.784904184591318,
+          "chars": 1441288,
+          "chars_per_token": 1.0119634979557648,
+          "docs": 600,
+          "special": 0,
+          "tokens": 1424249,
+          "tokens_per_1000_chars": 988.1779352912117,
+          "tokens_per_word": 5.284410375520835,
+          "words": 269519
+        },
+        "wiki_ar": {
+          "bytes": 2461878,
+          "bytes_per_token": 1.8201146684706064,
+          "chars": 1387034,
+          "chars_per_token": 1.0254614278479515,
+          "docs": 600,
+          "special": 0,
+          "tokens": 1352595,
+          "tokens_per_1000_chars": 975.1707600534666,
+          "tokens_per_word": 5.8271870341808905,
+          "words": 232118
+        },
+        "wiki_ary": {
+          "bytes": 731771,
+          "bytes_per_token": 1.7635330862329075,
+          "chars": 432826,
+          "chars_per_token": 1.0430899442337076,
+          "docs": 600,
+          "special": 0,
+          "tokens": 414946,
+          "tokens_per_1000_chars": 958.6900971753083,
+          "tokens_per_word": 4.914442049411375,
+          "words": 84434
+        }
+      },
+      "summary": {
+        "ar_chars_per_token": 1.0160827647106425,
+        "ar_tokens_per_word": 5.511665972742957,
+        "en_chars_per_token": 4.504319489703945,
+        "en_tokens_per_word": 1.320020500907731
+      },
+      "vocab_size": 50257
+    },
+    "ours-16384": {
+      "sources": {
+        "fineweb_edu_10bt": {
+          "bytes": 3590519,
+          "bytes_per_token": 3.3498834707613305,
+          "chars": 3573119,
+          "chars_per_token": 3.3336496136528604,
+          "docs": 600,
+          "special": 31,
+          "tokens": 1071834,
+          "tokens_per_1000_chars": 299.97153747188383,
+          "tokens_per_word": 1.7835689883833736,
+          "words": 600949
+        },
+        "fw2_acm": {
+          "bytes": 2625116,
+          "bytes_per_token": 5.01733723999396,
+          "chars": 1483842,
+          "chars_per_token": 2.8360406644381118,
+          "docs": 600,
+          "special": 17,
+          "tokens": 523209,
+          "tokens_per_1000_chars": 352.604253013461,
+          "tokens_per_word": 1.8840731578208216,
+          "words": 277701
+        },
+        "fw2_apc": {
+          "bytes": 1653914,
+          "bytes_per_token": 5.329069426499161,
+          "chars": 934687,
+          "chars_per_token": 3.0116510985735783,
+          "docs": 600,
+          "special": 4,
+          "tokens": 310357,
+          "tokens_per_1000_chars": 332.04377508192584,
+          "tokens_per_word": 1.781377889256872,
+          "words": 174223
+        },
+        "fw2_arb": {
+          "bytes": 3436023,
+          "bytes_per_token": 6.3658937851432595,
+          "chars": 1921788,
+          "chars_per_token": 3.5604820705690545,
+          "docs": 600,
+          "special": 18,
+          "tokens": 539755,
+          "tokens_per_1000_chars": 280.860844172198,
+          "tokens_per_word": 1.6575714768295304,
+          "words": 325630
+        },
+        "fw2_ars": {
+          "bytes": 1865410,
+          "bytes_per_token": 5.345290014957792,
+          "chars": 1053390,
+          "chars_per_token": 3.0184651357376597,
+          "docs": 473,
+          "special": 38,
+          "tokens": 348982,
+          "tokens_per_1000_chars": 331.2942025270792,
+          "tokens_per_word": 1.8164036475682879,
+          "words": 192128
+        },
+        "fw2_ary": {
+          "bytes": 1865358,
+          "bytes_per_token": 6.959693757625279,
+          "chars": 1027179,
+          "chars_per_token": 3.832428560235502,
+          "docs": 350,
+          "special": 0,
+          "tokens": 268023,
+          "tokens_per_1000_chars": 260.93115221397636,
+          "tokens_per_word": 1.6322760989512917,
+          "words": 164202
+        },
+        "fw2_arz": {
+          "bytes": 2542148,
+          "bytes_per_token": 5.597090210946496,
+          "chars": 1441288,
+          "chars_per_token": 3.1733081456920105,
+          "docs": 600,
+          "special": 22,
+          "tokens": 454191,
+          "tokens_per_1000_chars": 315.1285516843268,
+          "tokens_per_word": 1.6851910254935645,
+          "words": 269519
+        },
+        "wiki_ar": {
+          "bytes": 2461878,
+          "bytes_per_token": 6.024726585729353,
+          "chars": 1387034,
+          "chars_per_token": 3.3943601653333464,
+          "docs": 600,
+          "special": 0,
+          "tokens": 408629,
+          "tokens_per_1000_chars": 294.6063326493799,
+          "tokens_per_word": 1.7604365021239197,
+          "words": 232118
+        },
+        "wiki_ary": {
+          "bytes": 731771,
+          "bytes_per_token": 4.3112303812980155,
+          "chars": 432826,
+          "chars_per_token": 2.549995286798322,
+          "docs": 600,
+          "special": 0,
+          "tokens": 169736,
+          "tokens_per_1000_chars": 392.15758757560775,
+          "tokens_per_word": 2.010280218869176,
+          "words": 84434
+        }
+      },
+      "summary": {
+        "ar_chars_per_token": 3.172091390922198,
+        "ar_tokens_per_word": 1.7784512521141829,
+        "en_chars_per_token": 3.3336496136528604,
+        "en_tokens_per_word": 1.7835689883833736
+      },
+      "vocab_size": 16384
+    },
+    "ours-24576": {
+      "sources": {
+        "fineweb_edu_10bt": {
+          "bytes": 3590519,
+          "bytes_per_token": 3.5882225375759513,
+          "chars": 3573119,
+          "chars_per_token": 3.5708336664534697,
+          "docs": 600,
+          "special": 31,
+          "tokens": 1000640,
+          "tokens_per_1000_chars": 280.046648320417,
+          "tokens_per_word": 1.6650997006401542,
+          "words": 600949
+        },
+        "fw2_acm": {
+          "bytes": 2625116,
+          "bytes_per_token": 5.275713697157269,
+          "chars": 1483842,
+          "chars_per_token": 2.9820874825406714,
+          "docs": 600,
+          "special": 17,
+          "tokens": 497585,
+          "tokens_per_1000_chars": 335.3355680726115,
+          "tokens_per_word": 1.7918012538665686,
+          "words": 277701
+        },
+        "fw2_apc": {
+          "bytes": 1653914,
+          "bytes_per_token": 5.626763558177433,
+          "chars": 934687,
+          "chars_per_token": 3.179888887754859,
+          "docs": 600,
+          "special": 4,
+          "tokens": 293937,
+          "tokens_per_1000_chars": 314.47639691147947,
+          "tokens_per_word": 1.6871308610229419,
+          "words": 174223
+        },
+        "fw2_arb": {
+          "bytes": 3436023,
+          "bytes_per_token": 6.781753730827759,
+          "chars": 1921788,
+          "chars_per_token": 3.7930749994572266,
+          "docs": 600,
+          "special": 18,
+          "tokens": 506657,
+          "tokens_per_1000_chars": 263.6383409616461,
+          "tokens_per_word": 1.5559285078156189,
+          "words": 325630
+        },
+        "fw2_ars": {
+          "bytes": 1865410,
+          "bytes_per_token": 5.644906024650562,
+          "chars": 1053390,
+          "chars_per_token": 3.1876571677575734,
+          "docs": 473,
+          "special": 38,
+          "tokens": 330459,
+          "tokens_per_1000_chars": 313.7100219292,
+          "tokens_per_word": 1.7199939623584277,
+          "words": 192128
+        },
+        "fw2_ary": {
+          "bytes": 1865358,
+          "bytes_per_token": 7.403301278362299,
+          "chars": 1027179,
+          "chars_per_token": 4.076705706790283,
+          "docs": 350,
+          "special": 0,
+          "tokens": 251963,
+          "tokens_per_1000_chars": 245.29609736959188,
+          "tokens_per_word": 1.534469738492832,
+          "words": 164202
+        },
+        "fw2_arz": {
+          "bytes": 2542148,
+          "bytes_per_token": 5.921791249210901,
+          "chars": 1441288,
+          "chars_per_token": 3.3573995951426436,
+          "docs": 600,
+          "special": 22,
+          "tokens": 429287,
+          "tokens_per_1000_chars": 297.84956233591066,
+          "tokens_per_word": 1.592789376630219,
+          "words": 269519
+        },
+        "wiki_ar": {
+          "bytes": 2461878,
+          "bytes_per_token": 6.384554939198494,
+          "chars": 1387034,
+          "chars_per_token": 3.597089204069513,
+          "docs": 600,
+          "special": 0,
+          "tokens": 385599,
+          "tokens_per_1000_chars": 278.0025579762284,
+          "tokens_per_word": 1.661219724450495,
+          "words": 232118
+        },
+        "wiki_ary": {
+          "bytes": 731771,
+          "bytes_per_token": 4.528734280621844,
+          "chars": 432826,
+          "chars_per_token": 2.678643925141103,
+          "docs": 600,
+          "special": 0,
+          "tokens": 161584,
+          "tokens_per_1000_chars": 373.32322919602797,
+          "tokens_per_word": 1.913731435203828,
+          "words": 84434
+        }
+      },
+      "summary": {
+        "ar_chars_per_token": 3.356568371081734,
+        "ar_tokens_per_word": 1.6821331074801165,
+        "en_chars_per_token": 3.5708336664534697,
+        "en_tokens_per_word": 1.6650997006401542
+      },
+      "vocab_size": 24576
+    },
+    "ours-32768": {
+      "sources": {
+        "fineweb_edu_10bt": {
+          "bytes": 3590519,
+          "bytes_per_token": 3.7401512302693876,
+          "chars": 3573119,
+          "chars_per_token": 3.7220260981069653,
+          "docs": 600,
+          "special": 31,
+          "tokens": 959993,
+          "tokens_per_1000_chars": 268.67087270253245,
+          "tokens_per_word": 1.5974616814405216,
+          "words": 600949
+        },
+        "fw2_acm": {
+          "bytes": 2625116,
+          "bytes_per_token": 5.4678639197332215,
+          "chars": 1483842,
+          "chars_per_token": 3.090700043116107,
+          "docs": 600,
+          "special": 17,
+          "tokens": 480099,
+          "tokens_per_1000_chars": 323.551294544837,
+          "tokens_per_word": 1.7288342497866411,
+          "words": 277701
+        },
+        "fw2_apc": {
+          "bytes": 1653914,
+          "bytes_per_token": 5.843950631243088,
+          "chars": 934687,
+          "chars_per_token": 3.302629207845576,
+          "docs": 600,
+          "special": 4,
+          "tokens": 283013,
+          "tokens_per_1000_chars": 302.7890620068536,
+          "tokens_per_word": 1.6244296103269946,
+          "words": 174223
+        },
+        "fw2_arb": {
+          "bytes": 3436023,
+          "bytes_per_token": 7.062275451563309,
+          "chars": 1921788,
+          "chars_per_token": 3.94997245813225,
+          "docs": 600,
+          "special": 18,
+          "tokens": 486532,
+          "tokens_per_1000_chars": 253.1663221957885,
+          "tokens_per_word": 1.4941252341614717,
+          "words": 325630
+        },
+        "fw2_ars": {
+          "bytes": 1865410,
+          "bytes_per_token": 5.864667563726908,
+          "chars": 1053390,
+          "chars_per_token": 3.311755681032206,
+          "docs": 473,
+          "special": 38,
+          "tokens": 318076,
+          "tokens_per_1000_chars": 301.95464168066906,
+          "tokens_per_word": 1.655542138574284,
+          "words": 192128
+        },
+        "fw2_ary": {
+          "bytes": 1865358,
+          "bytes_per_token": 7.699500557229538,
+          "chars": 1027179,
+          "chars_per_token": 4.239810954719941,
+          "docs": 350,
+          "special": 0,
+          "tokens": 242270,
+          "tokens_per_1000_chars": 235.8595726742856,
+          "tokens_per_word": 1.475438788808906,
+          "words": 164202
+        },
+        "fw2_arz": {
+          "bytes": 2542148,
+          "bytes_per_token": 6.154100154448754,
+          "chars": 1441288,
+          "chars_per_token": 3.489108699967561,
+          "docs": 600,
+          "special": 22,
+          "tokens": 413082,
+          "tokens_per_1000_chars": 286.6061467243188,
+          "tokens_per_word": 1.532663745413125,
+          "words": 269519
+        },
+        "wiki_ar": {
+          "bytes": 2461878,
+          "bytes_per_token": 6.635360515761784,
+          "chars": 1387034,
+          "chars_per_token": 3.7383942817715297,
+          "docs": 600,
+          "special": 0,
+          "tokens": 371024,
+          "tokens_per_1000_chars": 267.4945242870759,
+          "tokens_per_word": 1.5984283855625157,
+          "words": 232118
+        },
+        "wiki_ary": {
+          "bytes": 731771,
+          "bytes_per_token": 4.604939903089799,
+          "chars": 432826,
+          "chars_per_token": 2.7237178277012144,
+          "docs": 600,
+          "special": 0,
+          "tokens": 158910,
+          "tokens_per_1000_chars": 367.14522695032184,
+          "tokens_per_word": 1.8820617286874957,
+          "words": 84434
+        }
+      },
+      "summary": {
+        "ar_chars_per_token": 3.480761144285798,
+        "ar_tokens_per_word": 1.6239404851651793,
+        "en_chars_per_token": 3.7220260981069653,
+        "en_tokens_per_word": 1.5974616814405216
+      },
+      "vocab_size": 32768
+    },
+    "ours-8192": {
+      "sources": {
+        "fineweb_edu_10bt": {
+          "bytes": 3590519,
+          "bytes_per_token": 2.9409029478495197,
+          "chars": 3573119,
+          "chars_per_token": 2.926651049644112,
+          "docs": 600,
+          "special": 31,
+          "tokens": 1220890,
+          "tokens_per_1000_chars": 341.68747248552313,
+          "tokens_per_word": 2.0316033473722395,
+          "words": 600949
+        },
+        "fw2_acm": {
+          "bytes": 2625116,
+          "bytes_per_token": 4.5626735911955585,
+          "chars": 1483842,
+          "chars_per_token": 2.579042871593789,
+          "docs": 600,
+          "special": 17,
+          "tokens": 575346,
+          "tokens_per_1000_chars": 387.74074328668416,
+          "tokens_per_word": 2.0718182505644562,
+          "words": 277701
+        },
+        "fw2_apc": {
+          "bytes": 1653914,
+          "bytes_per_token": 4.803239886969881,
+          "chars": 934687,
+          "chars_per_token": 2.714485686820607,
+          "docs": 600,
+          "special": 4,
+          "tokens": 344333,
+          "tokens_per_1000_chars": 368.3939115447203,
+          "tokens_per_word": 1.9763923247791624,
+          "words": 174223
+        },
+        "fw2_arb": {
+          "bytes": 3436023,
+          "bytes_per_token": 5.640573443517488,
+          "chars": 1921788,
+          "chars_per_token": 3.1548061106897674,
+          "docs": 600,
+          "special": 18,
+          "tokens": 609162,
+          "tokens_per_1000_chars": 316.9766904570119,
+          "tokens_per_word": 1.870718299910942,
+          "words": 325630
+        },
+        "fw2_ars": {
+          "bytes": 1865410,
+          "bytes_per_token": 4.8058131117048,
+          "chars": 1053390,
+          "chars_per_token": 2.7138245606803433,
+          "docs": 473,
+          "special": 38,
+          "tokens": 388157,
+          "tokens_per_1000_chars": 368.4836575247534,
+          "tokens_per_word": 2.020304172218521,
+          "words": 192128
+        },
+        "fw2_ary": {
+          "bytes": 1865358,
+          "bytes_per_token": 6.168940303394085,
+          "chars": 1027179,
+          "chars_per_token": 3.396991854593077,
+          "docs": 350,
+          "special": 0,
+          "tokens": 302379,
+          "tokens_per_1000_chars": 294.3780976830718,
+          "tokens_per_word": 1.841506193590821,
+          "words": 164202
+        },
+        "fw2_arz": {
+          "bytes": 2542148,
+          "bytes_per_token": 5.017582226713616,
+          "chars": 1441288,
+          "chars_per_token": 2.8447521750801346,
+          "docs": 600,
+          "special": 22,
+          "tokens": 506648,
+          "tokens_per_1000_chars": 351.52446977980804,
+          "tokens_per_word": 1.8798229438369836,
+          "words": 269519
+        },
+        "wiki_ar": {
+          "bytes": 2461878,
+          "bytes_per_token": 5.399696005299071,
+          "chars": 1387034,
+          "chars_per_token": 3.0422149062683004,
+          "docs": 600,
+          "special": 0,
+          "tokens": 455929,
+          "tokens_per_1000_chars": 328.7078759424787,
+          "tokens_per_word": 1.9642121679490603,
+          "words": 232118
+        },
+        "wiki_ary": {
+          "bytes": 731771,
+          "bytes_per_token": 4.04364860085761,
+          "chars": 432826,
+          "chars_per_token": 2.3917267141152028,
+          "docs": 600,
+          "special": 0,
+          "tokens": 180968,
+          "tokens_per_1000_chars": 418.1079694842731,
+          "tokens_per_word": 2.1433071985219225,
+          "words": 84434
+        }
+      },
+      "summary": {
+        "ar_chars_per_token": 2.8547306099801526,
+        "ar_tokens_per_word": 1.9710101939214837,
+        "en_chars_per_token": 2.926651049644112,
+        "en_tokens_per_word": 2.0316033473722395
+      },
+      "vocab_size": 8192
+    }
+  },
+  "tokenizer_file": "artifacts/tokenizer/bpe-32k.json",
+  "tokenizer_sha256": "d6991f20bac2b1ac63f2daa0a107e972273d3baea48cede9b738b39fe62d909f"
+}

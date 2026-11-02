@@ -12,6 +12,7 @@ from scratchllm.data.cleaning import (
     drop_books_stub,
     drop_if_shorter_than,
     is_books_stub,
+    is_wikipedia_url,
     rules_for,
     strip_wiki_footer,
 )
@@ -99,8 +100,9 @@ def test_the_content_before_the_heading_is_untouched_including_inner_blank_lines
 
 
 def test_rules_follow_source_kind_and_measured_headings():
-    assert [r.name for r in rules_for(get_source("fw2_apc"))] == ["books_stub", "pii"]
-    assert [r.name for r in rules_for(get_source("fineweb_edu_10bt"))] == ["books_stub", "pii"]
+    web = ["wikipedia_page", "books_stub", "pii"]
+    assert [r.name for r in rules_for(get_source("fw2_apc"))] == web
+    assert [r.name for r in rules_for(get_source("fineweb_edu_10bt"))] == web
     assert [r.name for r in rules_for(get_source("wiki_ar"))] == ["wiki_footer", "min_length"]
     assert [r.name for r in rules_for(get_source("wiki_ary"))] == ["wiki_footer"]  # eval-only
     assert rules_for(get_source("wiki_en")) == []  # headings not measured: no guess
@@ -139,6 +141,47 @@ def test_only_listed_sources_get_a_length_filter():
         for r in rules_for(get_source(s))
     }
     assert "min_length" not in names
+
+
+# ---------- Wikipedia pages inside the web crawls (D-017) ----------
+
+
+def test_wikipedia_hosts_are_recognised_with_their_subdomains_and_mobile_form():
+    for url in [
+        "https://ar.wikipedia.org/wiki/x",
+        "https://ar.m.wikipedia.org/wiki/x",
+        "http://wikipedia.org/",
+        "https://EN.Wikipedia.ORG/wiki/x",
+        "https://simple.wikipedia.org:443/wiki/x",
+    ]:
+        assert is_wikipedia_url(url), url
+
+
+def test_other_hosts_missing_urls_and_lookalikes_are_not_wikipedia():
+    for url in [
+        None,
+        "",
+        "https://example.com/ar.wikipedia.org",  # the name only in the path
+        "https://wikipedia.org.evil.com/",
+        "https://notwikipedia.org/",
+        "https://ar.wikipedia.com/",
+        "https://[broken/",  # malformed: not recognised, not an error
+    ]:
+        assert not is_wikipedia_url(url), url
+
+
+def test_the_wikipedia_rule_applies_to_web_sources_only():
+    page = {**doc(1, PROSE, source="fw2_arb"), "url": "https://ar.wikipedia.org/wiki/x"}
+    other = {**doc(2, PROSE, source="fw2_arb"), "url": "https://example.com/a"}
+    no_url = doc(3, PROSE, source="fw2_arb")
+    stats = CleaningStats()
+    out = list(clean_docs([page, other, no_url], rules_for(get_source("fw2_arb")), stats))
+    assert [d["id"] for d in out] == ["2", "3"]
+    assert stats.dropped == Counter({"wikipedia_page": 1})
+    assert stats.chars_removed["wikipedia_page"] == len(PROSE)
+    # the Wikipedia sources keep their own pages
+    assert "wikipedia_page" not in [r.name for r in rules_for(get_source("wiki_ar"))]
+    assert "wikipedia_page" not in [r.name for r in rules_for(get_source("wiki_ary"))]
 
 
 # ---------- running the rules ----------

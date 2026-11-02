@@ -216,6 +216,42 @@ def leaks(
             typer.echo(f"{name}: kept {r['kept']}, removed {r['removed_train_leaks']}")
 
 
+@data_app.command("tokenize")
+def tokenize(
+    tokenizer: Path,
+    out_dir: Annotated[Path, typer.Option(help="Where the token files are written.")],
+    data_dir: Annotated[Path, typer.Option(help="Folder of the sampled .jsonl files.")] = Path(
+        "data/raw/eda"
+    ),
+) -> None:
+    """Clean, normalize and tokenize every sampled source into uint16 token files."""
+    import hashlib
+
+    from scratchllm.data.tokens import tokenize_source
+    from scratchllm.tokenizer.corpus import available_sources
+    from scratchllm.tokenizer.tokenizer import Tokenizer
+
+    tok = Tokenizer.load(tokenizer)
+    digest = hashlib.sha256(tokenizer.read_bytes()).hexdigest()
+    for source in available_sources(data_dir):
+        meta = tokenize_source(
+            tok, digest, source, data_dir / f"{source.name}.jsonl", out_dir, progress=typer.echo
+        )
+        shown = ", ".join(f"{k} {v['tokens']:,}" for k, v in meta["splits"].items())
+        typer.echo(f"{source.name}: {shown} tokens")
+
+
+@data_app.command("verify-tokens")
+def verify_token_files(descriptions: list[Path]) -> None:
+    """Check token files against their <source>.tokens.json descriptions (hash and size)."""
+    from scratchllm.data.tokens import verify_tokens
+
+    for path in descriptions:
+        meta = verify_tokens(path)
+        total = sum(v["tokens"] for v in meta["splits"].values())
+        typer.echo(f"OK {path.name}: {total:,} tokens")
+
+
 @tokenizer_app.command("train")
 def tokenizer_train(
     out: Annotated[Path, typer.Option(help="Where the tokenizer file is written.")],

@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 from collections.abc import Collection, Iterator
 from pathlib import Path
-from typing import Any
 
 from scratchllm.data.cleaning import CleaningStats, clean_docs, rules_for
 from scratchllm.data.sources import SOURCES, Source
@@ -33,6 +32,23 @@ def training_sources(data_dir: Path) -> list[Source]:
     return [s for s in available_sources(data_dir) if s.name not in EVAL_ONLY_SOURCES]
 
 
+def prepared_docs(
+    path: Path, source: Source, splits: Collection[str] | None = None
+) -> Iterator[tuple[str, str]]:
+    """(split label, text) of each cleaned and normalized document, in file order.
+
+    `splits` keeps only documents with those split labels (None keeps all). A document that is
+    empty after normalization is skipped.
+    """
+    with path.open(encoding="utf-8") as f:
+        raw = (json.loads(line) for line in f)
+        wanted = (doc for doc in raw if splits is None or doc["split"] in splits)
+        for doc in clean_docs(wanted, rules_for(source), CleaningStats()):
+            text = normalize(doc["text"])
+            if text:
+                yield doc["split"], text
+
+
 def prepared_texts(
     path: Path,
     source: Source,
@@ -40,28 +56,13 @@ def prepared_texts(
     char_budget: int | None = None,
     max_docs: int | None = None,
 ) -> Iterator[str]:
-    """Cleaned and normalized documents of one sampled file, in file order.
-
-    `splits` keeps only documents with those split labels (None keeps all). Reading stops once
-    `char_budget` characters or `max_docs` documents have been produced.
-    """
-
-    def raw() -> Iterator[dict[str, Any]]:
-        with path.open(encoding="utf-8") as f:
-            for line in f:
-                doc = json.loads(line)
-                if splits is None or doc["split"] in splits:
-                    yield doc
-
-    chars = docs = 0
-    for doc in clean_docs(raw(), rules_for(source), CleaningStats()):
-        text = normalize(doc["text"])
-        if not text:
-            continue
+    """Texts of `prepared_docs`, stopping once `char_budget` characters or `max_docs` documents
+    have been produced."""
+    chars = 0
+    for count, (_, text) in enumerate(prepared_docs(path, source, splits), start=1):
         yield text
         chars += len(text)
-        docs += 1
         if (char_budget is not None and chars >= char_budget) or (
-            max_docs is not None and docs >= max_docs
+            max_docs is not None and count >= max_docs
         ):
             return
