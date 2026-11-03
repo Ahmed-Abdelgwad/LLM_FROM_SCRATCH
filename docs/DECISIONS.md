@@ -796,3 +796,273 @@ is in the module's docstring; this entry records the choices.
 - Mutation checks: eight deliberate breakages (no mask, mask also hiding the diagonal, scaling by
   `d_model`, softmax over the wrong axis, heads merged without transpose, values taken from the
   keys, fast path not causal, fast path dropping out in eval) each fail tests.
+
+## D-019 (2026-11-02): the GPT model (`model/layers.py`, `model/gpt.py`)
+
+Chapter 4 of the book. The mechanism of each part (layer norm, GELU, feed-forward, pre-norm
+residual blocks, position embeddings, weight tying, initialization) is explained in the module
+docstrings; this entry records the choices and what was measured.
+
+- **Architecture = GPT-2's:** token + learned absolute position embeddings, `n_layers` pre-norm
+  blocks (`x + attention(norm(x))`, `x + feed_forward(norm(x))`), a final layer norm, an output
+  map tied to the token embedding. Rotary embeddings were not used: learned positions are what the
+  book teaches and cost 0.2M parameters at 512 positions. Changing this later is a model change,
+  to be tested on bits per character (D-007), not decided here.
+- **Layer norm, GELU (tanh form) and feed-forward are written out** and compared with the library
+  versions in tests. Layer norm computes in float32 whatever the input dtype, because a variance in
+  bfloat16 is too coarse.
+- **No bias anywhere by default** (attention, feed-forward, layer norm), following D-018; `bias=True`
+  is an option. Feed-forward width is 4 x `d_model`.
+- **Initialization** as GPT-2: weights Normal(0, 0.02), the two maps that write into the residual
+  stream scaled by 1/sqrt(2 n_layers). Checked: an untrained model's loss is within 0.1 of
+  ln(vocab) = ln(1000) on random ids, i.e. it starts as a uniform guess.
+- **Parameters.** The default local model (16,384 ids, 512 positions, d_model 384, 6 layers,
+  6 heads) has 17.1M parameters, of which the tied embedding is 6.3M (37%); a model with d_model 512,
+  8 layers, 8 heads has 33.8M. The count is tested against the formula
+  `V d + T d + L (4 d^2 + 2 d d_ff + 2 d) + d`.
+- **A claim of mine that was wrong, found by its test.** I expected that without position
+  embeddings a model cannot tell a text from its reordering. That is exact for one layer (the last
+  token sees only the set of earlier token embeddings), but with two or more layers the causal
+  mask alone lets earlier tokens carry order, because each one sees a different prefix; the test
+  failed at two layers by about 0.002 in the logits. The docstring and the test now say so (the
+  literature reports models without position encodings still learning position; from memory,
+  not checked). Position embeddings are the explicit signal, not the only one.
+- **Correctness evidence.** Causality of the whole model (changing later ids never changes earlier
+  logits, three cut points); `fast_attention` gives the same logits as the explicit path; a
+  checkpoint restores identical predictions; dropout acts only in training; a small model
+  memorizes a batch (loss from above 3.0 to below 0.3 in 200 steps). Eight deliberate breakages
+  (no residual, no position embedding, unscaled residual writers, untied weights, no final norm,
+  unbiased variance, wrong GELU constant, post-norm order) each fail tests; the first run of the
+  GELU breakage did not apply (it hit the docstring) and was redone on the code line.
+- **Training throughput on the RTX 3050 (4 GiB), measured**, bfloat16 autocast, fast attention,
+  fused AdamW, 512 tokens per sequence, 5 timed steps after one warm-up:
+
+  | model | batch | ms/step | tokens/s | peak memory |
+  |---|---:|---:|---:|---:|
+  | 17.1M | 4 | 82 | 25,100 | 1,101 MiB |
+  | 17.1M | 8 | 164 | 24,900 | 1,946 MiB |
+  | 17.1M | 16 | out of memory | | |
+  | 33.8M | 4 | 153 | 13,400 | 1,684 MiB |
+  | 33.8M | 8 | 285 | 14,400 | 2,882 MiB |
+  | 33.8M | 16 | out of memory | | |
+
+  At 25,000 tokens per second one pass over the 167M training tokens of D-017 takes about 1.9
+  hours for the 17.1M model and, at 14,000, about 3.3 hours for the 33.8M one (arithmetic from the
+  measured rates, not a measured epoch). The memory limit at batch 16 is the logits: batch x 512 x
+  16,384 ids in float32 is 537 MB for one copy, so larger effective batches must come from
+  gradient accumulation (or a chunked loss), not from a larger batch.
+- **Not decided:** context length (512 is the default, not tuned), the optimizer schedule, batch
+  size in tokens, dropout (0 by default), and whether to use `torch.compile`.
+
+## D-020 (2026-11-02): the training pipeline (`training/`, `scratchllm train`)
+
+Chapter 5 of the book, plus what a run needs to be trusted and to survive a stop. Generation and
+fine-tuning are not part of it. Modules: `config.py` (typed YAML, unknown keys refused),
+`schedule.py`, `batches.py` (sampling and validation), `checkpoint.py`, `logger.py`, `trainer.py`.
+
+- **Optimizer and schedule.** AdamW (betas 0.9/0.95), weight decay only on matrices and
+  embeddings, not on norm scales or biases; linear warmup then cosine decay to `min_lr`; global
+  gradient-norm clipping (default 1.0, 0 turns it off). The values in `configs/` are common starting
+  points, not tuned.
+- **Gradient accumulation** divides each micro-batch loss by the number of micro-batches. Adam and
+  clipping make the weights insensitive to a wrong scale, so the test also compares the raw
+  gradient norm of 2 x 4 sequences with that of 1 x 8 on identical data.
+- **Data order is a function of (seed, step, micro-batch)**, not state. Each sequence picks a
+  source by weight and a window start uniformly (stride 1) in its train tokens. This makes
+  resuming exact without saving a data position. Sampling is with replacement, so there are no
+  "epochs"; one pass over D-017's 167M tokens is `max_steps x tokens_per_step` = that number.
+- **Source mix.** `data.train_sources` gives explicit weights; omitted, the sources are weighted by
+  their token counts (the natural mix, still the open question of D-017).
+- **Validation** uses fixed, evenly spaced, non-overlapping windows of each source's val split
+  (`eval_batches x micro_batch_size` windows per source), reported per source as loss and bits
+  per character, and as an unweighted mean over sources. Bits per character uses the val split's
+  tokens-per-character ratio, which includes one end-of-text id per document: an approximation of the
+  windows' own density. `best.pt` is written when the mean val loss improves; `last.pt` every
+  `checkpoint_interval` steps and at the end, atomically (a failed save keeps the previous file).
+- **Resuming** restores weights, optimizer state, step, counters and the random generators. It
+  refuses a different model configuration, different token files (by sha256 from their
+  descriptions), or a different seed, batch sizes or source weights. Changes to the optimizer,
+  schedule or intervals are allowed and logged (`config_sections_changed`), so a run can be
+  extended. An existing run directory is never overwritten.
+- **Reproducibility, as measured.** On CPU, a run interrupted at step 6 of 12 and resumed gives
+  bit-identical weights and identical per-step losses to the uninterrupted run, with and without
+  dropout; a crash with no chance to save resumes from the last checkpoint with the same result. On the
+  RTX 3050 (smoke config, interrupted at step 15 of 30) the resumed run was also bit-identical in
+  this one trial; PyTorch does not guarantee that on GPU, and `deterministic: true` is the setting
+  that asks for it (slower; not exercised here).
+- **Bad steps.** A step whose loss or gradient norm is not finite changes nothing, is logged as
+  `skip`, and still counts in the schedule; `max_consecutive_skips` in a row saves `last.pt`, logs
+  `diverged` and raises `DivergedError`. Ctrl-C saves `last.pt` at the last finished step.
+- **Log.** `runs/<name>/metrics.jsonl`, one JSON object per line: `start`/`resume` (full config and
+  its hash, parameter count, git commit and whether the tree was dirty, library versions, device,
+  data hashes), `train` (mean loss since the last line, lr, raw gradient norm, tokens seen, tokens
+  per second of compute only, peak GPU memory), `eval`, `checkpoint`, `skip`, `diverged`,
+  `interrupted`, `end`. Non-finite numbers are written as strings.
+- **Measured on the real files.** `configs/smoke.yaml` (2 layers, 128 wide, 30 steps, 61,440 tokens)
+  takes 14 s on the RTX 3050: train loss 9.66 -> 8.62 (a uniform guess is ln 16384 = 9.70),
+  val loss 9.15 -> 8.64. `configs/local-17m.yaml` run for 6 steps: 25,000 tokens/s and 2,012 MiB peak
+  with micro-batch 8 x accumulation 8 (32,768 tokens per step), matching D-019. No run beyond 6
+  steps of the full model has been done, so nothing is known yet about its loss curve.
+- **Mutation checks.** Twelve deliberate breakages of the loop and sampler (no loss scaling, no
+  zero_grad, learning rate not applied, sampler ignoring the step, generators or optimizer state not
+  restored, non-finite steps applied, clipping off, best checkpoint saved on every evaluation,
+  data fingerprint unchecked, decay on all parameters, skipped steps not counted) each fail a test;
+  two of them first survived (the accumulation scale and the best checkpoint) and the tests were
+  strengthened until they failed.
+- **Limits.** Single GPU, single process, no `torch.compile`, no learning-rate or batch-size tuning,
+  no activation checkpointing, no early stopping. Checkpoints hold the full optimizer state
+  (30 MB for the smoke model; about 205 MB for 17M parameters). `deterministic` is untested on GPU.
+
+## D-021 (2026-11-03): pilot run of the 17.1M model, and the ars train/validation gap
+
+`configs/pilot-17m.yaml`: 1,500 steps of 32,768 tokens planned (49M tokens), natural source mix,
+the untuned hyperparameters of `local-17m.yaml`. It was stopped on request at step 1,056 (SIGTERM,
+which saved `last.pt` at that step; `best.pt` is step 1,000). The schedule did not finish, so
+these are mid-schedule numbers.
+
+- **Health.** No skipped steps, gradient norm 0.5 to 0.6, peak memory 2,012 MiB, about 34,500
+  tokens/s (D-019 measured 25,000 with shorter timing windows; the difference is not explained).
+- **Validation at step 1,000** (mean over the six sources 5.60 nats per token, 2.40 bits per
+  character; a uniform guess is 9.70): edu 4.61, wiki_ar 5.27, arb 5.65, arz 5.93, ary 5.86,
+  ars 6.30. It was still falling by about 0.07 per 100 steps. Nothing here says anything about the
+  quality of the finished model.
+- **Train and validation agree within 0.04 on five sources at every evaluation. ars is 0.3 higher
+  on validation** (6.30 against a train probe of 6.00 at step 1,000), from step 200 on, not growing.
+- **Investigation of that gap** (on `best.pt`, step 1,000; one-off scripts, not kept in the repo):
+  - It is not noise in the window sample: all 370 ars val windows give 6.288, train probe 5.950, gap
+    +0.337 (standard error 0.025). The control arb gives -0.005. It is not noise in the choice of
+    sites either: a bootstrap over domains gives 95% intervals [6.12, 6.37] for ars validation and
+    [5.89, 6.02] for its train probe, which do not overlap (arb: [5.63, 5.71] and [5.64, 5.71]).
+  - It is uniform over positions inside a window (first 32 tokens +0.31, the rest +0.34), so it is
+    not about short context.
+  - ars validation is 282 documents from only 39 sites, and one site is 31% of its tokens (three
+    sites 58%); its train side is 9,507 documents from 1,886 sites, none shared with validation
+    (the split is by site). arb validation has 349 sites. The six largest ars validation sites have
+    mean loss 6.05 to 6.59, the six largest train sites 5.56 to 5.93.
+  - Memorization is small. Replaying the sampler (it is a function of seed and step) gives the
+    5,003 ars windows trained on (17% of its train tokens, 1.1 exposures each). Windows from the
+    same train sites that overlap none of them score 5.992, against 5.892 for the windows trained
+    on: +0.100 (standard error 0.028). arb: +0.030 (0.027). So of the 0.34 gap, about 0.1 is
+    familiarity with the exact text, and about 0.3 is the step from the training sites to new sites
+    (6.288 against 5.992). The two parts overlap and were not separated more finely.
+- **Correction (D-022):** the ars *test* split, also made of new sites, scores 5.928 at step 1,500,
+  only +0.10 above the train probe (5.830), against +0.31 for the validation split. So the
+  "about 0.3 from the step to new sites" above is not a general cost of new sites: most of the
+  validation gap belongs to the particular 39 validation sites, and what is left (about 0.1) is
+  the size of the memorization estimate.
+- **Reading.** Nothing is wrong with the training code. ars looks like a source with few, repetitive sites
+  (its text was not read; this is inferred from the concentration of sites and from the
+  seen/unseen result), which the model learns within a site quickly and which transfer to new
+  sites less well; its validation set is also small and dominated by a few sites,
+  so a single ars validation number is imprecise (about +-0.12 at 95%) and differences of a few
+  hundredths between evaluations or mixes should not be read for that source. Validation is the
+  honest number; the train probe is easier by construction (it shares sites with training).
+- **Open.** A larger and more varied ars validation
+  sample would need re-sampling the source (the sample is 3.4% of it). Reporting a site-level
+  bootstrap interval with each evaluation, for the web sources, is a possible addition.
+
+**Addendum (2026-11-03): the pilot was resumed and finished.** `train --resume auto` continued from
+step 1,056 to step 1,500 (49,152,000 tokens, 0 skipped steps, exit 0; the log has one `interrupted`
+and one `resume` event). The loss continued without a jump at the restart. Whether the resumed run
+equals an uninterrupted one was not tested on this model; D-020 tested it on a small one.
+
+| source | val loss @1000 | val loss @1500 | bits/char @1500 | train probe @1500 | gap @1500 |
+|---|---:|---:|---:|---:|---:|
+| edu | 4.61 | 4.44 | 1.91 | 4.41 | +0.03 |
+| wiki_ar | 5.27 | 5.05 | 2.16 | 5.10 | -0.05 |
+| arb | 5.65 | 5.47 | 2.22 | 5.51 | -0.04 |
+| arz | 5.93 | 5.76 | 2.54 | 5.79 | -0.04 |
+| ary | 5.86 | 5.68 | 2.24 | 5.65 | +0.03 |
+| ars | 6.30 | 6.16 | 2.88 | 5.83 | +0.33 |
+| **mean** | 5.60 | 5.43 | 2.33 | | |
+
+- The mean validation loss fell every time it was measured, from 7.62 at step 100 to
+  5.426 at step 1,500; the last three drops were 0.032, 0.025 and 0.017
+  per 100 steps with the learning rate at its floor (6e-5). It had not plateaued.
+- The ars gap is +0.33 at the end, as before; the other five sources are within 0.05 of their train
+  probe (arb, arz and wiki_ar are slightly *lower* on validation).
+- Peak GPU memory read 2,081 MiB after the resume against 2,012 MiB before; not investigated.
+- **What this does and does not show.** A mean loss of 5.43 nats per token is far
+  from good (a uniform guess is 9.70) and 49M tokens is 2.9 tokens per parameter, 0.29 of the
+  167M-token train split. No text was generated (generation is not implemented), so nothing is known
+  about what the model writes. The pilot shows that the whole path trains stably and reproducibly on
+  the real data and fits the GPU; it does not show what the model can reach with more data or time.
+
+## D-022 (2026-11-03): generation, full evaluation, and a first look at what the pilot model writes
+
+Code: `model/generate.py`, `training/evaluation.py`, commands `scratchllm generate` and
+`scratchllm eval`; report `reports/eval/final-pilot-17m` (numbers only, no text).
+
+- **`generate`** writes one token at a time from the last position's scores: greedy (temperature
+  0), or sampling from softmax(logits / temperature), optionally restricted to the top k tokens
+  (ties with the k-th score are kept). Ending: a generated end-of-text id finishes a sequence
+  (later steps pad it, and generation stops once all rows are done). Context: the model sees only
+  its last `context_length` tokens; the output keeps everything. No key/value cache: each step
+  recomputes the window (simple and correct, quadratic cost, fine for samples). `generate_text`
+  normalizes the prompt (D-013), parses special-token strings as plain text, and starts the
+  sequence with the end-of-text id, as every document starts in the training stream. The command
+  refuses a tokenizer that is not the one the token files were made with (vocabulary size, and the
+  sha256 stored in their descriptions when the files are still there).
+- **Tests.** 25 for generation (a scripted fake model gives exact expectations: greedy order,
+  top-k = 1 equals greedy, EOS handling for one row and for a batch, context never exceeded,
+  sampled frequencies match softmax at three temperatures and after top-k within
+  0.02, seeds) and 12 for evaluation and the tokenizer guard. Thirteen deliberate
+  breakages (temperature unused, top-k off by one, EOS ignored, context not cropped, greedy
+  picking the lowest, finished rows still sampling, prompt not normalized, no start token; loss
+  summed instead of averaged, unsmoothed unigram, natural-log bits, eval-only treated as training,
+  tokenizer hash unchecked) each fail a test.
+- **Full evaluation** (every non-overlapping 512-token window of each split; 3 minutes on the
+  GPU), checkpoint `best.pt` = step 1,500 of the pilot, 17,109,888 parameters:
+
+| source | split | tokens | loss | perplexity | bits/char | unigram bits/char | model / unigram |
+|---|---|---:|---:|---:|---:|---:|---:|
+| fineweb_edu_10bt | val | 1,548,223 | 4.450 | 86 | 1.914 | 3.330 | 0.57 |
+| fineweb_edu_10bt | test | 1,380,127 | 4.472 | 88 | 1.924 | 3.321 | 0.58 |
+| wiki_ar | val | 277,136 | 5.135 | 170 | 2.191 | 3.585 | 0.61 |
+| wiki_ar | test | 319,077 | 5.261 | 193 | 2.211 | 3.532 | 0.63 |
+| fw2_arb | val | 692,916 | 5.491 | 243 | 2.226 | 3.448 | 0.65 |
+| fw2_arb | test | 855,059 | 5.552 | 258 | 2.276 | 3.475 | 0.65 |
+| fw2_arz | val | 571,707 | 5.776 | 323 | 2.553 | 3.761 | 0.68 |
+| fw2_arz | test | 729,537 | 5.741 | 311 | 2.580 | 3.829 | 0.67 |
+| fw2_ary | val | 64,808 | 5.693 | 297 | 2.248 | 3.419 | 0.66 |
+| fw2_ary | test | 203,565 | 5.611 | 273 | 2.085 | 3.272 | 0.64 |
+| fw2_ars | val | 189,459 | 6.137 | 463 | 2.871 | 3.990 | 0.72 |
+| fw2_ars | test | 159,996 | 5.928 | 375 | 2.917 | 4.158 | 0.70 |
+| fw2_apc | eval | 4,472,543 | 6.065 | 430 | 2.949 | 4.120 | 0.72 |
+| fw2_acm | eval | 5,470,966 | 6.289 | 539 | 3.212 | 4.331 | 0.74 |
+| wiki_ary | eval | 2,232,171 | 6.477 | 650 | 3.664 | 4.695 | 0.78 |
+
+  "unigram" is a model that knows only the token frequencies of the training data. Uniform guess:
+  3.6 to 5.5 bits per character depending on the source.
+- **Reading the numbers.**
+  - The in-training estimate (80 windows per source) agrees with the full validation loss to
+    within 0.083 nats on every source; the sample was adequate.
+  - Test agrees with validation within 0.13 nats on every source except ars (test 5.928,
+    validation 6.137); see the correction in D-021.
+  - The model beats the unigram baseline on every split: bits per character are 0.66 of the
+    unigram's on the five trained Arabic sources and 0.75 on the three dialects it never
+    saw. It uses context, but a loss of 4.4 to 6.5 nats is a weak language model.
+  - On the three evaluation-only dialects the cost is 3.28 bits per character against
+    2.42 on the trained Arabic sources (mean over the sources, unweighted): the model and the
+    tokenizer carry over to dialects they did not see, at a clear price. wiki_ary (Moroccan
+    Wikipedia) is the hardest, 3.66.
+  - Bits per character is the number to compare sources; per-token loss is not (different
+    tokens per character).
+- **What it writes** (6 prompts: Modern Standard, Egyptian, English; 90 tokens; temperature 0.8,
+  top-k 40, two seeds each; and greedy; files kept in `runs/pilot-17m/`, not in git because
+  generated web-like text has not been filtered for adult or personal content; the adult-content
+  filter is still undecided):
+  - Surface form is right in all three: correct script and spelling, the register of the prompt
+    (news phrases such as "أعلنت وزارة الصحة", colloquial Egyptian "اللي / علشان كدة / هتلقي /
+    بيعملوا", English sentences), punctuation and line structure, sometimes web boilerplate
+    ("إقرأ أيضا", "Instagram").
+  - Meaning is absent: sentences do not continue the prompt's topic, facts are invented (named
+    officials and years attached to nonsense claims), English contains invented words ("Namentinia",
+    "Swasse"), and a prompt can drift to another genre (an Egyptian prompt turned into a list of
+    short chat lines).
+  - Greedy decoding loops in all six cases ("اليوم الثلاثاء، اليوم الثلاثاء...", "the United States,
+    the United States...", "النهار" on every line), as expected of a model this weak.
+  - Six prompts and two seeds are an impression, not a measurement. Nothing here measures factual
+    accuracy or dialect correctness.
+- **Not decided.** Whether to train longer, and with what mix or settings (see the answer to the
+  user for the evidence and recommendation; no longer run has been started).

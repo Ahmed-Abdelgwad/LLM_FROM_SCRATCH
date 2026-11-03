@@ -12,13 +12,20 @@
 
 ## Solution
 
-A tested, reproducible pipeline for a small bilingual GPT:
+A tested, reproducible pipeline for a small bilingual GPT. The list is the plan; the **Status**
+column says what exists, and the decision log entries hold the evidence.
 
-1. Arabic-aware normalization + a bilingual BPE tokenizer trained on our own data.
-2. A modern decoder-only transformer (RMSNorm, RoPE, GQA, SwiGLU, KV cache) written from scratch.
-3. Resumable pretraining (mixed precision, gradient accumulation, checkpointing).
-4. LoRA/SFT to turn the base model into a chat model.
-5. Typed YAML configs, unit tests and CI so every number in this repo can be reproduced.
+| # | Planned | Status |
+|---|---------|--------|
+| 1 | Arabic-aware normalization + a bilingual BPE tokenizer trained on our own data | **Built** (D-013 to D-016). Normalization is deliberately light: it keeps spelling variants (D-006). Fertility is measured against GPT-2 and Qwen3. |
+| 2 | A modern decoder-only transformer (RMSNorm, RoPE, GQA, SwiGLU, KV cache) written from scratch | **Partly.** What is built is the GPT-2 architecture of the book: LayerNorm, learned position embeddings, multi-head attention, GELU, tied embeddings (D-018, D-019). RMSNorm, RoPE, GQA, SwiGLU and a KV cache are **not built**; adopting any of them is an ablation judged by bits per character (D-007), not a given. |
+| 3 | Resumable pretraining (mixed precision, gradient accumulation, checkpointing) | **Built** (D-020): bfloat16, accumulation, clipping, warmup and cosine schedule, atomic checkpoints, exact resume, JSON-lines log. Only a 1,500-step pilot has been trained (D-021). |
+| 4 | LoRA/SFT to turn the base model into a chat model | **Not built.** `finetune/` is empty. |
+| 5 | Typed YAML configs, unit tests and CI so every number in this repo can be reproduced | **Configs and tests built** (typed, unknown keys refused; over 500 tests, mutation-checked). **CI exists but has not run on this code:** the workflow triggers on pushes to `main` while the branch is `master`, it installs the CUDA build of torch, and nothing has been pushed yet. |
+
+Also built, as the plan required before any training: the data pipeline (sampling with manifests,
+deterministic split by site, exploratory checks, cleaning rules, personal-data masking, leakage
+measurement; D-001 to D-012, D-017) and generation (D-022).
 
 The goal is not to compete with large Arabic LLMs. The goal is a clear, measurable and honest
 engineering result at a scale that fits one 4 GB GPU, with larger configs ready for rented compute.
@@ -43,6 +50,19 @@ comparisons must use bits-per-character (or bits-per-byte) instead.
 - Qualitative samples in both languages at fixed prompts and seeds, with failures kept in the report.
 - For SFT: a small hand-written instruction set scored by rubric, with the limits stated.
 - Reproducibility: a run from a clean checkout, config and seed gives the same loss curve within tolerance.
+
+## Where each metric stands
+
+| Metric | State |
+|---|---|
+| Tokenizer fertility vs GPT-2 (and Qwen3) | Measured, `reports/tokenizer/final-v2` (D-016, D-017). Arabic far better than GPT-2; English worse. |
+| Perplexity per language | Measured per source and split for the pilot, `reports/eval/final-pilot-17m` (D-022). English and Arabic are separate sources; there is no single "per language" figure yet. |
+| Bits per character | Measured with the same report, with unigram and uniform baselines. |
+| Tokenizer round trip | Tested, and 0 failures on 2,700 real documents (D-015). |
+| Throughput and peak VRAM | Measured on the RTX 3050 (D-019, D-020). |
+| Qualitative samples | Six prompts in Modern Standard, Egyptian and English (D-022): fluent surface, no coherent meaning, greedy decoding loops. |
+| SFT rubric | Not applicable yet. |
+| Reproducibility | A resumed run is bit-identical to an uninterrupted one on CPU (tested) and in the one GPU trial made (D-020). A clean-checkout reproduction of a full run has not been done. |
 
 ## Rules for credible claims
 
