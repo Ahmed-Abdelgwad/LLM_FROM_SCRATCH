@@ -1066,3 +1066,196 @@ Code: `model/generate.py`, `training/evaluation.py`, commands `scratchllm genera
     accuracy or dialect correctness.
 - **Not decided.** Whether to train longer, and with what mix or settings (see the answer to the
   user for the evidence and recommendation; no longer run has been started).
+
+## D-023 (2026-11-03): the 5,000-step baseline, and why the loss falls slowly: nothing broken was found
+
+Code: none changed. Evidence kept in git: `reports/eval/final-local-17m` (full evaluation of the
+final checkpoint) and `reports/diagnostics/final-d023/` (outputs of the diagnostic scripts).
+Scripts: `scripts/diagnose_checkpoint.py`, `scripts/diagnose_tokens.py` and `scripts/overfit_one_batch.py`
+made the files in `reports/diagnostics/final-d023/`; `scripts/d023_entry.py` computed the tables and numbers
+of this entry from the runs and those files (the prose around them is written by hand). Not in git:
+the runs (`runs/local-17m`, `runs/diag-lr-*`, ignored), so the entry can be regenerated only on the machine
+that has them. Rerunning `diagnose_checkpoint.py` on the same checkpoint gives identical output except
+the last digits of the noise-scale lines, which change from run to run (GPU kernels are not bitwise
+deterministic).
+
+**The baseline run.** `configs/local-17m.yaml`, unchanged from the pilot except for length:
+17,109,888 parameters (6,291,456 in the token embedding, 196,608 in the position embedding, 10,621,824 elsewhere),
+8 x 8 x 512 = 32,768 tokens per step,
+natural mix, peak learning rate 0.0006 decaying to 6e-05. It was stopped by SIGTERM at step 2,990 (2026-11-03T05:07Z;
+`last.pt` was written) and resumed from that checkpoint at 2026-11-03T16:17Z, then ran to step 5,000.
+163,840,000 tokens were seen (0.98 epoch of the
+167,394,059 train tokens), 0 steps were skipped, the median throughput was 34,424 tokens/s.
+
+| step | tokens seen | mean val loss | mean bits/char |
+|---:|---:|---:|---:|
+| 500 | 16,384,000 | 6.166 | 2.640 |
+| 1,000 | 32,768,000 | 5.566 | 2.385 |
+| 1,500 | 49,152,000 | 5.243 | 2.247 |
+| 2,000 | 65,536,000 | 4.962 | 2.127 |
+| 2,500 | 81,920,000 | 4.810 | 2.062 |
+| 3,000 | 98,304,000 | 4.703 | 2.016 |
+| 3,500 | 114,688,000 | 4.631 | 1.986 |
+| 4,000 | 131,072,000 | 4.579 | 1.963 |
+| 4,500 | 147,456,000 | 4.545 | 1.949 |
+| 5,000 | 163,840,000 | 4.524 | 1.940 |
+
+Final per-source state (step 5,000); the probe is the loss on train windows, measured the same way as validation:
+
+| source | share of train tokens | val loss | val bits/char | train-probe loss | val − probe |
+|---|---:|---:|---:|---:|---:|
+| edu | 39.3% | 3.634 | 1.563 | 3.581 | +0.053 |
+| arb | 23.0% | 4.501 | 1.825 | 4.496 | +0.005 |
+| ars | 8.0% | 5.300 | 2.479 | 4.925 | +0.375 |
+| ary | 3.2% | 4.742 | 1.873 | 4.678 | +0.064 |
+| arz | 17.7% | 4.800 | 2.121 | 4.653 | +0.146 |
+| wiki_ar | 8.7% | 4.169 | 1.779 | 4.144 | +0.025 |
+
+Mean validation loss 4.524 nats, 1.940 bits/char. Weighted by the
+train mix the validation loss is 4.256, against 4.177 for the training loss (mean of the last five logged
+windows): the same weighting, and a difference of 0.079, which is the generalization gap
+in the usual sense; `ars` and `arz` (below) account for 68% of the train-mix weighted val-minus-probe gap of 0.082. The headline `val_loss` is an unweighted mean over six
+sources, which is why it looks 0.35 higher than the training loss; the rest of that
+difference (0.27) is the weighting, not a gap. The per-source
+probe shows where the gap is: `ars` (+0.37, the concentrated
+validation sites of D-021) and `arz` (+0.15, not investigated); the other four are within
+0.06 nats.
+
+**Full evaluation** of `best.pt` (step 5,000), every non-overlapping 512-token window of val, test and the
+evaluation-only dialects; `change` is against the pilot (D-022):
+
+| source | split | tokens | loss | perplexity | bits/char | pilot bits/char | change | unigram bits/char | model / unigram |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| edu | val | 1,548,223 | 3.619 | 37 | 1.557 | 1.914 | -0.357 | 3.330 | 0.47 |
+| edu | test | 1,380,127 | 3.664 | 39 | 1.576 | 1.924 | -0.348 | 3.321 | 0.47 |
+| acm | eval | 5,470,966 | 5.562 | 260 | 2.841 | 3.212 | -0.371 | 4.331 | 0.66 |
+| apc | eval | 4,472,543 | 5.213 | 184 | 2.535 | 2.949 | -0.414 | 4.120 | 0.62 |
+| arb | val | 692,916 | 4.530 | 93 | 1.836 | 2.226 | -0.390 | 3.448 | 0.53 |
+| arb | test | 855,059 | 4.657 | 105 | 1.909 | 2.276 | -0.367 | 3.475 | 0.55 |
+| ars | val | 189,459 | 5.332 | 207 | 2.494 | 2.871 | -0.377 | 3.990 | 0.63 |
+| ars | test | 159,996 | 5.205 | 182 | 2.561 | 2.917 | -0.356 | 4.158 | 0.62 |
+| ary | val | 64,808 | 4.742 | 115 | 1.873 | 2.248 | -0.376 | 3.419 | 0.55 |
+| ary | test | 203,565 | 4.773 | 118 | 1.773 | 2.085 | -0.311 | 3.272 | 0.54 |
+| arz | val | 571,707 | 4.785 | 120 | 2.115 | 2.553 | -0.438 | 3.761 | 0.56 |
+| arz | test | 729,537 | 4.736 | 114 | 2.129 | 2.580 | -0.451 | 3.829 | 0.56 |
+| wiki_ar | val | 277,136 | 4.135 | 62 | 1.764 | 2.191 | -0.427 | 3.585 | 0.49 |
+| wiki_ar | test | 319,077 | 4.292 | 73 | 1.803 | 2.211 | -0.407 | 3.532 | 0.51 |
+| wiki_ary | eval | 2,232,171 | 5.095 | 163 | 2.882 | 3.664 | -0.782 | 4.695 | 0.61 |
+
+- Every split of a training source improved by 0.31 to 0.45 bits/char since the pilot (step 1,500), all of them by a similar amount.
+- Mean of the five trained Arabic sources (val): 2.016; mean of the three dialects never seen: 2.753. The ratio is
+  1.37; at the pilot it was 1.35 (3.275 / 2.418). The relative price of an unseen dialect did not move;
+  what the model learned about the seen ones carried over in the same proportion.
+- wiki_ary improved by 0.78, about twice the rest; it is the smallest of the three and the cause was not looked into.
+- For one source, val and test differ by up to 0.10 bits/char (set against seed noise below): compare a split with the same
+  split, never val with test.
+
+**Why the loss falls slowly: what was checked and what it showed.** Each check is a measurement on the baseline or a short run
+with one change.
+
+- *Implementation.* The exact model, on CPU, memorizes four 128-token windows: loss 9.78 at the start (ln 16,384 = 9.70),
+  0.0025 after 120 steps. Bf16 against fp32 on the validation windows differs by at most 0.001 nats on every source.
+  The loop's own checks stand from D-020 (resume bit-exact on CPU, mutants caught). No defect found.
+- *Gradient clipping.* The clip is 1.0. The log holds the norm of every 10th step: 3 of 500 logged steps were above it, the last at step 120
+  (during warmup); after step 200 the median is 0.72 and the maximum 0.84. Clipping acted only at the very start, and it does not slow the run.
+- *Learning rate.* Four runs of 800 steps, identical except the peak learning rate (minimum 10% of it, 50 warmup steps, seed 1337).
+  Command, for the rate LR (the minimum is LR/10): `scratchllm train configs/local-17m.yaml --set name=diag-lr-X --set optim.lr=LR
+  --set optim.min_lr=LR/10 --set optim.warmup_steps=50 --set train.max_steps=800 --set train.eval_interval=200
+  --set train.checkpoint_interval=800`; the repeat adds `--set train.seed=2024`
+  and `--set name=diag-lr-6e-4-seed2`:
+
+| peak LR | val loss at 200 | 400 | 600 | 800 | mean bits/char at 800 | max grad norm after step 100 | skipped steps |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 3e-4 | 7.129 | 6.701 | 6.494 | 6.409 | 2.743 | 0.64 | 0 |
+| 6e-4 | 6.932 | 6.437 | 6.168 | 6.061 | 2.595 | 0.56 | 0 |
+| 1.2e-3 | 6.991 | 6.559 | 6.293 | 6.162 | 2.639 | 0.52 | 0 |
+| 2.4e-3 | 7.027 | 6.645 | 6.353 | 6.210 | 2.659 | 0.34 | 0 |
+
+  6.061 at 6e-4 is the best; 3e-4 is 0.348 worse and 1.2e-3 is 0.102 worse, with no instability at any rate.
+  A higher rate was the hypothesis going in (6e-4 is a value for much wider models) and it is refuted at this horizon. A short sweep tends to favour
+  higher rates than a long run does, so the best rate at 5,000 steps is unlikely to be higher than 6e-4.
+- *Noise.* The 6e-4 run repeated with seed 2024 (different initialization and data order, same validation windows) gives 6.089 against 6.061:
+  +0.029 nats, +0.012 bits/char on the mean, +0.007 to +0.021 per source. One pair is a rough estimate of the noise; the
+  learning-rate gaps above are 3.5 to 12.1 times it.
+- *Batch size.* Gradient noise scale (McCandlish et al. 2018), 24 steps of 8 micro-batches, natural mix:
+  B_noise = 75,130 tokens at step 2,750 (batch/B_noise = 0.44) and 223,148 at step 5,000 (0.15).
+  It grows as the loss falls, as the theory says, so the batch of 32,768 tokens is further below it as training advances.
+  Below the noise scale every token is used with efficiency 87% at step 5,000 (69% at step 2,750) of the best possible
+  (E/E_min = 1 + B/B_noise); halving the batch would save about 7% of the tokens at step 5,000 and
+  15% at step 2,750, with the learning rate to be retuned. The estimate is 24 steps at one checkpoint.
+  The batch is not a cause of the slow fall.
+- *Data.* Train split, from the token files: exact duplicate documents (within a source) 0.00% in every source; tokens in documents of fewer than 64 tokens 0.00%;
+  the share of positions inside a 512-window whose previous 4-gram already occurred in it is 0.022 to 0.057 on average, and
+  windows with more than 30% of them: 0.0% to 4.0% (wiki_ar, lists and tables).
+- *Sources.* Cosine between the gradients of two 32,768-token batches, divided by what two batches of the same source reach (so 1 would mean as
+  alike as the source is to itself). Step 5,000:
+
+| | edu | arb | ars | ary | arz | wiki_ar |
+|---|---:|---:|---:|---:|---:|---:|
+| edu | 1 | 0.43 | 0.20 | 0.29 | 0.24 | 0.23 |
+| arb | 0.43 | 1 | 0.23 | 0.47 | 0.45 | 0.53 |
+| ars | 0.20 | 0.23 | 1 | 0.28 | 0.59 | 0.23 |
+| ary | 0.29 | 0.47 | 0.28 | 1 | 0.35 | 0.40 |
+| arz | 0.24 | 0.45 | 0.59 | 0.35 | 1 | 0.35 |
+| wiki_ar | 0.23 | 0.53 | 0.23 | 0.40 | 0.35 | 1 |
+
+  Step 2,750:
+
+| | edu | arb | ars | ary | arz | wiki_ar |
+|---|---:|---:|---:|---:|---:|---:|
+| edu | 1 | 0.32 | 0.17 | 0.30 | 0.26 | 0.28 |
+| arb | 0.32 | 1 | 0.34 | 0.75 | 0.59 | 0.77 |
+| ars | 0.17 | 0.34 | 1 | 0.33 | 0.64 | 0.22 |
+| ary | 0.30 | 0.75 | 0.33 | 1 | 0.57 | 0.64 |
+| arz | 0.26 | 0.59 | 0.64 | 0.57 | 1 | 0.50 |
+| wiki_ar | 0.28 | 0.77 | 0.22 | 0.64 | 0.50 | 1 |
+
+  Raw cosines between different sources were never negative at either step (smallest 0.087 and 0.046): no
+  sign of one source working against another. Arabic sources with each other are 0.50 to 0.77 at step 2,750 (arb, ary, arz,
+  wiki_ar); English with Arabic 0.17 to 0.32; ars is close only to arz (the other Arabic sources
+  0.22 to 0.34). At step 5,000 every value is smaller, because the
+  gradient is mostly noise by then (the diagonal itself fell from 0.49 to 0.25), so the later matrix says less. Token
+  statistics agree: the Jensen-Shannon divergence between unigram distributions is 0.04 to 0.17 among the Arabic sources
+  and 0.57 to 0.62 between English and any of them (maximum 0.69); 1,551 ids are used by English only, 12,221 by Arabic only, 2,492 by both.
+  Under 'is it appropriate to combine them': nothing found against it, and nothing measured for it either, see the open points.
+- *Where the loss goes, by position.* On the validation windows the loss drops from the middle of the window (64-255) to the end (256-511) by only
+  0.05 to 0.12 nats per source: the second half of the window adds little over the middle. The windows do not start at document starts, so
+  this says how much context helps within a window, not how well long-range structure is understood.
+- *Scale.* With the rounded Hoffmann et al. fit L = 1.69 + 406.4/N^0.34 + 410.7/D^0.28 (a different corpus and tokenizer, and the fit itself is disputed;
+  read as an order of magnitude), N = 17.1M and D = 90M tokens (step 2,750) give 5.53 nats (5.78 counting only the 10.6M non-embedding parameters);
+  the train-mix weighted validation loss at that step was 4.47, below it. Going on to 164M tokens the fit predicts a further fall of
+  0.38 nats (0.35 with the unrounded exponents of the replication paper); the weighted validation loss fell by 0.22 (0.23 for the unweighted mean), so the fit overstates the
+  further fall. It is for another corpus and tokenizer, so this is a limit of the fit, not a symptom. The run was announced before it finished as
+  "final mean validation loss between 4.4 and 4.6" and ended at 4.524: inside the range, in its upper half. The model is in the range expected for its size and its budget of
+  9.6 tokens per parameter (15.4 per non-embedding one; about 20 is the usual compute-optimal figure), not better or worse by a margin this analysis can resolve.
+
+**Conclusion.** No implementation, optimizer, precision, batch or data fault was found. The loss falls as a 17M-parameter model on 164M tokens
+is expected to fall. What makes it look worse than it is: the headline validation loss and the training loss are weighted differently; per-token
+losses of different sources are not comparable (tokens per character range from 0.279 to 0.331); and the first
+stop, at step 2,990, left the learning rate at 2.6e-04, in the middle of its decay, so the curve looked unfinished.
+
+**Samples** (the same six prompts, settings and seeds as D-022; kept in `runs/local-17m/samples-*.txt`, not in git, for the same reason):
+the first greedy sentence for the health-ministry prompt is now a plausible news sentence (a number of new deaths from a virus), where the
+pilot's was not; greedy decoding still falls into a loop in all six prompts, after roughly 20 to 40 tokens. With sampling, Arabic keeps its
+register and keeps drifting from the topic; web boilerplate appears ("تسجيل الدخول في وقت لاحق", a repeated "أبرزها", a chat-transcript speaker
+label); the Egyptian prompts continue in a recognizable colloquial style; the English samples are the weakest, with invented or broken words
+("jumpetal", "ented", "Self-Self-Self-") although English is the largest source. A possible reason is that the vocabulary was built for Arabic
+and cuts English into more pieces (1.78 tokens per word against 1.32 for GPT-2, D-016); this was not tested. Six prompts and two seeds are an impression.
+
+**Decisions.**
+
+1. Hyperparameters, batch, clipping, precision and architecture of `local-17m` are kept; this run is the baseline every later change is compared with.
+   Learning rate 6e-4 is not raised.
+2. Bits per character is the number to compare runs and sources. Report it next to the unweighted mean loss and the train-mix weighted loss, and
+   always on the same split.
+3. Rule fixed before the next experiment, from the noise above: a change counts as an improvement only if the mean bits/char on the same split falls by
+   at least 0.03 (about twice the 0.012 measured) and, for a claim about one source, by at least 0.04.
+
+**Not decided, and not tested here.**
+
+- Whether the English share (the largest, 39%) costs the Arabic sources anything. The gradient evidence says the sources do not fight, and
+  it says English shares little with Arabic; neither says what removing it would do. It needs the mix ablation (natural, Arabic only, English at 20%;
+  800 steps each, judged by rule 3), and it depends on the project wanting an English-capable model.
+- Whether several epochs on the same 167M tokens, or more data, helps; the literature suggests repeated data is nearly as good as new for a few epochs (recalled, not checked in this session).
+- The English tokenization hypothesis above; the `arz` train/validation gap; the single-seed basis of every run except the one repeated.
+- README still shows the pilot results; it has not been updated.
