@@ -31,3 +31,7 @@ reports/eda/*
 # Tokenizer reports: same rule as EDA reports
 reports/tokenizer/*
 !reports/tokenizer/final-*/
+
+# Evaluation reports: same rule
+reports/eval/*
+!reports/eval/final-*/

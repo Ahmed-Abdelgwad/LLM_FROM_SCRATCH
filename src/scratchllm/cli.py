@@ -343,3 +343,84 @@ def train_command(
         f"{result.skipped_steps} skipped steps; run in {result.run_dir}"
     )
 
+
+@app.command("generate")
+def generate_command(
+    checkpoint: Path,
+    tokenizer: Annotated[Path, typer.Option(help="The tokenizer file the model was trained with.")],
+    prompt: Annotated[
+        list[str] | None, typer.Option("--prompt", help="Repeatable; omit for an empty prompt.")
+    ] = None,
+    max_new_tokens: Annotated[int, typer.Option(help="Tokens to write after each prompt.")] = 80,
+    temperature: Annotated[
+        float, typer.Option(help="0 = greedy; below 1 sharper, above 1 flatter.")
+    ] = 0.8,
+    top_k: Annotated[int | None, typer.Option(help="Sample only among the k best tokens.")] = 40,
+    samples: Annotated[int, typer.Option(help="Samples per prompt (seeds seed, seed+1, ...).")] = 1,
+    seed: Annotated[int, typer.Option(help="Seed of the first sample.")] = 1,
+    device: Annotated[str, typer.Option(help="auto, cpu or cuda.")] = "auto",
+) -> None:
+    """Write text with a trained model (sampled with a seed, so a sample can be repeated)."""
+    import torch
+
+    from scratchllm.model.generate import generate_text
+    from scratchllm.tokenizer.tokenizer import Tokenizer
+    from scratchllm.training.checkpoint import load_checkpoint, model_from_state, tokenizer_mismatch
+    from scratchllm.training.trainer import autocast_factory, resolve_device
+
+    dev = resolve_device(device)
+    state = load_checkpoint(checkpoint, map_location=dev)
+    problem = tokenizer_mismatch(state["config"], tokenizer)
+    if problem:
+        typer.echo(f"error: {problem}", err=True)
+        raise typer.Exit(1)
+    model = model_from_state(state, dev)
+    tok = Tokenizer.load(tokenizer)
+    autocast, _ = autocast_factory(dev, "auto")
+    typer.echo(f"{checkpoint} (step {state['step']}), temperature {temperature}, top_k {top_k}")
+    for text in prompt or [""]:
+        for k in range(samples):
+            with torch.no_grad(), autocast():
+                sample = generate_text(
+                    model, tok, text, max_new_tokens, temperature=temperature, top_k=top_k,
+                    seed=seed + k, device=dev,
+                )  # fmt: skip
+            end = " [end of text]" if sample.stopped_by_eos else ""
+            typer.echo(f"\n--- prompt {text!r}, seed {seed + k}, {sample.new_tokens} tokens{end}")
+            typer.echo(sample.prompt + sample.completion)
+
+
+@app.command("eval")
+def eval_command(
+    checkpoint: Path,
+    tokens_dir: Annotated[
+        Path | None, typer.Option(help="Default: the one stored in the checkpoint.")
+    ] = None,
+    splits: Annotated[str, typer.Option(help="Splits of the training sources.")] = "val,test",
+    batch_size: Annotated[int, typer.Option(help="Windows per forward pass.")] = 16,
+    out_dir: Annotated[Path, typer.Option(help="Where reports are written.")] = Path(
+        "reports/eval"
+    ),
+    run_id: Annotated[
+        str, typer.Option(help="Report folder name; final-<name> is tracked.")
+    ] = "run",
+    device: Annotated[str, typer.Option(help="auto, cpu or cuda.")] = "auto",
+) -> None:
+    """Score a checkpoint on every held-out token (loss, bits per character, baselines)."""
+    import json
+
+    from scratchllm.training.evaluation import render_markdown, run_evaluation
+    from scratchllm.training.trainer import autocast_factory, resolve_device
+
+    dev = resolve_device(device)
+    autocast, _ = autocast_factory(dev, "auto")
+    report = run_evaluation(
+        checkpoint, tokens_dir, splits.split(","), batch_size, dev, autocast, progress=typer.echo
+    )
+    target = out_dir / run_id
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "report.json").write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    (target / "report.md").write_text(render_markdown(report), encoding="utf-8")
+    typer.echo(f"report written to {target}")
