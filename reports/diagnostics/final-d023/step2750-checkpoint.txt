@@ -1,0 +1,27 @@
+# Console output of the diagnostic script on runs/local-17m/best.pt when it was step 2750 (same
+# script and settings as step5000-checkpoint.txt). Copied verbatim from the session; that
+# checkpoint was overwritten by the step-5000 one, so this block cannot be regenerated.
+checkpoint runs/local-17m/best.pt step 2750
+
+[1] val loss by position in the 512 window (nats/token), bf16 autocast
+source                  0-0      1-3     4-15    16-63   64-255  256-511   all   fp32-all
+fineweb_edu_10bt      5.929    4.634    4.160    4.001    3.818    3.755  3.820  3.820
+fw2_arb               6.900    5.523    5.128    4.953    4.721    4.679  4.740  4.740
+fw2_ars               7.341    6.418    6.003    5.609    5.513    5.466  5.519  5.519
+fw2_ary               6.721    6.108    5.284    5.109    5.014    4.925  4.995  4.995
+fw2_arz               7.375    5.981    5.634    5.340    5.040    4.932  5.038  5.038
+wiki_ar               6.829    5.510    4.974    4.569    4.431    4.300  4.402  4.402
+
+[2] gradient noise scale (McCandlish et al. 2018), natural mixture
+|G_small|^2=2.9668 (B=4096)  |G_big|^2=0.5051 (B=32768)
+true |G|^2 ~ 0.1534   trace(Sigma) ~ 11523.7   B_noise = trace/|G|^2 ~ 75,130 tokens
+current batch = 32,768 tokens -> batch / B_noise = 0.44
+
+[3] cosine between gradients of 32k-token batches (rows/cols = sources; diagonal = two independent batches of the same source)
+                    du_10bt  fw2_arb  fw2_ars  fw2_ary  fw2_arz  wiki_ar
+fineweb_edu_10bt      0.411    0.153    0.088    0.125    0.126    0.124
+fw2_arb               0.122    0.444    0.186    0.339    0.241    0.373
+fw2_ars               0.087    0.172    0.632    0.174    0.322    0.125
+fw2_ary               0.156    0.377    0.204    0.519    0.265    0.324
+fw2_arz               0.087    0.269    0.342    0.269    0.422    0.241
+wiki_ar               0.128    0.358    0.123    0.328    0.224    0.506

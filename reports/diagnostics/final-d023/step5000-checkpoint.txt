@@ -1,0 +1,24 @@
+checkpoint runs/local-17m/best.pt step 5000
+
+[1] val loss by position in the 512 window (nats/token), bf16 autocast
+source                  0-0      1-3     4-15    16-63   64-255  256-511   all   fp32-all
+fineweb_edu_10bt      5.606    4.427    3.972    3.816    3.629    3.571  3.634  3.634
+fw2_arb               6.619    5.280    4.925    4.716    4.483    4.436  4.501  4.501
+fw2_ars               7.019    6.251    5.837    5.403    5.297    5.239  5.300  5.299
+fw2_ary               6.461    5.912    5.064    4.835    4.765    4.672  4.742  4.742
+fw2_arz               7.193    5.859    5.420    5.110    4.802    4.689  4.800  4.799
+wiki_ar               6.599    5.377    4.763    4.346    4.191    4.068  4.169  4.169
+
+[2] gradient noise scale (McCandlish et al. 2018), natural mixture
+|G_small|^2=3.8008 (B=4096)  |G_big|^2=0.5350 (B=32768)
+true |G|^2 ~ 0.0685   trace(Sigma) ~ 15287.3   B_noise = trace/|G|^2 ~ 223,148 tokens
+current batch = 32,768 tokens -> batch / B_noise = 0.15
+
+[3] cosine between gradients of 32k-token batches (rows/cols = sources; diagonal = two independent batches of the same source)
+                    du_10bt  fw2_arb  fw2_ars  fw2_ary  fw2_arz  wiki_ar
+fineweb_edu_10bt      0.227    0.065    0.061    0.055    0.046    0.055
+fw2_arb               0.111    0.187    0.057    0.088    0.083    0.132
+fw2_ars               0.047    0.057    0.327    0.087    0.170    0.054
+fw2_ary               0.088    0.126    0.081    0.275    0.085    0.095
+fw2_arz               0.052    0.082    0.118    0.072    0.180    0.051
+wiki_ar               0.063    0.115    0.086    0.134    0.108    0.293

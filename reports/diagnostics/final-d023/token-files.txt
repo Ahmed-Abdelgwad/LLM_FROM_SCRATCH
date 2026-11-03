@@ -1,0 +1,40 @@
+end_of_text id 16381
+
+[1] documents (train split)
+source                  tokens     docs   mean   p10   p50    p90  <64tok% dup docs% tok/char
+fineweb_edu_10bt    65,832,936   47,441   1388   293   855   2586     0.00      0.00    0.298
+fw2_arb             38,542,549   48,130    801   148   433   1586     0.00      0.00    0.285
+fw2_ars             13,431,542    9,507   1413   123   432   2427     0.00      0.00    0.331
+fw2_ary              5,400,709    9,627    561   140   304    964     0.00      0.00    0.279
+fw2_arz             29,656,698   47,592    623   147   363   1169     0.00      0.00    0.306
+wiki_ar             14,529,625   19,351    751   118   381   1643     0.00      0.00    0.297
+
+[2] unigram statistics (first 20M tokens of each train file)
+source              H1 nats  ids>1e-6  ids>1e-5
+fineweb_edu_10bt       6.93      4043      3788
+fw2_arb                8.05     14209     10500
+fw2_ars                7.73     13517      8278
+fw2_ary                7.96     13172      9978
+fw2_arz                8.04     14913     10602
+wiki_ar                7.84     13492      9749
+
+Jensen-Shannon divergence between unigram distributions (nats; max ln2=0.693)
+                    du_10bt  fw2_arb  fw2_ars  fw2_ary  fw2_arz  wiki_ar
+fineweb_edu_10bt      0.000    0.576    0.591    0.617    0.568    0.571
+fw2_arb               0.576    0.000    0.148    0.058    0.072    0.044
+fw2_ars               0.591    0.148    0.000    0.152    0.081    0.169
+fw2_ary               0.617    0.058    0.152    0.000    0.082    0.073
+fw2_arz               0.568    0.072    0.081    0.082    0.000    0.100
+wiki_ar               0.571    0.044    0.169    0.073    0.100    0.000
+
+probability mass on ids that English almost never uses (<1e-6): Arabic 0.861
+probability mass on ids that Arabic almost never uses (<1e-6): English 0.142
+ids used (>1e-6) by English only: 1551, Arabic only: 12221, both: 2492, neither: 120
+
+[3] repetition inside random 512-token windows (share of positions whose preceding 4-gram already occurred in the window)
+fineweb_edu_10bt   mean 0.045  p90 0.095  windows with >30% repeated: 0.0%
+fw2_arb            mean 0.029  p90 0.069  windows with >30% repeated: 0.0%
+fw2_ars            mean 0.037  p90 0.085  windows with >30% repeated: 0.7%
+fw2_ary            mean 0.022  p90 0.057  windows with >30% repeated: 0.0%
+fw2_arz            mean 0.040  p90 0.111  windows with >30% repeated: 0.7%
+wiki_ar            mean 0.057  p90 0.131  windows with >30% repeated: 4.0%

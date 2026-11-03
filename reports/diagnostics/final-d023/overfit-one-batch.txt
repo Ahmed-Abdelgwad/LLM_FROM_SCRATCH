@@ -1,0 +1,9 @@
+# CPU, the exact 17.1M-parameter model (fast attention), 4 windows of 128 tokens from fw2_arb train,
+# AdamW lr 1e-3, no weight decay, 120 steps. Copied verbatim from the session.
+init loss 9.775045394897461 ln(V) = 9.704060527839234
+1 9.775
+10 6.459
+30 2.0993
+60 0.0271
+90 0.0049
+120 0.0025
