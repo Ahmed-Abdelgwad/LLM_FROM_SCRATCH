@@ -1,0 +1,37 @@
+# A 30-step run on the real token files, small enough to finish in about a minute on the
+# RTX 3050 (or on CPU, slowly). It checks the whole path: data -> model -> loss -> update ->
+# validation -> checkpoint -> log. The numbers it produces mean nothing about model quality.
+name: smoke
+runs_dir: runs
+
+model:
+  vocab_size: 16384          # must equal the tokenizer used for data/processed/tokens-16k
+  context_length: 128
+  d_model: 128
+  n_layers: 2
+  n_heads: 4
+  fast_attention: true
+
+data:
+  tokens_dir: data/processed/tokens-16k
+  train_sources:             # three sources, so the mixing path is exercised
+    fw2_arb: 0.5
+    wiki_ar: 0.25
+    fineweb_edu_10bt: 0.25
+
+optim:
+  lr: 0.001
+  min_lr: 0.0001
+  warmup_steps: 5
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 30
+  micro_batch_size: 8
+  grad_accum_steps: 2
+  eval_interval: 10
+  eval_batches: 4
+  checkpoint_interval: 10
+  log_interval: 5

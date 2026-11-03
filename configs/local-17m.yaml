@@ -1,0 +1,35 @@
+# The default 17.1M-parameter model on the RTX 3050 (4 GiB), one pass over the 167M train tokens
+# of D-017. The hyperparameters are common starting values for a model this size, NOT tuned:
+# treat the first run as a measurement. 8 x 8 x 512 = 32,768 tokens per step, so 5,000 steps is
+# 164M tokens, about one epoch (about 1.4 hours at the 34,500 tokens/s of the pilot, D-021; 1.9 at the 25,000 of D-019).
+# The mix is the natural one (proportional to tokens) until a decision is taken (D-017).
+name: local-17m
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10

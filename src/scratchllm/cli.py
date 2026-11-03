@@ -311,3 +311,35 @@ def tokenizer_fertility(
         progress=typer.echo,
     )
     typer.echo(f"report written to {write_report(report, out_dir, run_id)}")
+
+
+@app.command("train")
+def train_command(
+    config: Path,
+    resume: Annotated[
+        str | None,
+        typer.Option(
+            help="'auto' continues runs/<name>/last.pt if it exists; or a checkpoint path."
+        ),
+    ] = None,
+    set_: Annotated[
+        list[str] | None,
+        typer.Option("--set", help="Override a config value, e.g. --set train.max_steps=50."),
+    ] = None,
+) -> None:
+    """Train the GPT described by CONFIG (validation, checkpoints and metrics.jsonl included)."""
+    from scratchllm.training.config import load_config
+    from scratchllm.training.trainer import TrainingError, train
+
+    cfg = load_config(config, set_)
+    try:
+        result = train(cfg, resume=resume, progress=typer.echo)
+    except TrainingError as error:
+        typer.echo(f"error: {error}", err=True)
+        raise typer.Exit(1) from error
+    best = f"{result.best_val_loss:.4f}" if result.best_val_loss is not None else "n/a"
+    typer.echo(
+        f"done: step {result.final_step}, best val loss {best}, {result.tokens_seen:,} tokens, "
+        f"{result.skipped_steps} skipped steps; run in {result.run_dir}"
+    )
+

@@ -1,0 +1,35 @@
+# Pilot run of the 17.1M model: 1,500 steps x 32,768 tokens = 49M tokens (0.29 of an epoch of the
+# 167M train tokens), about 35 minutes on the RTX 3050. The aim is to watch the loss of every
+# source (validation, and a fixed probe of its training tokens) and catch problems early, not to
+# produce a good model. Same hyperparameters as local-17m.yaml, untuned; the schedule is
+# compressed (warmup 100, cosine to min_lr by step 1,500). Mix: the natural one (by tokens).
+name: pilot-17m
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 100
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 1500
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 100
+  eval_batches: 10
+  checkpoint_interval: 250
+  log_interval: 10
