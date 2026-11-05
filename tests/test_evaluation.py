@@ -15,6 +15,7 @@ from scratchllm.tokenizer.tokenizer import Tokenizer
 from scratchllm.training.checkpoint import load_checkpoint, model_from_state, tokenizer_mismatch
 from scratchllm.training.dataset import TokenWindows
 from scratchllm.training.evaluation import (
+    evaluate_checkpoint,
     full_loss,
     list_splits,
     token_counts,
@@ -164,6 +165,35 @@ def test_cli_eval_reports_every_split_with_baselines(checkpoint: Path, tmp_path:
     assert rows[("omega", "eval")]["loss"] > r["loss"] + 2
     md = (tmp_path / "rep" / "t" / "report.md").read_text()
     assert "| omega | eval | evaluation-only |" in md and "model / unigram" in md
+
+
+def test_the_same_language_unigram_counts_only_that_language(tokens_dir: Path):
+    """D-026: the pooled unigram also counts the other language's tokens; the same-language one
+    does not, so on a source of one language it is the stronger (lower) baseline."""
+    add_eval_only_source(tokens_dir)
+    specs = list_splits(tokens_dir, ["val"])
+    by_source = {n: tokens_dir / f"{n}.train.bin" for n in ("alpha", "beta")}
+    assert all(p.exists() for p in by_source.values())
+    rows = evaluate_checkpoint(
+        tiny_model(), specs, list(by_source.values()), 4, CPU, nullcontext,
+        language_of={"alpha": "xx", "beta": "yy", "omega": "yy"}, train_paths_by_source=by_source,
+    )  # fmt: skip
+    got = {r["source"]: r for r in rows}
+    alpha = got["alpha"]
+    own = unigram_loss(token_counts([by_source["alpha"]], VOCAB), specs[0].path)
+    assert alpha["unigram_same_language_loss"] == pytest.approx(own)
+    assert alpha["unigram_same_language_sources"] == ["alpha"]
+    assert alpha["unigram_same_language_loss"] < alpha["unigram_loss"]
+    # an evaluation-only source is measured against the training sources of its language
+    assert got["omega"]["unigram_same_language_sources"] == ["beta"]
+
+
+def test_a_source_of_unknown_language_has_no_same_language_baseline(tokens_dir: Path):
+    specs = list_splits(tokens_dir, ["val"])
+    rows = evaluate_checkpoint(
+        tiny_model(), specs, [tokens_dir / "alpha.train.bin"], 4, CPU, nullcontext
+    )
+    assert all(r["unigram_same_language_bits_per_char"] is None for r in rows)
 
 
 def test_the_model_in_a_checkpoint_gives_the_same_predictions(checkpoint: Path):

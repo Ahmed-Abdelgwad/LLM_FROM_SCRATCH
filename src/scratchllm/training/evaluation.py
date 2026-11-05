@@ -8,9 +8,14 @@ windows of the token file, and reports
   tokenizers);
 * bits per character, using the split's tokens-per-character ratio: the number to compare across
   tokenizers, languages and sources. It includes the cost of predicting each end-of-text id;
-* two baselines on the same tokens, so the model's number has something to be measured against:
-  the uniform guess (log2 of the vocabulary) and a unigram model that knows only how often each
-  token occurs in the training data (add-one smoothing) and ignores all context.
+* baselines on the same tokens, so the model's number has something to be measured against:
+  the uniform guess (log2 of the vocabulary), and unigram models that know only how often each
+  token occurs in training data (add-one smoothing) and ignore all context. `unigram_*` counts
+  the train split of every training source, both languages pooled; `unigram_same_language_*`
+  counts only the training sources in the language of the scored source (D-026). The pooled one
+  spends probability on the other language's tokens, so it is the weaker baseline and makes the
+  model look better against it; the same-language one is the fair comparison. It is left empty
+  for a source whose language is not in the source registry.
 
 Splits: val and test of the training sources, and the single `eval` split of the evaluation-only
 sources (D-002), whose dialects the tokenizer and the model never saw.
@@ -20,7 +25,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,6 +34,7 @@ from typing import Any
 import numpy as np
 import torch
 
+from scratchllm.data.sources import SOURCES
 from scratchllm.data.tokens import DTYPE
 from scratchllm.model.gpt import GPT
 from scratchllm.training.batches import bits_per_char
@@ -118,9 +124,22 @@ def evaluate_checkpoint(
     device: torch.device,
     autocast: Callable[[], AbstractContextManager[Any]],
     progress: Callable[[str], None] = lambda _: None,
+    language_of: Mapping[str, str] | None = None,
+    train_paths_by_source: Mapping[str, Path] | None = None,
 ) -> list[dict[str, Any]]:
+    """One row per split. `language_of` (source -> language) and `train_paths_by_source` give the
+    same-language unigram; without them, or for a source of unknown language, it is None."""
     vocab = model.cfg.vocab_size
     counts = token_counts(train_paths, vocab)
+    language_of = language_of or {}
+    by_language: dict[str, list[str]] = {}
+    for name in sorted(train_paths_by_source or {}):
+        if name in language_of:
+            by_language.setdefault(language_of[name], []).append(name)
+    language_counts = {
+        lang: token_counts([(train_paths_by_source or {})[n] for n in names], vocab)
+        for lang, names in by_language.items()
+    }
     rows: list[dict[str, Any]] = []
     for spec in specs:
         loss, windows = full_loss(
@@ -140,7 +159,18 @@ def evaluate_checkpoint(
             "unigram_loss": uni,
             "unigram_bits_per_char": bits_per_char(uni, spec.tokens, spec.chars),
             "uniform_bits_per_char": bits_per_char(math.log(vocab), spec.tokens, spec.chars),
+            "unigram_same_language_loss": None,
+            "unigram_same_language_bits_per_char": None,
+            "unigram_same_language_sources": None,
         }
+        lang = language_of.get(spec.source)
+        if lang in language_counts:
+            same = unigram_loss(language_counts[lang], spec.path)
+            row["unigram_same_language_loss"] = same
+            row["unigram_same_language_bits_per_char"] = bits_per_char(
+                same, spec.tokens, spec.chars
+            )
+            row["unigram_same_language_sources"] = by_language[lang]
         rows.append(row)
         progress(
             f"{spec.source}/{spec.split}: loss {loss:.3f}, {row['bits_per_char']:.3f} bits/char"
@@ -161,12 +191,21 @@ def run_evaluation(
     model = model_from_state(state, device)
     directory = tokens_dir or Path(state["config"]["data"]["tokens_dir"])
     specs = list_splits(directory, splits)
-    train_paths = [
-        directory / json.loads(m.read_text(encoding="utf-8"))["splits"]["train"]["file"]
-        for m in sorted(directory.glob("*.tokens.json"))
-        if json.loads(m.read_text(encoding="utf-8"))["role"] == "training"
+    metas = [
+        json.loads(m.read_text(encoding="utf-8")) for m in sorted(directory.glob("*.tokens.json"))
     ]
-    rows = evaluate_checkpoint(model, specs, train_paths, batch_size, device, autocast, progress)
+    by_source = {
+        m["source"]: directory / m["splits"]["train"]["file"]
+        for m in metas
+        if m["role"] == "training"
+    }
+    language_of = {
+        m["source"]: SOURCES[m["source"]].language for m in metas if m["source"] in SOURCES
+    }
+    rows = evaluate_checkpoint(
+        model, specs, list(by_source.values()), batch_size, device, autocast, progress,
+        language_of=language_of, train_paths_by_source=by_source,
+    )  # fmt: skip
     return {
         "checkpoint": str(checkpoint),
         "step": state["step"],
@@ -182,18 +221,23 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         f"Checkpoint step {report['step']}, {report['parameters']:,} parameters. Every "
         "non-overlapping window of each split is scored. *Bits per character* is the figure to "
-        "compare across sources; *unigram* knows only token frequencies of the training data and "
-        "*uniform* knows nothing.",
+        "compare across sources; *unigram* knows only token frequencies of the training data (both "
+        "languages pooled), *same-language unigram* only those of the training sources in the "
+        "source's own language (the fair baseline, D-026), and *uniform* knows nothing.",
         "",
         "| source | split | role | tokens | loss | perplexity | bits/char | unigram bits/char "
-        "| uniform bits/char | model / unigram |",
-        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| uniform bits/char | model / unigram | same-language unigram bits/char "
+        "| model / same-language unigram |",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in report["rows"]:
         ratio = r["bits_per_char"] / r["unigram_bits_per_char"]
+        same = r.get("unigram_same_language_bits_per_char")
+        same_cells = f"{same:.3f} | {r['bits_per_char'] / same:.2f}" if same else "— | —"
         lines.append(
             f"| {r['source']} | {r['split']} | {r['role']} | {r['tokens']:,} | {r['loss']:.3f} "
             f"| {r['perplexity']:.0f} | {r['bits_per_char']:.3f} "
-            f"| {r['unigram_bits_per_char']:.3f} | {r['uniform_bits_per_char']:.3f} | {ratio:.2f} |"
+            f"| {r['unigram_bits_per_char']:.3f} | {r['uniform_bits_per_char']:.3f} | {ratio:.2f} "
+            f"| {same_cells} |"
         )
     return "\n".join(lines) + "\n"
