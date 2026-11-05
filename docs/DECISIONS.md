@@ -1409,3 +1409,57 @@ stays the baseline every later change is compared with.
   The 0.03 threshold applies to the Arabic mean; English is no longer only reported: a change that makes English
   worse by 0.03 bits/char or more does not count as an improvement. This adds a condition, written here before the
   next experiment; it does not loosen the rule.
+
+## D-026 (2026-11-05): two faults found in review: the unigram baseline pooled both languages, and a stop signal could leave an inexact checkpoint
+
+A review of the model, training, evaluation and generation code (the data and tokenizer code was not
+re-read) found no fault in the architecture and none that changes a training result. It found two
+faults and one small weakness; all three are fixed, each with a test that fails on the old code.
+
+**1. The unigram baseline counted both languages** (`training/evaluation.py`). The baseline in every
+evaluation report counted the train splits of all training sources together, so an Arabic source was
+measured against frequencies that also hold English (and the reverse). That baseline spends probability
+on the other language's tokens and is weaker than it should be, which makes the model look better
+against it. The model's own bits per character, and every model-to-model comparison (D-023, D-024),
+are not affected. Fix: the report keeps the pooled columns and adds `unigram_same_language_*`, which
+counts only the training sources in the scored source's language (from the source registry; empty for a
+source not in it). The reports already in git are not rewritten: a unigram baseline does not depend
+on the model, so `scripts/d026_unigram.py` computes the same-language baseline for each of their rows
+into `reports/eval/final-d026-unigram/`. Mean over each group, model bits/char divided by the baseline:
+
+| report | trained Arabic, val: pooled → same-language | unseen dialects | English, val |
+|---|---|---|---|
+| final-pilot-17m (D-022) | 0.66 → 0.70 | 0.75 → 0.78 | 0.57 → 0.64 |
+| final-local-17m (D-023) | 0.55 → 0.58 | 0.63 → 0.66 | 0.47 → 0.52 |
+| final-ablation-english-20-long (D-024) | 0.54 → 0.57 | 0.62 → 0.65 | 0.49 → 0.55 |
+
+The README's "0.55 of what a model knowing only token frequencies reaches" becomes 0.58; the ratios
+quoted in D-022 (0.66 and 0.75) and the `model / unigram` columns of D-022 and D-023 are the pooled
+ones and stay as written, read with this entry.
+
+**2. A stop signal could leave a checkpoint that claims a step it does not contain**
+(`training/trainer.py`). The step counter was advanced before the optimizer update, and SIGTERM/SIGHUP
+raised KeyboardInterrupt wherever they landed. A signal between those two lines saved `last.pt` as step
+k+1 with the weights of step k, and a resumed run would silently miss one update. The same kind of gap
+existed between raising the best validation loss and writing `best.pt`. The window is microseconds, so it
+was very unlikely to be hit at the baseline's one stop (step 2,990), but the logs cannot show it either
+way: the loss around the resume stays within its usual spread, and one missed update in 5,000 would not
+show there. If it happened, it cost one step, not the validity of the run. Fix: Ctrl+C, SIGTERM and SIGHUP now only record a stop request;
+the loop finishes the step (update, evaluation, checkpoints) and stops at the boundary, so the
+checkpoint is exact. A second signal stops at once, for a run that must stop now; that path, and
+SIGKILL, keep the old risk. The counter is now advanced after the update. The test sends SIGTERM from
+inside the sixth optimizer step: on the old code the resumed run's weights differ from an uninterrupted
+run's; on the new code they are identical.
+
+**3. Small:** the in-training `evaluate` did not put the model back in training mode if an exception
+was raised inside it; it now does (`try/finally`).
+
+**Not faults, recorded as limits.** The validation splits of `ary` (126 windows of 512 tokens) and
+`ars` (370) are small, so per-source claims about them rest on few windows. The full evaluation leaves
+out the tail of each file that does not fill a window: at most 0.46% of a split's tokens (ary val),
+0.06% or less for most.
+
+**Decisions.**
+
+1. Evaluation reports carry both unigram baselines; the same-language one is the one to quote.
+2. A stop request is honoured at a step boundary; this is now part of the trainer's contract and tested.

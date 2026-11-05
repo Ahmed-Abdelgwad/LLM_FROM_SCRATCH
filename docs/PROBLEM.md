@@ -57,7 +57,7 @@ comparisons must use bits-per-character (or bits-per-byte) instead.
 |---|---|
 | Tokenizer fertility vs GPT-2 (and Qwen3) | Measured, `reports/tokenizer/final-v2` (D-016, D-017). Arabic far better than GPT-2; English worse. |
 | Perplexity per language | Measured per source and split for the 5,000-step baseline, `reports/eval/final-local-17m` (D-023), and for the pilot, `reports/eval/final-pilot-17m` (D-022). English and Arabic are separate sources; there is no single "per language" figure yet. |
-| Bits per character | Measured with the same report, with unigram and uniform baselines. |
+| Bits per character | Measured with the same report, with unigram and uniform baselines; the fair unigram baseline counts one language only (D-026, `reports/eval/final-d026-unigram`). |
 | Tokenizer round trip | Tested, and 0 failures on 2,700 real documents (D-015). |
 | Throughput and peak VRAM | Measured on the RTX 3050 (D-019, D-020). |
 | Qualitative samples | Six prompts in Modern Standard, Egyptian and English (D-022, D-023): fluent surface; after 5,000 steps a first sentence can make sense, but there is no coherence over several sentences and greedy decoding loops. |
