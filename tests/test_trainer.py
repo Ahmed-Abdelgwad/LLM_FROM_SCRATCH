@@ -420,12 +420,65 @@ def test_sigterm_saves_a_checkpoint_and_the_run_resumes_exactly(make_cfg):
     assert same_weights(weights(reference.run_dir), weights(killed.run_dir))
 
 
+def test_a_signal_inside_the_optimizer_update_still_leaves_an_exact_checkpoint(
+    make_cfg, monkeypatch
+):
+    """D-026: the signal lands after the step was counted and before the weights changed. The run
+    must finish that update and stop at the step boundary, so resuming gives the same weights."""
+    import os
+    import signal
+
+    reference = make_cfg("reference")
+    train(reference)
+    killed = make_cfg("killed")
+    real_make = trainer_module.make_optimizer
+
+    def make_signalling_optimizer(model, cfg, device):
+        optimizer = real_make(model, cfg, device)
+        real_step, calls = optimizer.step, {"n": 0}
+
+        def step(*args, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 6:
+                os.kill(os.getpid(), signal.SIGTERM)  # handled before the real update runs
+            return real_step(*args, **kwargs)
+
+        optimizer.step = step
+        return optimizer
+
+    monkeypatch.setattr(trainer_module, "make_optimizer", make_signalling_optimizer)
+    with pytest.raises(KeyboardInterrupt):
+        train(killed)
+    monkeypatch.undo()
+    assert load_checkpoint(killed.run_dir / "last.pt")["step"] == 6
+    assert events(killed.run_dir, "interrupted")[0]["step"] == 6
+    train(killed, resume="auto")
+    assert same_weights(weights(reference.run_dir), weights(killed.run_dir))
+
+
+def test_a_second_signal_stops_at_once(make_cfg):
+    import os
+    import signal
+
+    cfg = make_cfg()
+
+    def terminate_twice_at_6(message: str) -> None:
+        if message.startswith("step 6/"):
+            os.kill(os.getpid(), signal.SIGTERM)
+            os.kill(os.getpid(), signal.SIGTERM)
+
+    with pytest.raises(KeyboardInterrupt, match="second request"):
+        train(cfg, progress=terminate_twice_at_6)
+    assert load_checkpoint(cfg.run_dir / "last.pt")["step"] == 6
+
+
 def test_the_signal_handlers_are_restored_after_a_normal_run(make_cfg):
     import signal
 
-    before = (signal.getsignal(signal.SIGTERM), signal.getsignal(signal.SIGHUP))
+    names = (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
+    before = [signal.getsignal(n) for n in names]
     train(make_cfg(train={"max_steps": 2}, optim={"warmup_steps": 0}))
-    assert (signal.getsignal(signal.SIGTERM), signal.getsignal(signal.SIGHUP)) == before
+    assert [signal.getsignal(n) for n in names] == before
 
 
 # ---------- the train-side probe ----------

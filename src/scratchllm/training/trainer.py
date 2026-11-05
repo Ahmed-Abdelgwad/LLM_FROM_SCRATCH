@@ -15,6 +15,9 @@ Reliability:
   `max_consecutive_skips` in a row aborts the run with `DivergedError`.
 * `last.pt` is written atomically every `checkpoint_interval` steps and at the end; `best.pt`
   whenever the validation loss improves. `resume` continues from `last.pt`.
+* A stop request (Ctrl+C, SIGTERM, SIGHUP) is honoured at the end of the current step, after its
+  evaluation and saving, so the checkpoint it leaves never describes a half-applied step (D-026).
+  A second request stops at once.
 * Resuming reproduces the uninterrupted run exactly on CPU (tests compare the weights bit for
   bit): data order depends only on (seed, step), the optimizer state and the random generators
   are in the checkpoint. On GPU, kernels are not bitwise deterministic, so results agree to
@@ -107,28 +110,41 @@ def resolve_device(choice: str) -> torch.device:
     return torch.device(choice)
 
 
-@contextmanager
-def stop_on_termination() -> Iterator[None]:
-    """Turn SIGTERM and SIGHUP (kill, closed terminal) into KeyboardInterrupt while training.
+@dataclass
+class StopRequest:
+    """Set by a signal handler; the training loop looks at it between steps."""
 
-    The loop already saves `last.pt` on KeyboardInterrupt, so a run that is asked to stop leaves a
-    checkpoint at its last finished step instead of losing everything since the last interval.
+    signal_number: int | None = None
+
+
+@contextmanager
+def stop_on_termination() -> Iterator[StopRequest]:
+    """Turn SIGINT, SIGTERM and SIGHUP (Ctrl+C, kill, closed terminal) into a stop request.
+
+    The first signal only records the request; the loop finishes the step it is in (weights,
+    evaluation, checkpoints), then raises KeyboardInterrupt, and the loop's handler saves `last.pt`
+    at that finished step. Raising at once, as before D-026, could land between the line that
+    counts a step as done and the optimizer update, and leave a checkpoint that claims a step it
+    does not contain. A second signal raises at once, for a run that must stop now.
     Only possible in the main thread; elsewhere it does nothing. SIGKILL cannot be caught.
     """
-    names = [n for n in ("SIGTERM", "SIGHUP") if hasattr(signal, n)]
+    names = [n for n in ("SIGINT", "SIGTERM", "SIGHUP") if hasattr(signal, n)]
     previous: dict[int, Any] = {}
+    request = StopRequest()
 
-    def raise_interrupt(signum: int, frame: Any) -> None:
-        raise KeyboardInterrupt(f"signal {signum}")
+    def note_request(signum: int, frame: Any) -> None:
+        if request.signal_number is not None:
+            raise KeyboardInterrupt(f"signal {signum}, second request")
+        request.signal_number = signum
 
     try:
         for name in names:
             number = getattr(signal, name)
-            previous[number] = signal.signal(number, raise_interrupt)
+            previous[number] = signal.signal(number, note_request)
     except ValueError:  # not the main thread
         previous.clear()
     try:
-        yield
+        yield request
     finally:
         for number, handler in previous.items():
             signal.signal(number, handler)
@@ -352,7 +368,7 @@ def train(
     model.train()
 
     guard = ExitStack()
-    guard.enter_context(stop_on_termination())
+    stop = guard.enter_context(stop_on_termination())
     try:
         for step_index in range(step, t.max_steps):
             step_started = time.perf_counter()
@@ -373,7 +389,6 @@ def train(
             mean_loss = float(loss_sum) / t.grad_accum_steps
             grad_norm = float(torch.nn.utils.clip_grad_norm_(params, max_norm))
 
-            completed = step_index + 1
             if math.isfinite(mean_loss) and math.isfinite(grad_norm):
                 optimizer.step()
                 consecutive_skips = 0
@@ -386,10 +401,11 @@ def train(
                 skipped += 1
                 consecutive_skips += 1
                 logger.log(
-                    "skip", step=completed, loss=mean_loss, grad_norm=grad_norm, lr=lr,
+                    "skip", step=step_index + 1, loss=mean_loss, grad_norm=grad_norm, lr=lr,
                     consecutive=consecutive_skips,
                 )  # fmt: skip
             optimizer.zero_grad(set_to_none=True)
+            completed = step_index + 1  # only now: the step's update (or its skip) is done
             window_time += time.perf_counter() - step_started  # evaluation and saving excluded
             if consecutive_skips >= t.max_consecutive_skips:
                 save_checkpoint(run_dir / "last.pt", snapshot(completed))
@@ -468,6 +484,8 @@ def train(
             if completed % t.checkpoint_interval == 0 or completed == t.max_steps:
                 save_checkpoint(run_dir / "last.pt", snapshot(completed))
                 logger.log("checkpoint", step=completed, path="last.pt")
+            if stop.signal_number is not None and completed < t.max_steps:
+                raise KeyboardInterrupt(f"signal {stop.signal_number}")
         logger.log(
             "end", step=completed, best_val_loss=best_val, tokens_seen=tokens_seen,
             skipped_steps=skipped,

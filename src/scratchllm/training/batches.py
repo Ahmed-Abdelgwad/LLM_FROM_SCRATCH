@@ -148,6 +148,20 @@ def evaluate(
     """Mean cross-entropy (nats per token) of `model` on each source's fixed val windows."""
     was_training = model.training
     model.eval()
+    try:
+        return _mean_losses(model, sets, batch_size, max_windows, device, autocast)
+    finally:
+        model.train(was_training)
+
+
+def _mean_losses(
+    model: GPT,
+    sets: dict[str, TokenWindows],
+    batch_size: int,
+    max_windows: int,
+    device: torch.device,
+    autocast: Callable[[], AbstractContextManager[Any]],
+) -> dict[str, float]:
     losses: dict[str, float] = {}
     for name, dataset in sets.items():
         picks = evenly_spaced(len(dataset), max_windows)
@@ -161,7 +175,6 @@ def evaluate(
             assert loss is not None
             total += float(loss) * len(chunk)  # every window has the same number of tokens
         losses[name] = total / len(picks)
-    model.train(was_training)
     return losses
 
 
