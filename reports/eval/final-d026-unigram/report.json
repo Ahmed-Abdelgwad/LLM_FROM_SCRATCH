@@ -1,0 +1,416 @@
+{
+ "tokens_dir": "data/processed/tokens-16k",
+ "languages": {
+  "ar": [
+   "fw2_arb",
+   "fw2_ars",
+   "fw2_ary",
+   "fw2_arz",
+   "wiki_ar"
+  ],
+  "en": [
+   "fineweb_edu_10bt"
+  ]
+ },
+ "reports": {
+  "final-pilot-17m": {
+   "step": 1500,
+   "rows": [
+    {
+     "source": "fineweb_edu_10bt",
+     "split": "val",
+     "bits_per_char": 1.9140854022500855,
+     "unigram_bits_per_char": 3.3304699394241477,
+     "unigram_same_language_bits_per_char": 2.9848311934819254
+    },
+    {
+     "source": "fineweb_edu_10bt",
+     "split": "test",
+     "bits_per_char": 1.9238535977328648,
+     "unigram_bits_per_char": 3.320982237089083,
+     "unigram_same_language_bits_per_char": 2.9733242408952383
+    },
+    {
+     "source": "fw2_acm",
+     "split": "eval",
+     "bits_per_char": 3.2124636383468284,
+     "unigram_bits_per_char": 4.330666597507823,
+     "unigram_same_language_bits_per_char": 4.127295785081455
+    },
+    {
+     "source": "fw2_apc",
+     "split": "eval",
+     "bits_per_char": 2.949154532409036,
+     "unigram_bits_per_char": 4.1198546623401455,
+     "unigram_same_language_bits_per_char": 3.9331441248307524
+    },
+    {
+     "source": "fw2_arb",
+     "split": "val",
+     "bits_per_char": 2.226290104564208,
+     "unigram_bits_per_char": 3.4475740792065954,
+     "unigram_same_language_bits_per_char": 3.301673500856231
+    },
+    {
+     "source": "fw2_arb",
+     "split": "test",
+     "bits_per_char": 2.27582984428817,
+     "unigram_bits_per_char": 3.4745965281816296,
+     "unigram_same_language_bits_per_char": 3.3217252320336224
+    },
+    {
+     "source": "fw2_ars",
+     "split": "val",
+     "bits_per_char": 2.8709331357419647,
+     "unigram_bits_per_char": 3.990121353934408,
+     "unigram_same_language_bits_per_char": 3.803305549851655
+    },
+    {
+     "source": "fw2_ars",
+     "split": "test",
+     "bits_per_char": 2.917248430280424,
+     "unigram_bits_per_char": 4.157576986779909,
+     "unigram_same_language_bits_per_char": 3.9793471024064457
+    },
+    {
+     "source": "fw2_ary",
+     "split": "val",
+     "bits_per_char": 2.2483969985425127,
+     "unigram_bits_per_char": 3.419004105855988,
+     "unigram_same_language_bits_per_char": 3.255106559337265
+    },
+    {
+     "source": "fw2_ary",
+     "split": "test",
+     "bits_per_char": 2.0847649783059405,
+     "unigram_bits_per_char": 3.271507463878164,
+     "unigram_same_language_bits_per_char": 3.109541825441644
+    },
+    {
+     "source": "fw2_arz",
+     "split": "val",
+     "bits_per_char": 2.552814878952065,
+     "unigram_bits_per_char": 3.7613191552382834,
+     "unigram_same_language_bits_per_char": 3.6054700332823004
+    },
+    {
+     "source": "fw2_arz",
+     "split": "test",
+     "bits_per_char": 2.5801317436321902,
+     "unigram_bits_per_char": 3.8288338639136064,
+     "unigram_same_language_bits_per_char": 3.6596277340565955
+    },
+    {
+     "source": "wiki_ar",
+     "split": "val",
+     "bits_per_char": 2.1908902986780743,
+     "unigram_bits_per_char": 3.584517546274764,
+     "unigram_same_language_bits_per_char": 3.4261305477569732
+    },
+    {
+     "source": "wiki_ar",
+     "split": "test",
+     "bits_per_char": 2.210509302506753,
+     "unigram_bits_per_char": 3.532244460006811,
+     "unigram_same_language_bits_per_char": 3.369195641722972
+    },
+    {
+     "source": "wiki_ary",
+     "split": "eval",
+     "bits_per_char": 3.6640043544755105,
+     "unigram_bits_per_char": 4.6950446231712695,
+     "unigram_same_language_bits_per_char": 4.487218120706292
+    }
+   ],
+   "summary": {
+    "trained Arabic, val": {
+     "model": 2.417865083295765,
+     "pooled_unigram": 3.6405072481020078,
+     "same_language_unigram": 3.4783372382168847,
+     "model_over_pooled": 0.6641560965319676,
+     "model_over_same_language": 0.6951209493807581
+    },
+    "unseen dialects": {
+     "model": 3.275207508410458,
+     "pooled_unigram": 4.381855294339746,
+     "same_language_unigram": 4.182552676872833,
+     "model_over_pooled": 0.7474476650658003,
+     "model_over_same_language": 0.7830642579878351
+    },
+    "English, val": {
+     "model": 1.9140854022500855,
+     "pooled_unigram": 3.3304699394241477,
+     "same_language_unigram": 2.9848311934819254,
+     "model_over_pooled": 0.5747193150108537,
+     "model_over_same_language": 0.6412709055138318
+    }
+   }
+  },
+  "final-local-17m": {
+   "step": 5000,
+   "rows": [
+    {
+     "source": "fineweb_edu_10bt",
+     "split": "val",
+     "bits_per_char": 1.5566459570949132,
+     "unigram_bits_per_char": 3.3304699394241477,
+     "unigram_same_language_bits_per_char": 2.9848311934819254
+    },
+    {
+     "source": "fineweb_edu_10bt",
+     "split": "test",
+     "bits_per_char": 1.576230838333283,
+     "unigram_bits_per_char": 3.320982237089083,
+     "unigram_same_language_bits_per_char": 2.9733242408952383
+    },
+    {
+     "source": "fw2_acm",
+     "split": "eval",
+     "bits_per_char": 2.841164790778997,
+     "unigram_bits_per_char": 4.330666597507823,
+     "unigram_same_language_bits_per_char": 4.127295785081455
+    },
+    {
+     "source": "fw2_apc",
+     "split": "eval",
+     "bits_per_char": 2.5348331265452155,
+     "unigram_bits_per_char": 4.1198546623401455,
+     "unigram_same_language_bits_per_char": 3.9331441248307524
+    },
+    {
+     "source": "fw2_arb",
+     "split": "val",
+     "bits_per_char": 1.836478482204217,
+     "unigram_bits_per_char": 3.4475740792065954,
+     "unigram_same_language_bits_per_char": 3.301673500856231
+    },
+    {
+     "source": "fw2_arb",
+     "split": "test",
+     "bits_per_char": 1.908905446559757,
+     "unigram_bits_per_char": 3.4745965281816296,
+     "unigram_same_language_bits_per_char": 3.3217252320336224
+    },
+    {
+     "source": "fw2_ars",
+     "split": "val",
+     "bits_per_char": 2.494350064566958,
+     "unigram_bits_per_char": 3.990121353934408,
+     "unigram_same_language_bits_per_char": 3.803305549851655
+    },
+    {
+     "source": "fw2_ars",
+     "split": "test",
+     "bits_per_char": 2.561333834604543,
+     "unigram_bits_per_char": 4.157576986779909,
+     "unigram_same_language_bits_per_char": 3.9793471024064457
+    },
+    {
+     "source": "fw2_ary",
+     "split": "val",
+     "bits_per_char": 1.8727165056711725,
+     "unigram_bits_per_char": 3.419004105855988,
+     "unigram_same_language_bits_per_char": 3.255106559337265
+    },
+    {
+     "source": "fw2_ary",
+     "split": "test",
+     "bits_per_char": 1.7732966220087567,
+     "unigram_bits_per_char": 3.271507463878164,
+     "unigram_same_language_bits_per_char": 3.109541825441644
+    },
+    {
+     "source": "fw2_arz",
+     "split": "val",
+     "bits_per_char": 2.1148257616076798,
+     "unigram_bits_per_char": 3.7613191552382834,
+     "unigram_same_language_bits_per_char": 3.6054700332823004
+    },
+    {
+     "source": "fw2_arz",
+     "split": "test",
+     "bits_per_char": 2.1287473982734166,
+     "unigram_bits_per_char": 3.8288338639136064,
+     "unigram_same_language_bits_per_char": 3.6596277340565955
+    },
+    {
+     "source": "wiki_ar",
+     "split": "val",
+     "bits_per_char": 1.7641129645769345,
+     "unigram_bits_per_char": 3.584517546274764,
+     "unigram_same_language_bits_per_char": 3.4261305477569732
+    },
+    {
+     "source": "wiki_ar",
+     "split": "test",
+     "bits_per_char": 1.803466092752821,
+     "unigram_bits_per_char": 3.532244460006811,
+     "unigram_same_language_bits_per_char": 3.369195641722972
+    },
+    {
+     "source": "wiki_ary",
+     "split": "eval",
+     "bits_per_char": 2.8819655679276326,
+     "unigram_bits_per_char": 4.6950446231712695,
+     "unigram_same_language_bits_per_char": 4.487218120706292
+    }
+   ],
+   "summary": {
+    "trained Arabic, val": {
+     "model": 2.0164967557253926,
+     "pooled_unigram": 3.6405072481020078,
+     "same_language_unigram": 3.4783372382168847,
+     "model_over_pooled": 0.5539054363308027,
+     "model_over_same_language": 0.5797300887245533
+    },
+    "unseen dialects": {
+     "model": 2.752654495083948,
+     "pooled_unigram": 4.381855294339746,
+     "same_language_unigram": 4.182552676872833,
+     "model_over_pooled": 0.6281938380392627,
+     "model_over_same_language": 0.6581278725560545
+    },
+    "English, val": {
+     "model": 1.5566459570949132,
+     "pooled_unigram": 3.3304699394241477,
+     "same_language_unigram": 2.9848311934819254,
+     "model_over_pooled": 0.4673952881748765,
+     "model_over_same_language": 0.5215189255909053
+    }
+   }
+  },
+  "final-ablation-english-20-long": {
+   "step": 5000,
+   "rows": [
+    {
+     "source": "fineweb_edu_10bt",
+     "split": "val",
+     "bits_per_char": 1.6324660205170027,
+     "unigram_bits_per_char": 3.3304699394241477,
+     "unigram_same_language_bits_per_char": 2.9848311934819254
+    },
+    {
+     "source": "fineweb_edu_10bt",
+     "split": "test",
+     "bits_per_char": 1.6512897924022119,
+     "unigram_bits_per_char": 3.320982237089083,
+     "unigram_same_language_bits_per_char": 2.9733242408952383
+    },
+    {
+     "source": "fw2_acm",
+     "split": "eval",
+     "bits_per_char": 2.813524209301099,
+     "unigram_bits_per_char": 4.330666597507823,
+     "unigram_same_language_bits_per_char": 4.127295785081455
+    },
+    {
+     "source": "fw2_apc",
+     "split": "eval",
+     "bits_per_char": 2.4944392460886005,
+     "unigram_bits_per_char": 4.1198546623401455,
+     "unigram_same_language_bits_per_char": 3.9331441248307524
+    },
+    {
+     "source": "fw2_arb",
+     "split": "val",
+     "bits_per_char": 1.7925379732413205,
+     "unigram_bits_per_char": 3.4475740792065954,
+     "unigram_same_language_bits_per_char": 3.301673500856231
+    },
+    {
+     "source": "fw2_arb",
+     "split": "test",
+     "bits_per_char": 1.8673764657895253,
+     "unigram_bits_per_char": 3.4745965281816296,
+     "unigram_same_language_bits_per_char": 3.3217252320336224
+    },
+    {
+     "source": "fw2_ars",
+     "split": "val",
+     "bits_per_char": 2.4552762214581696,
+     "unigram_bits_per_char": 3.990121353934408,
+     "unigram_same_language_bits_per_char": 3.803305549851655
+    },
+    {
+     "source": "fw2_ars",
+     "split": "test",
+     "bits_per_char": 2.5228968856496676,
+     "unigram_bits_per_char": 4.157576986779909,
+     "unigram_same_language_bits_per_char": 3.9793471024064457
+    },
+    {
+     "source": "fw2_ary",
+     "split": "val",
+     "bits_per_char": 1.8261836771077153,
+     "unigram_bits_per_char": 3.419004105855988,
+     "unigram_same_language_bits_per_char": 3.255106559337265
+    },
+    {
+     "source": "fw2_ary",
+     "split": "test",
+     "bits_per_char": 1.732141553764108,
+     "unigram_bits_per_char": 3.271507463878164,
+     "unigram_same_language_bits_per_char": 3.109541825441644
+    },
+    {
+     "source": "fw2_arz",
+     "split": "val",
+     "bits_per_char": 2.0677510874441123,
+     "unigram_bits_per_char": 3.7613191552382834,
+     "unigram_same_language_bits_per_char": 3.6054700332823004
+    },
+    {
+     "source": "fw2_arz",
+     "split": "test",
+     "bits_per_char": 2.0802565313346673,
+     "unigram_bits_per_char": 3.8288338639136064,
+     "unigram_same_language_bits_per_char": 3.6596277340565955
+    },
+    {
+     "source": "wiki_ar",
+     "split": "val",
+     "bits_per_char": 1.7221621961729197,
+     "unigram_bits_per_char": 3.584517546274764,
+     "unigram_same_language_bits_per_char": 3.4261305477569732
+    },
+    {
+     "source": "wiki_ar",
+     "split": "test",
+     "bits_per_char": 1.7596222217225401,
+     "unigram_bits_per_char": 3.532244460006811,
+     "unigram_same_language_bits_per_char": 3.369195641722972
+    },
+    {
+     "source": "wiki_ary",
+     "split": "eval",
+     "bits_per_char": 2.8739677588620762,
+     "unigram_bits_per_char": 4.6950446231712695,
+     "unigram_same_language_bits_per_char": 4.487218120706292
+    }
+   ],
+   "summary": {
+    "trained Arabic, val": {
+     "model": 1.9727822310848475,
+     "pooled_unigram": 3.6405072481020078,
+     "same_language_unigram": 3.4783372382168847,
+     "model_over_pooled": 0.541897624874491,
+     "model_over_same_language": 0.567162438825559
+    },
+    "unseen dialects": {
+     "model": 2.727310404750592,
+     "pooled_unigram": 4.381855294339746,
+     "same_language_unigram": 4.182552676872833,
+     "model_over_pooled": 0.6224099659962734,
+     "model_over_same_language": 0.652068393503108
+    },
+    "English, val": {
+     "model": 1.6324660205170027,
+     "pooled_unigram": 3.3304699394241477,
+     "same_language_unigram": 2.9848311934819254,
+     "model_over_pooled": 0.4901608632442012,
+     "model_over_same_language": 0.546920718358168
+    }
+   }
+  }
+ }
+}
