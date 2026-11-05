@@ -82,7 +82,11 @@ def grad_vector(x, y):
     with torch.autocast("cuda", dtype=torch.bfloat16):
         _, loss = model(x, y)
     loss.backward()
-    return torch.cat([p.grad.reshape(-1).float() for p in params]).clone()
+    parts = []
+    for p in params:
+        assert p.grad is not None
+        parts.append(p.grad.reshape(-1).float())
+    return torch.cat(parts).clone()
 
 
 print("\n[2] gradient noise scale (McCandlish et al. 2018), natural mixture")
@@ -90,11 +94,12 @@ micro, accum, K = 8, 8, 24
 b_small, b_big = micro * T, micro * accum * T
 small_sq, big_sq = [], []
 for _ in range(K):
-    total = None
+    total: torch.Tensor | None = None
     for _ in range(accum):
         g = grad_vector(*batch(rng.choice(len(srcs), size=micro, p=weights)))
         small_sq.append(float(g @ g))
         total = g if total is None else total + g
+    assert total is not None
     total /= accum
     big_sq.append(float(total @ total))
 gs, gb = np.mean(small_sq), np.mean(big_sq)

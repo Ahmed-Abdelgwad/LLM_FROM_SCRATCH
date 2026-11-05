@@ -21,6 +21,12 @@ SHORT = {
 }  # fmt: skip
 
 
+def must(m: re.Match[str] | None) -> re.Match[str]:
+    """A pattern the diagnostic output is known to contain; fail loudly if it does not."""
+    assert m is not None
+    return m
+
+
 def events(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
@@ -154,13 +160,15 @@ lr_gap_max = sweep_final["3e-4"]["val_loss"] - s1["val_loss"]
 # ------------------------------------------------------------------ diagnostics parsed from text files
 def parse_diag(path: Path) -> dict:
     text = path.read_text(encoding="utf-8")
-    out = {"step": int(re.search(r"step (\d+)", text).group(1))}
+    out: dict = {"step": int(must(re.search(r"step (\d+)", text)).group(1))}
     out["b_noise"] = int(
-        re.search(r"B_noise = trace/\|G\|\^2 ~ ([\d,]+) tokens", text).group(1).replace(",", "")
+        must(re.search(r"B_noise = trace/\|G\|\^2 ~ ([\d,]+) tokens", text))
+        .group(1)
+        .replace(",", "")
     )
-    out["ratio"] = float(re.search(r"batch / B_noise = ([\d.]+)", text).group(1))
-    out["gsmall"] = float(re.search(r"\|G_small\|\^2=([\d.]+)", text).group(1))
-    out["gbig"] = float(re.search(r"\|G_big\|\^2=([\d.]+)", text).group(1))
+    out["ratio"] = float(must(re.search(r"batch / B_noise = ([\d.]+)", text)).group(1))
+    out["gsmall"] = float(must(re.search(r"\|G_small\|\^2=([\d.]+)", text)).group(1))
+    out["gbig"] = float(must(re.search(r"\|G_big\|\^2=([\d.]+)", text)).group(1))
     block = (
         text.split("diagonal = two independent batches of the same source)")[1]
         .strip()
@@ -233,17 +241,19 @@ shorts = re.findall(
     flags=re.M,
 )
 jsm = (
-    re.search(r"Jensen-Shannon.*?\n(.*?)\n\nprobability", tokfiles, flags=re.S)
+    must(re.search(r"Jensen-Shannon.*?\n(.*?)\n\nprobability", tokfiles, flags=re.S))
     .group(1)
     .splitlines()[1:]
 )
 js = np.array([[float(x) for x in row.split()[1:]] for row in jsm])
-ids = re.search(
-    r"ids used \(>1e-6\) by English only: (\d+), Arabic only: (\d+), both: (\d+), neither: (\d+)",
-    tokfiles,
+ids = must(
+    re.search(
+        r"ids used \(>1e-6\) by English only: (\d+), Arabic only: (\d+), both: (\d+), neither: (\d+)",
+        tokfiles,
+    )
 ).groups()
 mass_en_only = float(
-    re.search(r"Arabic almost never uses \(<1e-6\): English ([\d.]+)", tokfiles).group(1)
+    must(re.search(r"Arabic almost never uses \(<1e-6\): English ([\d.]+)", tokfiles)).group(1)
 )
 tpc = [
     float(x)

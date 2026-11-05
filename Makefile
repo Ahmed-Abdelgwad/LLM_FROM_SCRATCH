@@ -12,7 +12,7 @@ format:
 	uv run ruff check --fix .
 
 typecheck:
-	uv run mypy src
+	uv run mypy src scripts
 
 test:
 	uv run pytest

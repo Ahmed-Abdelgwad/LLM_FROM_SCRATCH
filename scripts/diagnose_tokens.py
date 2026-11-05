@@ -95,15 +95,16 @@ for n in names:
     for _ in range(300):
         s = int(rng.integers(len(a) - 513))
         w = a[s : s + 512].tolist()
-        seen, rep = set(), 0
+        grams: set[tuple[int, ...]] = set()
+        rep = 0
         for i in range(4, 512):
             g = tuple(w[i - 4 : i])
-            if g in seen:
+            if g in grams:
                 rep += 1
-            seen.add(g)
+            grams.add(g)
         fr.append(rep / 508)
-    fr = np.array(fr)
+    fa = np.array(fr)
     print(
-        f"{n:18s} mean {fr.mean():.3f}  p90 {np.percentile(fr, 90):.3f}  "
-        f"windows with >30% repeated: {100 * (fr > 0.3).mean():.1f}%"
+        f"{n:18s} mean {fa.mean():.3f}  p90 {np.percentile(fa, 90):.3f}  "
+        f"windows with >30% repeated: {100 * (fa > 0.3).mean():.1f}%"
     )
