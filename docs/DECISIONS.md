@@ -1259,3 +1259,138 @@ and cuts English into more pieces (1.78 tokens per word against 1.32 for GPT-2, 
 - Whether several epochs on the same 167M tokens, or more data, helps; the literature suggests repeated data is nearly as good as new for a few epochs (recalled, not checked in this session).
 - The English tokenization hypothesis above; the `arz` train/validation gap; the single-seed basis of every run except the one repeated.
 - README still shows the pilot results; it has not been updated.
+
+## D-024 (2026-11-05): the English share, 39% to 20% of the tokens: Arabic gains 0.044 bits/char at 5,000 steps, English loses 0.074
+
+Code: none changed. Added: `configs/ablation-arabic-only.yaml`, `configs/ablation-english-20.yaml` (800 steps) and
+`configs/ablation-english-20-long.yaml` (5,000 steps), each with the question and the rule of D-023 in its header, written
+before the run. Evidence kept in git: `reports/eval/final-ablation-english-20-long/` (full evaluation of the 5,000-step
+checkpoint) and `reports/eval/final-d024-mix-ablation/evals.json` (the evaluation events of the six runs below, copied from
+their `metrics.jsonl`). Script: `scripts/d024_entry.py` computed the tables and numbers of this entry from those runs and the
+two full evaluations (prose by hand; sentences that depend on a comparison are guarded by an assert in the script). Not in git:
+the runs themselves (`runs/`, ignored). The first attempt of the Arabic-only arm was killed when the session restarted, at step 370,
+and rerun from step 0; its directory was kept aside and is not used.
+
+**The question** (left open in D-023): does the English share, the largest source at 39.3% of the training tokens, cost the Arabic sources
+anything? D-023's gradient evidence said the sources do not fight and share little; it could not say what removing English would do.
+**The rule** (D-023, decision 3, fixed before the runs): a change counts only if the mean bits/char of the five Arabic sources on the same
+split falls by at least 0.03, and a claim about one source needs at least 0.04. English is reported and is not part of the rule.
+
+Everything else is identical to `configs/local-17m.yaml`: the model, optimizer, batch (32,768 tokens), seed 1337 and the validation
+windows. The Arabic sources keep their natural relative weights; only the English weight changes. Training batches are random windows drawn
+with replacement, so "passes" below are expected coverage (tokens drawn from a source / its tokens in the files).
+
+| run | steps | English share of train tokens | Arabic share | tokens seen | expected passes over the Arabic data | over the English data |
+|---|---:|---:|---:|---:|---:|---:|
+| control (`diag-lr-6e-4`) | 800 | 39.3% | 60.7% | 26,214,400 | 0.16 | 0.16 |
+| `ablation-arabic-only` | 800 | 0.0% | 100.0% | 26,214,400 | 0.26 | 0.00 |
+| `ablation-english-20` | 800 | 20.0% | 80.0% | 26,214,400 | 0.21 | 0.08 |
+| baseline (`local-17m`) | 5,000 | 39.3% | 60.7% | 163,840,000 | 0.98 | 0.98 |
+| `ablation-english-20-long` | 5,000 | 20.0% | 80.0% | 163,840,000 | 1.29 | 0.50 |
+
+**800 steps** (the control is the learning-rate run `diag-lr-6e-4`, same settings, 50 warmup steps; bits/char, validation, step 800).
+Seed noise measured on this control and its repeat (seed 2024): +0.013 on the Arabic mean and +0.010 to +0.021 per source
+(D-023 quoted 0.012, the mean over six sources with English; the Arabic mean used by the rule is 0.013).
+
+| run (step 800) | arb | ars | ary | arz | wiki_ar | Arabic mean | change vs control | English | change |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| control | 2.479 | 3.095 | 2.506 | 2.825 | 2.518 | 2.685 |  | 2.147 |  |
+| Arabic only | 2.388 | 3.002 | 2.398 | 2.716 | 2.399 | 2.581 | -0.104 | 2.892 | +0.744 |
+| English 20% | 2.450 | 3.062 | 2.468 | 2.790 | 2.479 | 2.650 | -0.035 | 2.282 | +0.135 |
+
+Arabic only: mean -0.104 (mean meets the 0.03 threshold; 5 of 5 sources reach 0.04); English +0.744.
+English 20%: mean -0.035 (mean meets the 0.03 threshold; 0 of 5 sources reach 0.04); English +0.135.
+Both pass on the mean; the 20% arm passes only there, since no single source reaches 0.04 (its gain per source is 0.029 to 0.038, against seed noise of up to 0.021 per source).
+The Arabic-only arm gains about 3.0 times as much as the 20% arm, at the cost of English losing 0.74 bits/char (English was not in its mix at all).
+Only 800 steps, one seed per arm, and the English share and the Arabic exposure change together.
+
+**5,000 steps** (English 20% against the baseline of D-023, `local-17m`; the in-training validation evaluation, 20 batches per source):
+
+| run (step 5,000, validation) | arb | ars | ary | arz | wiki_ar | Arabic mean | English |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| baseline, English 39.3% | 1.825 | 2.479 | 1.873 | 2.121 | 1.779 | 2.0153 | 1.5634 |
+| English 20.0% | 1.781 | 2.438 | 1.826 | 2.075 | 1.737 | 1.9715 | 1.6375 |
+| change | -0.044 | -0.041 | -0.047 | -0.046 | -0.042 | -0.0438 | +0.0741 |
+
+By the rule: mean meets the 0.03 threshold; 5 of 5 sources reach 0.04. The margin per source is thin: the smallest gain is 0.041, against a threshold of 0.04 and a per-source seed noise of up to 0.021 measured at 800 steps; the mean gain is
+0.0438, 1.5 times the threshold and 3.3 times the seed noise measured at 800 steps. English is +0.0741, not part of the rule.
+Caveat on the baseline: it was stopped once at step 2,990 and resumed; the 20% run was not interrupted.
+
+The gap is there at every checkpoint, not only the last:
+
+| step | baseline Arabic mean | English 20% Arabic mean | change | baseline English | English 20% English | change |
+|---:|---:|---:|---:|---:|---:|---:|
+| 500 | 2.729 | 2.685 | -0.044 | 2.195 | 2.299 | +0.105 |
+| 1,000 | 2.465 | 2.417 | -0.048 | 1.986 | 2.075 | +0.090 |
+| 1,500 | 2.328 | 2.276 | -0.053 | 1.842 | 1.944 | +0.102 |
+| 2,000 | 2.208 | 2.157 | -0.051 | 1.723 | 1.810 | +0.087 |
+| 2,500 | 2.141 | 2.089 | -0.052 | 1.666 | 1.748 | +0.082 |
+| 3,000 | 2.094 | 2.047 | -0.047 | 1.627 | 1.706 | +0.079 |
+| 3,500 | 2.062 | 2.016 | -0.046 | 1.601 | 1.679 | +0.078 |
+| 4,000 | 2.039 | 1.994 | -0.045 | 1.583 | 1.658 | +0.075 |
+| 4,500 | 2.024 | 1.980 | -0.045 | 1.571 | 1.645 | +0.074 |
+| 5,000 | 2.015 | 1.972 | -0.044 | 1.563 | 1.637 | +0.074 |
+
+It reaches 0.03 already at step 500 and stays beyond it at every checkpoint: -0.044 at step 500, -0.053 at its largest (step 1,500) and -0.044 at 5,000, so the 800-step result carried over to the full length and settled a little lower as the loss flattened.
+The English loss is +0.105 at step 500, +0.082 at 2,500 and +0.074 at 5,000.
+
+**Full evaluation** of the two final checkpoints (every held-out token; `reports/eval/final-local-17m` and `reports/eval/final-ablation-english-20-long`).
+Its validation numbers differ slightly from the table above because it reads every validation token, not 20 batches; the comparison is between like and like.
+The test split and the three dialects never seen in training are not part of the rule; they are the check that the validation result is not an accident of the validation windows.
+
+| source | split | baseline bits/char | English 20% | change |
+|---|---|---:|---:|---:|
+| edu | val | 1.557 | 1.632 | +0.076 |
+| edu | test | 1.576 | 1.651 | +0.075 |
+| arb | val | 1.836 | 1.793 | -0.044 |
+| arb | test | 1.909 | 1.867 | -0.042 |
+| ars | val | 2.494 | 2.455 | -0.039 |
+| ars | test | 2.561 | 2.523 | -0.038 |
+| ary | val | 1.873 | 1.826 | -0.047 |
+| ary | test | 1.773 | 1.732 | -0.041 |
+| arz | val | 2.115 | 2.068 | -0.047 |
+| arz | test | 2.129 | 2.080 | -0.048 |
+| wiki_ar | val | 1.764 | 1.722 | -0.042 |
+| wiki_ar | test | 1.803 | 1.760 | -0.044 |
+| acm | eval | 2.841 | 2.814 | -0.028 |
+| apc | eval | 2.535 | 2.494 | -0.040 |
+| wiki_ary | eval | 2.882 | 2.874 | -0.008 |
+| **trained Arabic, val (mean)** | | **2.016** | **1.973** | **-0.044** |
+| **trained Arabic, test (mean)** | | **2.035** | **1.992** | **-0.043** |
+| **unseen dialects (mean)** | | **2.753** | **2.727** | **-0.025** |
+
+The change on the Arabic mean is -0.044 on validation and -0.043 on test, both beyond 0.03. Per source, 4 of 5 reach 0.04 on validation and 4 of 5 on test; ars falls just short on at least one of them,
+so a claim about every single source (the 0.04 rule) holds on the in-training validation table above and is thinner on the full evaluation. On the 3 dialects never seen in training the sign is the same for all three, but the mean change is -0.025, under 0.03, and wiki_ary moves by only -0.008:
+read it as no worse on unseen dialects, not as better.
+
+**What the 20% run does not rule out.** At 20%, the Arabic data is drawn 1.29 times in expectation over 5,000 steps, against 0.98 for the baseline. Part of the
+gain may be exposure to Arabic rather than relief from English (the same run cannot tell the two apart), and if repeating data hurt, it would show as a growing gap between the loss on held-out data and on the training data. The held-out loss minus the loss on a probe of
+the training data (same tokens, so comparable across runs), in nats:
+
+| run | arb | ars | ary | arz | wiki_ar | mean |
+|---|---:|---:|---:|---:|---:|---:|
+| baseline | +0.005 | +0.375 | +0.064 | +0.146 | +0.025 | +0.123 |
+| English 20% | +0.009 | +0.390 | +0.082 | +0.180 | +0.030 | +0.138 |
+
+The gap is larger in the 20% run for 5 of 5 Arabic sources (arb, ars, ary, arz, wiki_ar) by 0.005 to 0.034 nats, so
+the 20% run fits its training data a little more tightly relative to held-out data; held-out loss still fell, which is what the rule measures, and at 1.29 passes this is not yet overfitting by any large amount. Besides
+this, every run here has one seed (noise 0.013 on the Arabic mean, measured once, at 800 steps), the baseline was interrupted once, and the English tokenization
+and the `arz` train/validation gap of D-023 are still untested.
+
+**Decisions.**
+
+1. The English-20% mix meets the rule of D-023 at the full length (mean 0.044 against 0.03; all five sources beyond 0.04 by a thin margin), and the mean gain holds on the test split. This is recorded
+   as the result; the question "does English cost the Arabic sources anything" has the answer: at this model size and length, cutting English from 39% to 20% of the tokens
+   improved the Arabic sources by 0.044 bits/char, and English paid 0.074.
+2. `configs/local-17m.yaml` is not changed, and no checkpoint is replaced. Whether to adopt the 20% mix (or another) as the default is a project decision, taken on
+   how much English the model must keep, not an experimental one: the experiment gives the exchange rate, English losing about 1.7 times what the Arabic mean gains.
+3. The rule of D-023 stands unchanged.
+
+**Not decided, and not tested here.**
+
+- Whether the mechanism is less English or more Arabic exposure. A run that gives the Arabic data the same 1.29 passes while keeping English at 39% (about 216M tokens, 6,593 steps)
+  would separate the two; it is also the test of whether more steps alone help.
+- The Arabic-only arm at 5,000 steps (not run; 800 steps only), other English shares (10%, 30%), and a second seed of the 5,000-step pair. Each result above
+  is a single seed.
+- How much English the project wants the model to keep (D-023's open point, now with a price), and whether English quality matters more than its bits/char
+  number says; the English samples were already the weakest in D-023.
