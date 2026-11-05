@@ -1,0 +1,48 @@
+# Mix ablation, arm 1 of 2 (D-023, "not decided"): the same run as the control `diag-lr-6e-4`
+# (local-17m settings; peak learning rate 6e-4 to 6e-5, 50 warmup steps, 800 steps, seed 1337)
+# with English (fineweb_edu_10bt) removed from the training mix. The five Arabic sources keep
+# their natural relative weights (their train tokens), so they now get 100% of the tokens
+# instead of 60.7%. English is still evaluated, to see what removing it costs.
+#
+# Fixed before the run. Compared with the control, by bits per character on the validation
+# split, at step 800: the mean of the five Arabic sources (arb, ars, ary, arz, wiki_ar).
+# Rule of D-023: it counts as better only if that mean falls by at least 0.03, and a claim about
+# one source needs at least 0.04. Seed noise measured in D-023: 0.012 on the mean. How much
+# English is allowed to degrade is not part of the rule; it is reported and left to the project.
+name: ablation-arabic-only
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+
+data:
+  tokens_dir: data/processed/tokens-16k
+  train_sources:
+    fw2_arb: 38542549
+    fw2_ars: 13431542
+    fw2_ary: 5400709
+    fw2_arz: 29656698
+    wiki_ar: 14529625
+  val_sources: [fineweb_edu_10bt, fw2_arb, fw2_ars, fw2_ary, fw2_arz, wiki_ar]
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 50
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 800
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 200
+  eval_batches: 20
+  checkpoint_interval: 800
+  log_interval: 10
