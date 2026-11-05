@@ -738,7 +738,7 @@ Wikipedia sources keep their pages); keep the 32k tokenizer and its provenance i
   Wikipedia documents of fineweb_edu's val/test). At 16,384 ids: Arabic 1.78
   tokens per word, English 1.78; the rest of D-016 holds.
 - **Files in git.** `artifacts/tokenizer/bpe-32k.json` and `.provenance.json` (final-v2; the
-  version measured in final-v1 is in the history, commit 0c56002), and `bpe-16k.json` with its
+  version measured in final-v1 is in the history, commit 19a2ced), and `bpe-16k.json` with its
   provenance. The 16k file has exactly the first 16,125 merges of the 32k file (checked), so the
   32k file can produce any size up to 32,768 with `Tokenizer.truncated`.
 - **Token files (`data/tokens.py`, `scratchllm data tokenize`).** One uint16 file per source and
