@@ -1394,3 +1394,18 @@ and the `arz` train/validation gap of D-023 are still untested.
   is a single seed.
 - How much English the project wants the model to keep (D-023's open point, now with a price), and whether English quality matters more than its bits/char
   number says; the English samples were already the weakest in D-023.
+
+## D-025 (2026-11-05): Arabic and English matter equally; the natural mix stays
+
+The project decision left open by D-024 (decision 2). **Arabic and English are of equal importance** to this
+project, so the training mix stays natural (English 39.3% of the training tokens) and `configs/local-17m.yaml`
+stays the baseline every later change is compared with.
+
+- D-024's 20% mix is not adopted. With equal weight on the two languages it trades an English loss (0.074 bits/char)
+  for a smaller Arabic gain (0.044 on the mean of five sources), which is not a gain for the project.
+- D-024 stays as recorded: it is the measured exchange rate between the two languages at this size, and it shows the
+  Arabic sources are not saturated at one pass.
+- Consequence for later experiments: a change judged by the rule of D-023 is now judged on Arabic **and** English.
+  The 0.03 threshold applies to the Arabic mean; English is no longer only reported: a change that makes English
+  worse by 0.03 bits/char or more does not count as an improvement. This adds a condition, written here before the
+  next experiment; it does not loosen the rule.
