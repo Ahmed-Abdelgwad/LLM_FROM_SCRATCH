@@ -1463,3 +1463,154 @@ out the tail of each file that does not fill a window: at most 0.46% of a split'
 
 1. Evaluation reports carry both unigram baselines; the same-language one is the one to quote.
 2. A stop request is honoured at a step boundary; this is now part of the trainer's contract and tested.
+
+## D-027 (2026-11-05): modern architecture options: RMSNorm, rotary embeddings, SwiGLU (built; result pending)
+
+Code: `model/layers.py` (`RMSNorm`, `SwiGLUFeedForward`, `swiglu_hidden`), `model/attention.py`
+(`rotary_cos_sin`, `apply_rotary`, `rope=` on `CausalSelfAttention`), `model/gpt.py` and `training/config.py`
+(three switches). Tests: `tests/test_modern.py`. Item 2 of the plan in `docs/PROBLEM.md`.
+
+**What was built, and the choices.**
+
+- `norm: layernorm | rmsnorm`. RMSNorm is `x / sqrt(mean(x^2) + eps) * weight`, in float32 like `LayerNorm`;
+  no mean subtraction and no shift. eps 1e-6. It matches `torch.nn.RMSNorm`.
+- `position: learned | rope`. Rotary embeddings rotate each query and key, pair by pair, by an angle
+  proportional to the position, so the score between two positions depends on their distance only.
+  Convention: the pair is (dimension i, dimension i + head_dim/2) and the angle is position x
+  theta^(-2i/head_dim), theta 10,000, as in Llama; the test fixes the rotation direction by hand. With
+  rotary embeddings the model has no position table (-196,608 parameters). The cos/sin tables are buffers
+  and are not saved in a checkpoint.
+- `ffn: gelu | swiglu`. SwiGLU is `down(silu(gate(x)) * up(x))`. Its default width is 8/3 d_model
+  rounded to a multiple of 64, which for d_model 384 is exactly 1,024 and gives exactly the 1,179,648
+  weights of the GELU layer (1,536 wide). For very small d_model the rounding moves the count by up to 12%
+  (d_model 64); at 384 and above it is within 2%.
+- **The defaults are GPT-2.** The 17M model still has exactly 17,109,888 parameters and the same state-dict
+  names; a config without the new keys builds the same model (both tested). One consequence: the new keys are in
+  `RunConfig.as_dict()`, so the `config_sha256` of a new run differs from that of an old run with the same
+  settings, and a checkpoint made before this change refuses to resume with `a different model configuration`.
+  No run in use is affected (all finished); it matters only for resuming an old unfinished run.
+
+**Checks.** Each component against its definition (the library layer, a hand formula, the
+property that is its reason: the rotary score depends on distance only, lengths are kept, the rotation is the
+documented one); the fast attention path equals the explicit one with rotary embeddings; causality holds for the
+modern model; every parameter gets a gradient; the modern model trains, checkpoints, loads and generates through
+the normal commands. Four deliberate mistakes (key not rotated, rotation direction reversed, SwiGLU without its
+gate activation, RMSNorm with mean subtraction) each make a test fail. Speed on the RTX 3050 for 40 steps: 49,000
+tokens/s, peak memory 1,607 MiB; the baseline's median over its run was 34,424 tokens/s. The two are not
+a controlled comparison (40 steps against 5,000, different hardware state), so this is not a measured speedup;
+the 5,000-step run's own throughput will say more.
+
+**Not built:** grouped-query attention (it saves key/value memory, which matters for a cache at long
+context; at 6 heads it was not judged worth building before there is a cache to save), a key/value cache
+(next), and any change to the tokenizer.
+
+**The experiment.** `configs/modern-17m.yaml` is the baseline run with all three switches on. The
+criterion is in its header, written before the run: the Arabic mean bits/char at step 5,000 must fall by at least 0.03
+below the baseline's 2.0153 and English (1.5634) must not get worse by 0.03 or more (D-023, D-025). The
+result is recorded in the next entry. Caveats fixed in advance: the model has 1.15% fewer parameters; one seed;
+the three changes are tested together, so a pass says the package helps and a fail says it does not at this size,
+and neither separates the parts.
+
+## D-028 (2026-11-06): RMSNorm + rotary embeddings + SwiGLU against the GPT-2 baseline: Arabic -0.064 bits/char, English -0.073, at the same length
+
+Code: none changed (D-027 built the options). Added: `configs/modern-17m.yaml`. Evidence kept in git:
+`reports/eval/final-modern-17m/` (full evaluation of the 5,000-step checkpoint) and
+`reports/eval/final-d028-modern-arch/evals.json` (the evaluation events of both runs). Script:
+`scripts/d028_entry.py` computed the tables and numbers of this entry (prose by hand; sentences that depend on a
+comparison are guarded by an assert). Not in git: the runs (`runs/`, ignored).
+
+**What was run.** The baseline `local-17m` and `modern-17m` are identical in every setting (seed 1337, natural mix, 5,000
+steps of 32,768 tokens, learning rate 6e-4 to 6e-5, the same validation windows) except the three switches of D-027, all on
+together. The model has 16,913,280 parameters against 17,109,888 (no position table, -1.15%). The modern
+run was not interrupted and skipped no step; the baseline was stopped once at step 2,990 and resumed (D-023).
+
+**The criterion**, in the config header before the run: the Arabic mean bits/char at step 5,000 must be at least 0.03 below
+2.0153 (a claim about one source, 0.04), and English must not get worse by 0.03 or more (D-023, D-025).
+
+| run (step 5,000, validation) | arb | ars | ary | arz | wiki_ar | Arabic mean | English |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| baseline (GPT-2 parts) | 1.825 | 2.479 | 1.873 | 2.121 | 1.779 | 2.0153 | 1.5634 |
+| RMSNorm + RoPE + SwiGLU | 1.762 | 2.420 | 1.802 | 2.056 | 1.718 | 1.9515 | 1.4900 |
+| change | -0.063 | -0.059 | -0.071 | -0.065 | -0.061 | -0.0637 | -0.0733 |
+
+By the rule: the Arabic mean is -0.0637 (threshold -0.03), all five Arabic sources are beyond 0.04 (the smallest gain is
+0.059), and English moved by -0.0733, i.e. it improved. **The criterion is met.** The gain is about
+5 times the seed noise measured at 800 steps (0.013 on the Arabic mean, D-024), and 2.8 times its largest per-source value.
+
+The gap was larger earlier and narrowed as training went on:
+
+| step | baseline Arabic mean | modern | change | baseline English | modern | change |
+|---:|---:|---:|---:|---:|---:|---:|
+| 500 | 2.729 | 2.559 | -0.170 | 2.195 | 1.946 | -0.249 |
+| 1,000 | 2.465 | 2.325 | -0.139 | 1.986 | 1.783 | -0.202 |
+| 1,500 | 2.328 | 2.201 | -0.127 | 1.842 | 1.702 | -0.140 |
+| 2,000 | 2.208 | 2.118 | -0.090 | 1.723 | 1.624 | -0.099 |
+| 2,500 | 2.141 | 2.063 | -0.078 | 1.666 | 1.576 | -0.090 |
+| 3,000 | 2.094 | 2.023 | -0.071 | 1.627 | 1.546 | -0.081 |
+| 3,500 | 2.062 | 1.995 | -0.068 | 1.601 | 1.524 | -0.077 |
+| 4,000 | 2.039 | 1.974 | -0.065 | 1.583 | 1.507 | -0.076 |
+| 4,500 | 2.024 | 1.960 | -0.065 | 1.571 | 1.496 | -0.074 |
+| 5,000 | 2.015 | 1.952 | -0.064 | 1.563 | 1.490 | -0.073 |
+
+At step 500 the modern model is 0.170 bits/char ahead on the Arabic mean, at 2,500 0.078, at 5,000 0.064; it stays beyond the
+threshold at every checkpoint, but the advantage is shrinking: most of it is faster early learning, and the part that remains at the
+end was still decreasing slowly (-0.065 at 4,000, -0.064 at 5,000). Whether it would persist, vanish or grow
+with a longer run is not known from this one.
+
+**Full evaluation** of the two final checkpoints (every held-out token; `reports/eval/final-local-17m`, `reports/eval/final-modern-17m`):
+
+| source | split | baseline | modern | change |
+|---|---|---:|---:|---:|
+| edu | val | 1.557 | 1.486 | -0.071 |
+| edu | test | 1.576 | 1.508 | -0.068 |
+| arb | val | 1.836 | 1.773 | -0.064 |
+| arb | test | 1.909 | 1.847 | -0.062 |
+| ars | val | 2.494 | 2.436 | -0.058 |
+| ars | test | 2.561 | 2.502 | -0.059 |
+| ary | val | 1.873 | 1.802 | -0.071 |
+| ary | test | 1.773 | 1.707 | -0.066 |
+| arz | val | 2.115 | 2.051 | -0.064 |
+| arz | test | 2.129 | 2.066 | -0.062 |
+| wiki_ar | val | 1.764 | 1.704 | -0.060 |
+| wiki_ar | test | 1.803 | 1.741 | -0.062 |
+| acm | eval | 2.841 | 2.812 | -0.029 |
+| apc | eval | 2.535 | 2.491 | -0.044 |
+| wiki_ary | eval | 2.882 | 2.977 | +0.095 |
+| **trained Arabic, val (mean)** | | **2.016** | **1.953** | **-0.063** |
+| **trained Arabic, test (mean)** | | **2.035** | **1.973** | **-0.062** |
+| **unseen dialects (mean)** | | **2.753** | **2.760** | **+0.007** |
+| **English, val** | | **1.557** | **1.486** | **-0.071** |
+| **English, test** | | **1.576** | **1.508** | **-0.068** |
+
+The mean gain on the trained Arabic sources is -0.063 on validation and -0.062 on test; every trained source, English included, has a lower bits/char on test.
+**On the three dialects never seen in training the mean change is +0.007**: wiki_ary is worse than the baseline
+(acm -0.029, apc -0.044, wiki_ary +0.095). The modern model scored lower on the languages it trained on, but this
+run gives no sign that it generalizes better to dialects it did not see, and for one of them it is worse. The rule does not cover these sources; it is a
+point against reading the result as "a better model everywhere".
+
+**Speed and memory** (same GPU, whole runs): median 48,316 tokens/s against 34,424 for the baseline (+40%); peak
+memory 1,607 MiB against 2,081. The modern run's rate fell as low as 26,099 tokens/s in some stretches (the cause was not looked into:
+another load on the machine, or the GPU's own clock), and the median is the fair figure; a controlled benchmark was not run. Where the difference comes from (the normalization, the missing position
+addition, the SwiGLU matrix shapes) was not separated.
+
+**Limits.** One seed per run. The three changes were tested together: this result says the package scored lower in this run, not
+whether it would again, nor which part does the work, and one part could even hurt while the others help. The parameter count is 1.15% lower for the modern model, which
+if anything works against it. The advantage narrows with training. Generalization to unseen dialects is not improved.
+
+**Decisions.**
+
+1. The modern architecture meets the criterion in this run (one seed). It is recorded as a result, not as established superiority: no claim that it is
+   better is made until the same comparison has been repeated with a second seed, with every setting and the token budget unchanged.
+2. `configs/local-17m.yaml` stays the baseline of record, so earlier numbers keep their meaning; `configs/modern-17m.yaml` is the new reference
+   for later experiments that build on this architecture. Which of the two a later change is compared against is stated in that change's config.
+3. Nothing is removed: the GPT-2 parts stay as the default of the code (D-027).
+
+**Not decided, and not tested here.**
+
+- **The next step, already fixed:** the same two configurations (`local-17m`, `modern-17m`) rerun with a different seed, every training
+  setting and the token budget unchanged, judged by the same criterion. The baseline numbers above are not altered by it.
+- Which of the three changes matters (three runs with one switch each, or with one removed); only worth it if the project wants a design
+  that is minimal, or if one part is suspected of hurting the unseen dialects.
+- A longer run, to see if the advantage keeps narrowing.
+- Why the unseen dialects do not follow; the rotary embeddings, which generalize position differently, are the first suspect, but nothing here shows it.
+- A key/value cache and grouped-query attention (not built).
