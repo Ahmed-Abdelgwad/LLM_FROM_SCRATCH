@@ -51,6 +51,8 @@ import torch
 import torch.nn.functional as F  # noqa: N812
 from torch import nn
 
+from scratchllm.model.cache import KVCache
+
 
 def rotary_cos_sin(
     length: int, head_dim: int, theta: float = 10000.0
@@ -122,8 +124,13 @@ class CausalSelfAttention(nn.Module):
         self.register_buffer("rope_cos", cos, persistent=False)  # tables, rebuilt from the config
         self.register_buffer("rope_sin", sin, persistent=False)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """x: (batch, T, d_model) -> (batch, T, d_model)."""
+    def forward(
+        self, x: torch.Tensor, cache: KVCache | None = None, layer: int = 0
+    ) -> torch.Tensor:
+        """x: (batch, T, d_model) -> (batch, T, d_model). With a `cache`, x is the next T
+        positions of a text whose first `cache.length` positions are already stored (D-030)."""
+        if cache is not None:
+            return self._forward_cached(x, cache, layer)
         if not self.fast:
             return self.forward_with_weights(x)[0]
         batch, length, width = self._check(x)
@@ -142,11 +149,37 @@ class CausalSelfAttention(nn.Module):
             raise ValueError(f"expected last dimension {self.d_model}, got {width}")
         return batch, length, width
 
-    def _qkv(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def _forward_cached(self, x: torch.Tensor, cache: KVCache, layer: int) -> torch.Tensor:
+        """Attention for the next T positions against the stored keys and values plus their own.
+
+        Position i of this call sits at absolute position cache.length + i, which is what rotary
+        embeddings must rotate by; the mask lets it see everything stored and the new positions
+        up to itself. Uses the fused kernel whatever `fast` says (the numbers agree, D-018).
+        """
+        if self.training:
+            raise ValueError("a key/value cache is for generation; put the model in eval mode")
+        batch, length, width = self._check(x)
+        offset = cache.length
+        q, k, v = self._qkv(x, offset)
+        keys, values = cache.update(layer, k, v)  # (batch, heads, offset + T, head_dim)
+        if length == 1:  # the newest token may see everything stored
+            out = F.scaled_dot_product_attention(q, keys, values)
+        elif offset == 0:
+            out = F.scaled_dot_product_attention(q, keys, values, is_causal=True)
+        else:  # several new positions after stored ones: position i sees j <= offset + i
+            allowed = ~self.future[offset : offset + length, : offset + length]
+            out = F.scaled_dot_product_attention(q, keys, values, attn_mask=allowed)
+        out = out.transpose(1, 2).reshape(batch, length, width)
+        return self.out_proj(out)
+
+    def _qkv(
+        self, x: torch.Tensor, offset: int = 0
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         q, k, v = (self._heads(t) for t in self.qkv(x).split(self.d_model, dim=2))
         if self.rope:
             length = x.shape[1]
-            cos, sin = self.rope_cos[:length], self.rope_sin[:length]
+            cos = self.rope_cos[offset : offset + length]
+            sin = self.rope_sin[offset : offset + length]
             q, k = apply_rotary(q, cos, sin), apply_rotary(k, cos, sin)
         return q, k, v
 

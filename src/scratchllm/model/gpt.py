@@ -50,6 +50,7 @@ import torch.nn.functional as F  # noqa: N812
 from torch import nn
 
 from scratchllm.model.attention import CausalSelfAttention
+from scratchllm.model.cache import KVCache
 from scratchllm.model.layers import (
     FeedForward,
     LayerNorm,
@@ -108,8 +109,10 @@ class Block(nn.Module):
         ff_class = SwiGLUFeedForward if cfg.ffn == "swiglu" else FeedForward
         self.ff = ff_class(cfg.d_model, cfg.hidden, cfg.dropout, cfg.bias)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.attn(self.norm1(x))
+    def forward(
+        self, x: torch.Tensor, cache: KVCache | None = None, layer: int = 0
+    ) -> torch.Tensor:
+        x = x + self.attn(self.norm1(x), cache, layer)
         return x + self.ff(self.norm2(x))
 
 
@@ -147,20 +150,38 @@ class GPT(nn.Module):
         positions = self.pos_emb.weight.numel() if self.pos_emb is not None else 0
         return total - self.tok_emb.weight.numel() - positions
 
+    def new_cache(self) -> KVCache:
+        """An empty key/value cache for this model, for `forward(..., cache=cache)` (D-030)."""
+        return KVCache(self.cfg.n_layers, self.cfg.context_length)
+
     def forward(
-        self, ids: torch.Tensor, targets: torch.Tensor | None = None
+        self,
+        ids: torch.Tensor,
+        targets: torch.Tensor | None = None,
+        cache: KVCache | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         """ids (batch, T) -> logits (batch, T, vocab); with `targets` (batch, T) also the mean
-        cross-entropy of predicting each target from its left context."""
+        cross-entropy of predicting each target from its left context.
+
+        With a `cache` (generation only), `ids` are the next T tokens of a text whose first
+        `cache.length` tokens the cache already holds; the logits are those of the new positions
+        and the cache grows by T. Feeding a text in pieces gives the same logits as in one go."""
         _, length = ids.shape
-        if length > self.cfg.context_length:
-            raise ValueError(f"{length} tokens exceed the context of {self.cfg.context_length}")
+        offset = 0 if cache is None else cache.length
+        if cache is not None and targets is not None:
+            raise ValueError("a loss is for training; it cannot be computed with a cache")
+        if offset + length > self.cfg.context_length:
+            raise ValueError(
+                f"{offset + length} tokens exceed the context of {self.cfg.context_length}"
+            )
         x = self.tok_emb(ids)
         if self.pos_emb is not None:
-            x = x + self.pos_emb(torch.arange(length, device=ids.device))
+            x = x + self.pos_emb(torch.arange(offset, offset + length, device=ids.device))
         x = self.drop(x)
-        for block in self.blocks:
-            x = block(x)
+        for index, block in enumerate(self.blocks):
+            x = block(x, cache, index)
+        if cache is not None:
+            cache.advance(length)
         logits = self.lm_head(self.final_norm(x))
         loss = None
         if targets is not None:

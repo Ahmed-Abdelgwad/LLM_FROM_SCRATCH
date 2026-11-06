@@ -359,6 +359,15 @@ def generate_command(
     samples: Annotated[int, typer.Option(help="Samples per prompt (seeds seed, seed+1, ...).")] = 1,
     seed: Annotated[int, typer.Option(help="Seed of the first sample.")] = 1,
     device: Annotated[str, typer.Option(help="auto, cpu or cuda.")] = "auto",
+    cache: Annotated[
+        bool,
+        typer.Option(
+            "--cache/--no-cache",
+            help="Key/value cache: faster on CPU; numerically equivalent, not bitwise, so under "
+            "bf16 some samples differ (D-030). Off by default so the samples of D-022 and "
+            "D-023 repeat exactly.",
+        ),
+    ] = False,
 ) -> None:
     """Write text with a trained model (sampled with a seed, so a sample can be repeated)."""
     import torch
@@ -383,7 +392,7 @@ def generate_command(
             with torch.no_grad(), autocast():
                 sample = generate_text(
                     model, tok, text, max_new_tokens, temperature=temperature, top_k=top_k,
-                    seed=seed + k, device=dev,
+                    seed=seed + k, device=dev, use_cache=cache,
                 )  # fmt: skip
             end = " [end of text]" if sample.stopped_by_eos else ""
             typer.echo(f"\n--- prompt {text!r}, seed {seed + k}, {sample.new_tokens} tokens{end}")

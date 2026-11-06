@@ -17,8 +17,24 @@ the first `eos_id`; callers cut the text there.
 
 The model only sees its last `context_length` tokens (its position embeddings stop there), so
 when the text grows past that, the oldest tokens are dropped from the model's view while still
-being kept in the output. There is no key/value cache: every step recomputes the whole window,
-which is simple and correct and costs time quadratic in the window, fine for short samples.
+being kept in the output.
+
+Key/value cache (D-030). A model that offers `new_cache()` is run with one: the prompt goes in
+once and each later step feeds only the newest token, so a step costs one position instead of the
+whole window. Once the text outgrows the window the cache cannot help (the model's view slides,
+so every position's numbers change) and the remaining steps recompute the window as before.
+`use_cache=False` turns it off.
+
+Equivalence with the uncached computation is numerical, not bitwise, and the text is not
+guaranteed to be the same:
+
+* The logits agree to rounding: about 1e-5 in float32 (tested on four architecture variants).
+* The text was identical in every float32 case tried (CPU tests; six prompts on two real
+  checkpoints, greedy and sampled). That is an observation, not a guarantee: a near-tie between two
+  tokens can be decided differently by a different order of floating-point operations.
+* Under bfloat16 autocast, which the GPU commands use, the text differs on some prompts (D-030):
+  the cached and the uncached logits each stray from the float32 ones by about 0.2, so an
+  occasional token choice, and everything after it, can differ. Neither text is "the" right one.
 """
 
 from __future__ import annotations
@@ -71,6 +87,7 @@ def generate(
     top_k: int | None = None,
     eos_id: int | None = None,
     generator: torch.Generator | None = None,
+    use_cache: bool = True,
 ) -> torch.Tensor:
     """Continue `ids` (batch, T0) or (T0,) by up to `max_new_tokens` tokens.
 
@@ -89,12 +106,18 @@ def generate(
     if out.size(1) == 0:
         raise ValueError("the prompt needs at least one token")
     context = model.cfg.context_length
+    cache = model.new_cache() if use_cache and hasattr(model, "new_cache") else None
     finished = torch.zeros(out.size(0), dtype=torch.bool, device=out.device)
     was_training = model.training
     model.eval()
     try:
         for _ in range(max_new_tokens):
-            logits, _ = model(out[:, -context:])
+            if cache is not None and cache.length == 0:  # first step: the prompt, once
+                logits, _ = model(out[:, -context:], cache=cache)
+            elif cache is not None and cache.length < context and cache.length == out.size(1) - 1:
+                logits, _ = model(out[:, -1:], cache=cache)  # only the newest token
+            else:  # no cache, or the text has outgrown the window: recompute it
+                logits, _ = model(out[:, -context:])
             token = _pick(logits[:, -1, :].float(), temperature, top_k, generator)
             if eos_id is not None:
                 token = torch.where(finished, torch.full_like(token, eos_id), token)
@@ -125,6 +148,7 @@ def generate_text(
     top_k: int | None = None,
     seed: int | None = None,
     device: torch.device | str = "cpu",
+    use_cache: bool = True,
 ) -> Sample:
     """Text in, text out.
 
@@ -146,6 +170,7 @@ def generate_text(
         top_k=top_k,
         eos_id=eot,
         generator=generator,
+        use_cache=use_cache,
     )
     new = out[len(start) :].tolist()
     stopped = eot in new
