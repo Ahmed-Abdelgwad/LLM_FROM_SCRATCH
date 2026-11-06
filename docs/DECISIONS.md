@@ -1773,3 +1773,47 @@ not by arithmetic, so the cache helps little there: in the six-prompt runs float
 **Not built.** Grouped-query attention (it shrinks the cache by sharing keys and values between heads; at 6 heads, 384 wide, the cache is
 2 x 6 layers x 512 x 384 values per sequence, about 9 MiB in float32, so there is nothing to save yet), and a cache that slides
 (it would need the model to be trained for it, as in models with a sliding window).
+
+## D-031 (2026-11-06): ablation plan: which parts of the modern architecture earn their place (plan only; nothing run yet)
+
+Written before any run, so the rules cannot be bent to the results. D-028 and D-029 showed that the three modern switches together lower bits
+per character on the trained languages (Arabic mean -0.0637 and -0.0683 at seeds 1337 and 2024, mean **-0.0660**; English **-0.0724**) and raise it on the Moroccan
+Wikipedia (`wiki_ary`, +0.095 and +0.087). They did not say which switch does what. This entry sets out how to find out and how to decide what to keep.
+
+**Design.** Three switches (norm, position, ffn) with two values each give eight cells; two are done (all GPT-2 = `local-17m`, all modern = `modern-17m`, two seeds each).
+
+- *Stage 1* (always): the baseline with one switch on, three runs: `configs/ablation-rmsnorm-only.yaml`, `configs/ablation-rope-only.yaml`,
+  `configs/ablation-swiglu-only.yaml`. Each differs from `local-17m` in its name and one line (checked by diff), seed 1337, 5,000 steps, same token budget.
+  About 80 minutes each at the baseline's speed, about four hours in all.
+- *Stage 2* (only if the additivity test below fails): the modern package with one switch off, three runs. Not written yet; its configs will be written, with these same rules, if it is triggered.
+- Stage 1 covers the three cells with one switch on, stage 2 the three with two on (the package minus one); with the two finished cells, both stages together are all eight. Stage 1 alone gives each switch's effect on top of GPT-2, not on top of the others.
+
+**Measurements** (every run): bits per character per source and the Arabic mean at step 5,000 (the in-training validation, as in D-023 to D-029), English, the full evaluation
+(`scratchllm eval`) for `wiki_ary` and the other unseen dialects, median tokens per second, peak memory, parameter count. RoPE removes the position table (196,608 parameters, -1.15%); that works
+against RoPE and is not compensated.
+
+**Threshold (chosen by the project).** For attribution the threshold is **0.01 bits/char on the Arabic mean**, about three times the largest seed-to-seed difference measured at the full length
+(0.0033 on the mean, D-029). It is lower than the 0.03 of D-023, which was set for deciding to adopt a change; this one decides whether a single component has any effect at all.
+
+- Arabic mean (and English, the same way): effect <= -0.01 **helps**; >= +0.01 **hurts**; between -0.01 and +0.01 **neutral**.
+- An effect whose size is between 0.005 and 0.015 is **unresolved**, not classified: with one seed it could be on either side of 0.01; a second seed (2024) decides, run only for such a case.
+- `wiki_ary`: noise between seeds on the unseen sources reaches 0.032 (D-029), so a change counts only at **0.05 or more**; smaller is "no difference".
+- Speed and memory: a difference of **10% or more** counts (the throughput of the same configuration varied by tens of percent between runs on this GPU, D-030); less is no difference.
+- Per-source numbers are reported but are not used to classify a component.
+
+**Additivity test (decides stage 2).** Sum the three Arabic-mean effects of stage 1. The total effect of the package is -0.0660 (mean of the two seeds above). If the sum is within 0.01 of
+-0.0660, the effects are taken as additive and stage 2 is not run. If not, the switches interact and stage 2 is run. English is looked at the same way (total -0.0724), but does not trigger stage 2 by itself.
+
+**Keep / drop rule (stated now; the decision is taken when the results are in).**
+
+1. *Keep* a component that **helps** the Arabic mean.
+2. A **neutral** component is kept only if it is at least 10% faster or uses at least 10% less peak memory; otherwise it is a candidate to drop (simpler code, no gain). Its parameter saving, if any, is reported, not counted.
+3. A component that **hurts** the Arabic mean is a candidate to drop.
+4. If a component helps Arabic and `wiki_ary` is worse by 0.05 or more, that is a **trade-off**, reported as one and left to the project, as the English share was in D-024 and D-025. It is not resolved by this rule.
+5. If a component is neutral on Arabic and `wiki_ary` is worse by 0.05 or more, it is a candidate to drop.
+6. Nothing is removed from the code (D-027): the options stay. "Keep" and "drop" are about which switches `modern-17m` and later configs turn on.
+
+**What this plan cannot show.** Stage 1 attributes effects on top of GPT-2; it does not say what each part adds on top of the others unless stage 2 runs. One seed per cell, with a second seed
+only for unresolved ones. Effects might differ at other sizes or lengths. If all three switches look neutral, the package's gain would have to come from an interaction, which only stage 2 can show.
+
+**Not started.** No run exists for this plan. Training starts only when the project says so.
