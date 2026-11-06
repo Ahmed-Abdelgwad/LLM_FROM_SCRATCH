@@ -15,6 +15,13 @@ and a block is two residual steps, with the normalization BEFORE each sublayer (
 The residual "x + ..." is a path along which the signal and the gradient pass unchanged, which is
 what lets a deep stack be trained at all.
 
+Options (D-027). The description above is the default, GPT-2. Three config switches replace its
+parts with the ones recent models use: `norm="rmsnorm"` (RMS norm instead of layer norm),
+`position="rope"` (rotary embeddings in the attention instead of a learned vector per position;
+the model then has no position table) and `ffn="swiglu"` (a gated feed-forward instead of the
+GELU one, at a width that keeps its parameter count). Each is off by default, so a config or a
+checkpoint made before they existed builds the model it always was.
+
 Positions. Attention does not know the order of tokens, so a learned vector per position
 (0..context_length-1) is added to the token's embedding (GPT-2). `tests/test_gpt.py` shows the
 effect in a one-layer model: without it the last token's prediction is the same for any
@@ -36,14 +43,20 @@ from __future__ import annotations
 
 import math
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, Literal
 
 import torch
 import torch.nn.functional as F  # noqa: N812
 from torch import nn
 
 from scratchllm.model.attention import CausalSelfAttention
-from scratchllm.model.layers import FeedForward, LayerNorm
+from scratchllm.model.layers import (
+    FeedForward,
+    LayerNorm,
+    RMSNorm,
+    SwiGLUFeedForward,
+    swiglu_hidden,
+)
 
 
 @dataclass(frozen=True)
@@ -59,24 +72,41 @@ class GPTConfig:
     tie_embeddings: bool = True
     fast_attention: bool = False
     init_std: float = 0.02
+    # The "modern" options (D-027). The defaults are GPT-2, so an older checkpoint's config, which
+    # lacks these keys, builds the same model it always was.
+    norm: Literal["layernorm", "rmsnorm"] = "layernorm"
+    position: Literal["learned", "rope"] = "learned"
+    ffn: Literal["gelu", "swiglu"] = "gelu"
+    rope_theta: float = 10000.0
 
     @property
     def hidden(self) -> int:
-        return self.d_ff if self.d_ff is not None else 4 * self.d_model
+        """Width of the feed-forward's middle layer."""
+        if self.d_ff is not None:
+            return self.d_ff
+        return swiglu_hidden(self.d_model) if self.ffn == "swiglu" else 4 * self.d_model
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
+def make_norm(cfg: GPTConfig) -> nn.Module:
+    if cfg.norm == "rmsnorm":
+        return RMSNorm(cfg.d_model)
+    return LayerNorm(cfg.d_model, bias=cfg.bias)
+
+
 class Block(nn.Module):
     def __init__(self, cfg: GPTConfig) -> None:
         super().__init__()
-        self.norm1 = LayerNorm(cfg.d_model, bias=cfg.bias)
+        self.norm1 = make_norm(cfg)
         self.attn = CausalSelfAttention(
-            cfg.d_model, cfg.n_heads, cfg.context_length, cfg.dropout, cfg.bias, cfg.fast_attention
-        )
-        self.norm2 = LayerNorm(cfg.d_model, bias=cfg.bias)
-        self.ff = FeedForward(cfg.d_model, cfg.hidden, cfg.dropout, cfg.bias)
+            cfg.d_model, cfg.n_heads, cfg.context_length, cfg.dropout, cfg.bias,
+            cfg.fast_attention, rope=cfg.position == "rope", rope_theta=cfg.rope_theta,
+        )  # fmt: skip
+        self.norm2 = make_norm(cfg)
+        ff_class = SwiGLUFeedForward if cfg.ffn == "swiglu" else FeedForward
+        self.ff = ff_class(cfg.d_model, cfg.hidden, cfg.dropout, cfg.bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x + self.attn(self.norm1(x))
@@ -88,10 +118,12 @@ class GPT(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.tok_emb = nn.Embedding(cfg.vocab_size, cfg.d_model)
-        self.pos_emb = nn.Embedding(cfg.context_length, cfg.d_model)
+        self.pos_emb = (
+            nn.Embedding(cfg.context_length, cfg.d_model) if cfg.position == "learned" else None
+        )  # with rotary embeddings the position lives in the attention, not in the input
         self.drop = nn.Dropout(cfg.dropout)
         self.blocks = nn.ModuleList(Block(cfg) for _ in range(cfg.n_layers))
-        self.final_norm = LayerNorm(cfg.d_model, bias=cfg.bias)
+        self.final_norm = make_norm(cfg)
         self.lm_head = nn.Linear(cfg.d_model, cfg.vocab_size, bias=False)
         if cfg.tie_embeddings:
             self.lm_head.weight = self.tok_emb.weight
@@ -112,7 +144,8 @@ class GPT(nn.Module):
         total = sum(p.numel() for p in self.parameters())
         if include_embeddings:
             return total
-        return total - self.tok_emb.weight.numel() - self.pos_emb.weight.numel()
+        positions = self.pos_emb.weight.numel() if self.pos_emb is not None else 0
+        return total - self.tok_emb.weight.numel() - positions
 
     def forward(
         self, ids: torch.Tensor, targets: torch.Tensor | None = None
@@ -122,8 +155,10 @@ class GPT(nn.Module):
         _, length = ids.shape
         if length > self.cfg.context_length:
             raise ValueError(f"{length} tokens exceed the context of {self.cfg.context_length}")
-        positions = torch.arange(length, device=ids.device)
-        x = self.drop(self.tok_emb(ids) + self.pos_emb(positions))
+        x = self.tok_emb(ids)
+        if self.pos_emb is not None:
+            x = x + self.pos_emb(torch.arange(length, device=ids.device))
+        x = self.drop(x)
         for block in self.blocks:
             x = block(x)
         logits = self.lm_head(self.final_norm(x))

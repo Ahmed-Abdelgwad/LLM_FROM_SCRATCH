@@ -35,6 +35,10 @@ class ModelSection(_Strict):
     tie_embeddings: bool = True
     fast_attention: bool = False
     init_std: float = Field(0.02, gt=0.0)
+    norm: Literal["layernorm", "rmsnorm"] = "layernorm"
+    position: Literal["learned", "rope"] = "learned"
+    ffn: Literal["gelu", "swiglu"] = "gelu"
+    rope_theta: float = Field(10000.0, gt=0.0)
 
     def to_gpt(self) -> GPTConfig:
         return GPTConfig(**self.model_dump())

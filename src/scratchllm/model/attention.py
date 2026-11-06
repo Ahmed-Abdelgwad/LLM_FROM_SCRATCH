@@ -37,8 +37,10 @@ return the weights. With `fast=True`, `forward` uses `F.scaled_dot_product_atten
 the same numbers (the tests compare them) without ever building the T x T tables in memory,
 which on the RTX 3050 is about 4 times faster and uses about 3.5 times less memory per layer.
 
-Positions are not handled here. Attention alone does not know the order of the tokens; the model
-adds that information to the inputs (a learned position embedding in GPT-2).
+Positions. Attention alone does not know the order of the tokens. By default the model adds that
+information to the inputs (a learned position embedding in GPT-2) and nothing happens here. With
+`rope=True` the order is put into the queries and keys instead (rotary embeddings, Su et al. 2021,
+D-027): see `rotary_cos_sin` and `apply_rotary`.
 """
 
 from __future__ import annotations
@@ -50,6 +52,37 @@ import torch.nn.functional as F  # noqa: N812
 from torch import nn
 
 
+def rotary_cos_sin(
+    length: int, head_dim: int, theta: float = 10000.0
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """cos and sin tables (length, head_dim) for rotary embeddings.
+
+    Each head vector is cut in two halves; dimension i of the first half is paired with dimension
+    i of the second, and the pair is rotated in its plane by the angle position * theta^(-2i/d).
+    Low pairs turn fast (they tell neighbours apart), high pairs slowly (they track long range).
+    """
+    if head_dim % 2:
+        raise ValueError(f"rotary embeddings need an even head size, got {head_dim}")
+    inv_freq = theta ** (-torch.arange(0, head_dim, 2, dtype=torch.float32) / head_dim)
+    angles = torch.arange(length, dtype=torch.float32)[:, None] * inv_freq[None, :]
+    angles = torch.cat(
+        [angles, angles], dim=-1
+    )  # (length, head_dim): the same angle for both halves
+    return angles.cos(), angles.sin()
+
+
+def apply_rotary(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:
+    """Rotate x (..., T, head_dim) pair by pair: (a, b) -> (a cos - b sin, b cos + a sin).
+
+    The dot product of a rotated query at position i and a rotated key at position j depends on
+    the two vectors and on i - j only, never on i and j separately: that is what makes the position
+    relative. The rotation does not change a vector's length.
+    """
+    half = x.shape[-1] // 2
+    rotated = torch.cat([-x[..., half:], x[..., :half]], dim=-1)
+    return x * cos.to(x.dtype) + rotated * sin.to(x.dtype)
+
+
 class CausalSelfAttention(nn.Module):
     def __init__(
         self,
@@ -59,6 +92,8 @@ class CausalSelfAttention(nn.Module):
         dropout: float = 0.0,
         bias: bool = False,
         fast: bool = False,
+        rope: bool = False,
+        rope_theta: float = 10000.0,
     ) -> None:
         super().__init__()
         if d_model % n_heads != 0:
@@ -78,13 +113,21 @@ class CausalSelfAttention(nn.Module):
         future = torch.triu(torch.ones(context_length, context_length, dtype=torch.bool), 1)
         self.future: torch.Tensor
         self.register_buffer("future", future, persistent=False)
+        self.rope = rope
+        self.rope_cos: torch.Tensor
+        self.rope_sin: torch.Tensor
+        cos, sin = (
+            rotary_cos_sin(context_length, self.head_dim, rope_theta) if rope else (None, None)
+        )
+        self.register_buffer("rope_cos", cos, persistent=False)  # tables, rebuilt from the config
+        self.register_buffer("rope_sin", sin, persistent=False)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """x: (batch, T, d_model) -> (batch, T, d_model)."""
         if not self.fast:
             return self.forward_with_weights(x)[0]
         batch, length, width = self._check(x)
-        q, k, v = (self._heads(t) for t in self.qkv(x).split(self.d_model, dim=2))
+        q, k, v = self._qkv(x)
         out = F.scaled_dot_product_attention(
             q, k, v, dropout_p=self.dropout if self.training else 0.0, is_causal=True
         )
@@ -99,6 +142,14 @@ class CausalSelfAttention(nn.Module):
             raise ValueError(f"expected last dimension {self.d_model}, got {width}")
         return batch, length, width
 
+    def _qkv(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        q, k, v = (self._heads(t) for t in self.qkv(x).split(self.d_model, dim=2))
+        if self.rope:
+            length = x.shape[1]
+            cos, sin = self.rope_cos[:length], self.rope_sin[:length]
+            q, k = apply_rotary(q, cos, sin), apply_rotary(k, cos, sin)
+        return q, k, v
+
     def _heads(self, t: torch.Tensor) -> torch.Tensor:
         """(batch, T, d_model) -> (batch, heads, T, head_dim)."""
         batch, length, _ = t.shape
@@ -107,7 +158,7 @@ class CausalSelfAttention(nn.Module):
     def forward_with_weights(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Also returns the attention weights (batch, heads, T, T), to look at or to test."""
         batch, length, width = self._check(x)
-        q, k, v = (self._heads(t) for t in self.qkv(x).split(self.d_model, dim=2))
+        q, k, v = self._qkv(x)
         scores = q @ k.transpose(-2, -1) / math.sqrt(self.head_dim)  # (batch, H, T, T)
         scores = scores.masked_fill(self.future[:length, :length], float("-inf"))
         weights = torch.softmax(scores, dim=-1)
