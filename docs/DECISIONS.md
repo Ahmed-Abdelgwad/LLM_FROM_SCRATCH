@@ -1718,3 +1718,58 @@ source is hurt was not investigated.
 - Which of the three changes helps and which hurts `wiki_ary`: three runs with one switch each (or one removed). Rotary embeddings are the first suspect for the generalization difference; nothing here shows it.
 - A longer run, to see where the narrowing advantage ends.
 - A key/value cache and grouped-query attention (not built).
+
+## D-030 (2026-11-06): key/value cache for generation
+
+Code: `model/cache.py` (`KVCache`), a cached branch in `model/attention.py`, `cache=` and `new_cache()` in
+`model/gpt.py`, `use_cache=` in `model/generate.py`, `--cache/--no-cache` in `scratchllm generate`. Tests:
+`tests/test_kv_cache.py`. Evidence kept in git: `reports/diagnostics/final-d030/kv-cache-real-checkpoints.txt`,
+the output of `scripts/check_kv_cache.py` (needs a GPU and the two checkpoints; the timings in it vary from run
+to run). Item 6 of the plan; nothing in training or evaluation uses it.
+
+**What it does.** Without a cache every generated token feeds the whole text so far through the model again.
+Causal attention makes that waste avoidable: the keys and values of a position never change once computed. The
+cache keeps them per layer (room for the whole 512-token window, filled from the left); the prompt goes through once
+and each later step feeds one token, one query against the stored keys. Both architectures work: with rotary
+embeddings the new token is rotated by its absolute position (the cache length), with learned positions it takes
+the matching row of the position table. Several new positions after stored ones (a chunk) use a mask that lets
+position i see everything up to `length + i`.
+
+**The window.** A model with learned positions, or any model whose text outgrows 512 tokens, sees a sliding window,
+and every position's numbers change when the window slides (the earliest positions it saw are gone), so a cache cannot
+be slid without changing the result. `generate` therefore uses the cache while the text fits in the window and, once it
+does not, recomputes the window at each step exactly as before. A prompt longer than the window goes straight to the
+recomputing path. The cache is refused in training mode, with a loss, with a changed batch size, and past the window.
+
+**Is it equivalent to generation without a cache? Numerically, not bitwise, and the text is not guaranteed to be the same.**
+The criterion set for it was "must match generation without a cache"; it did not say how closely. What was found:
+
+- *Established (logits).* Float32, CPU tests (four architecture variants; a text fed in pieces of 5, 4 and 1 tokens against fed whole): the logits agree to 1e-5.
+  Real checkpoints, float32: the largest logit difference is 3.0e-05 (baseline) and 1.8e-05 (modern) over 4 texts of 200 tokens.
+- *Observed, float32 (text).* CPU tests: greedy text identical with and without the cache for prompts of 1, 5, 16 and 22 tokens (shorter than, equal to and
+  longer than the 16-token test window) and 20 new tokens, four variants; sampled text identical for the same seed; end-of-text handling unchanged. Real checkpoints: the six prompts
+  of D-022, 400 new tokens, seed 1, both models, greedy and sampled: 24 of 24 completions identical. This is an observation, not a guarantee: two tokens that are nearly tied
+  can be ordered differently by a different order of floating-point operations, in float32 as anywhere.
+- *Not the same, bfloat16.* Under bfloat16 autocast, which the GPU commands use, the text **differs** on some prompts: identical on 4 of 6 (greedy) and 2 of 6 (sampled) for the baseline,
+  5 of 6 and 1 of 6 for the modern model. This is rounding, not a logic difference: in bf16 both computations are about 0.2 from the float32 logits (uncached 0.272 and 0.179, cached 0.246 and 0.165, for the
+  two models) and the cached one is no further than the uncached one; but a different token at one step changes everything after it. Neither text is the right one.
+  So the cache cannot be described as preserving the text. It preserves the model's computation to the precision of the arithmetic used.
+- *Tests.* Seven deliberate mistakes (rotary position ignored, learned position ignored, wrong mask for a chunk, cache length not advanced, wrong token fed, keys overwritten, no
+  fall-back past the window) each make a test fail. The CPU tests establish the logic; the bf16 behaviour is measured on real checkpoints only, by `scripts/check_kv_cache.py`.
+
+**Speed.** Per generated token (300 tokens, `modern-17m`): on the CPU 29.6 ms without the cache, 6.3 ms with it (4.7x);
+on the RTX 3050 3.6 ms and 2.8 ms (1.3x). On the GPU the model is small enough that a step is limited by launching kernels,
+not by arithmetic, so the cache helps little there: in the six-prompt runs float32 on the GPU gave 1.6x to 2.0x in one run and
+1.04x to 1.12x in another on the same machine, and bf16 about 1.0x to 1.1x. The GPU timings are noisy and should be read as
+"between none and about twofold"; the CPU gain is the clear one. A larger model or a longer context, where the arithmetic dominates, would benefit more; not measured.
+
+**Decisions.**
+
+1. The cache is built and tested as a numerically equivalent computation. In the library, `generate(..., use_cache=True)` is the default, for any model that offers `new_cache()` (the test doubles do not and run as before); callers who need the text to match a recorded one must pass `use_cache=False`.
+2. The command `scratchllm generate` keeps it **off by default** (`--cache` turns it on): under bf16 it changes some samples (the arithmetic differs, see above), and
+   the samples of D-022 and D-023 are recorded with exact prompts, seeds and settings that should repeat exactly; on the GPU the gain is small.
+3. Nothing in D-022 to D-029 is affected: none of their numbers or samples used generation with a cache.
+
+**Not built.** Grouped-query attention (it shrinks the cache by sharing keys and values between heads; at 6 heads, 384 wide, the cache is
+2 x 6 layers x 512 x 384 values per sequence, about 9 MiB in float32, so there is nothing to save yet), and a cache that slides
+(it would need the model to be trained for it, as in models with a sliding window).
