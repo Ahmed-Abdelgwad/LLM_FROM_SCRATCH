@@ -1,0 +1,44 @@
+# Ablation, stage 1 of 2 (D-031): the GPT-2 baseline `local-17m` with exactly one modern switch on:
+# RMSNorm instead of LayerNorm. Every other setting, the seed (1337) and the token budget are those of `local-17m`.
+# Question: what does this component alone do? It is not an adoption test; it attributes the effect
+# of D-028/D-029 (modern package: Arabic mean about -0.066 bits/char, English about -0.072, `wiki_ary` +0.09).
+#
+# Fixed before the runs (D-031), all bits per character at step 5,000 against `local-17m`
+# (in-training validation for the Arabic mean and English, full evaluation for `wiki_ary`):
+#   Arabic-mean effect <= -0.01: helps;  >= +0.01: hurts;  within +-0.01: neutral;
+#   an effect between 0.005 and 0.015 in size is "unresolved" (a second seed decides), not classified.
+#   English is classified the same way. `wiki_ary` (unseen) counts only if the change is 0.05 or more.
+#   Speed and peak memory are read from the log: 10% or more is a difference, less is not.
+# One seed. Baseline numbers (seed 1337): Arabic mean 2.0153, English 1.5634; it was stopped once at
+# step 2,990 and resumed (D-026); this run should not be.
+name: ablation-rmsnorm-only
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  norm: rmsnorm
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
