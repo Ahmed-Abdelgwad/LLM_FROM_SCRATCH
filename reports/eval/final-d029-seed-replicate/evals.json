@@ -1,0 +1,3702 @@
+{
+ "b1337": {
+  "run": "local-17m",
+  "evals": [
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:22:21+00:00",
+    "step": 250,
+    "val_loss": 6.86053698681019,
+    "val_bits_per_char": 2.935433781858895,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 5.696536922454834,
+      "bits_per_char": 2.4504347036448424,
+      "train_loss": 5.667742586135864,
+      "train_bits_per_char": 2.4369742958932576
+     },
+     "fw2_arb": {
+      "loss": 6.963268256187439,
+      "bits_per_char": 2.823070209356918,
+      "train_loss": 6.989077162742615,
+      "train_bits_per_char": 2.8716114412107974
+     },
+     "fw2_ars": {
+      "loss": 7.243554997444153,
+      "bits_per_char": 3.3883117170079005,
+      "train_loss": 7.008779454231262,
+      "train_bits_per_char": 3.3432567878968786
+     },
+     "fw2_ary": {
+      "loss": 7.230659855736627,
+      "bits_per_char": 2.855582890788448,
+      "train_loss": 7.146606922149658,
+      "train_bits_per_char": 2.8814726150771173
+     },
+     "fw2_arz": {
+      "loss": 7.1605743885040285,
+      "bits_per_char": 3.1646308948786492,
+      "train_loss": 7.157137179374695,
+      "train_bits_per_char": 3.1557195841896126
+     },
+     "wiki_ar": {
+      "loss": 6.868627500534058,
+      "bits_per_char": 2.930572275476611,
+      "train_loss": 6.752287578582764,
+      "train_bits_per_char": 2.8943728147274363
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:26:29+00:00",
+    "step": 500,
+    "val_loss": 6.165773618536652,
+    "val_bits_per_char": 2.640019011678971,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 5.102259159088135,
+      "bits_per_char": 2.1947988893279127,
+      "train_loss": 5.0677029371261595,
+      "train_bits_per_char": 2.1789736582618984
+     },
+     "fw2_arb": {
+      "loss": 6.222362065315247,
+      "bits_per_char": 2.5226896813597657,
+      "train_loss": 6.255821466445923,
+      "train_bits_per_char": 2.570337696796693
+     },
+     "fw2_ars": {
+      "loss": 6.70385890007019,
+      "bits_per_char": 3.135858520890681,
+      "train_loss": 6.445632958412171,
+      "train_bits_per_char": 3.074630366274939
+     },
+     "fw2_ary": {
+      "loss": 6.448320986732604,
+      "bits_per_char": 2.5466161389705984,
+      "train_loss": 6.418803024291992,
+      "train_bits_per_char": 2.588026085322766
+     },
+     "fw2_arz": {
+      "loss": 6.49261691570282,
+      "bits_per_char": 2.86942568644098,
+      "train_loss": 6.447625470161438,
+      "train_bits_per_char": 2.842882210829146
+     },
+     "wiki_ar": {
+      "loss": 6.025223684310913,
+      "bits_per_char": 2.570725153083886,
+      "train_loss": 5.925172162055969,
+      "train_bits_per_char": 2.539829210300626
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:30:38+00:00",
+    "step": 750,
+    "val_loss": 5.803823589774036,
+    "val_bits_per_char": 2.485975835045646,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.832874846458435,
+      "bits_per_char": 2.0789199479164586,
+      "train_loss": 4.784872436523438,
+      "train_bits_per_char": 2.0573642785858586
+     },
+     "fw2_arb": {
+      "loss": 5.829529547691346,
+      "bits_per_char": 2.3634262813341698,
+      "train_loss": 5.872783946990967,
+      "train_bits_per_char": 2.4129585610871334
+     },
+     "fw2_ars": {
+      "loss": 6.414405965805054,
+      "bits_per_char": 3.000461361755569,
+      "train_loss": 6.128464078903198,
+      "train_bits_per_char": 2.923337688819114
+     },
+     "fw2_ary": {
+      "loss": 6.055595299554249,
+      "bits_per_char": 2.3915181568424657,
+      "train_loss": 6.032869529724121,
+      "train_bits_per_char": 2.4324198223853557
+     },
+     "fw2_arz": {
+      "loss": 6.123570156097412,
+      "bits_per_char": 2.706324695691253,
+      "train_loss": 6.055093145370483,
+      "train_bits_per_char": 2.669807151105543
+     },
+     "wiki_ar": {
+      "loss": 5.56696572303772,
+      "bits_per_char": 2.375204566733958,
+      "train_loss": 5.528530263900757,
+      "train_bits_per_char": 2.3698083819751687
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:34:47+00:00",
+    "step": 1000,
+    "val_loss": 5.566422624941225,
+    "val_bits_per_char": 2.3848187513550485,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.616492843627929,
+      "bits_per_char": 1.9858405952855707,
+      "train_loss": 4.573036098480225,
+      "train_bits_per_char": 1.9662804470776558
+     },
+     "fw2_arb": {
+      "loss": 5.57399730682373,
+      "bits_per_char": 2.2598275931631986,
+      "train_loss": 5.615111446380615,
+      "train_bits_per_char": 2.3070883176188643
+     },
+     "fw2_ars": {
+      "loss": 6.213740038871765,
+      "bits_per_char": 2.9065960274449694,
+      "train_loss": 5.872416687011719,
+      "train_bits_per_char": 2.801200562582721
+     },
+     "fw2_ary": {
+      "loss": 5.808244440290663,
+      "bits_per_char": 2.29383262110612,
+      "train_loss": 5.777454233169555,
+      "train_bits_per_char": 2.329437779226837
+     },
+     "fw2_arz": {
+      "loss": 5.8963781833648685,
+      "bits_per_char": 2.605916726027238,
+      "train_loss": 5.801529407501221,
+      "train_bits_per_char": 2.5580060170235686
+     },
+     "wiki_ar": {
+      "loss": 5.289682936668396,
+      "bits_per_char": 2.256898945103194,
+      "train_loss": 5.253135013580322,
+      "train_bits_per_char": 2.2517600144321763
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:38:56+00:00",
+    "step": 1250,
+    "val_loss": 5.401458891012051,
+    "val_bits_per_char": 2.3144889450696513,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.44805748462677,
+      "bits_per_char": 1.9133860751734717,
+      "train_loss": 4.409509301185608,
+      "train_bits_per_char": 1.8959683967965537
+     },
+     "fw2_arb": {
+      "loss": 5.411220693588257,
+      "bits_per_char": 2.1938341845081832,
+      "train_loss": 5.448156952857971,
+      "train_bits_per_char": 2.2384915025319
+     },
+     "fw2_ars": {
+      "loss": 6.078709268569947,
+      "bits_per_char": 2.8434327959472188,
+      "train_loss": 5.738967609405518,
+      "train_bits_per_char": 2.737544039009824
+     },
+     "fw2_ary": {
+      "loss": 5.638945208655463,
+      "bits_per_char": 2.226971781441874,
+      "train_loss": 5.6074995517730715,
+      "train_bits_per_char": 2.260912986191093
+     },
+     "fw2_arz": {
+      "loss": 5.741624450683593,
+      "bits_per_char": 2.5375229887416912,
+      "train_loss": 5.625505113601685,
+      "train_bits_per_char": 2.4803935167137108
+     },
+     "wiki_ar": {
+      "loss": 5.0901962399482725,
+      "bits_per_char": 2.1717858446054676,
+      "train_loss": 5.066996669769287,
+      "train_bits_per_char": 2.1719716825764808
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:43:04+00:00",
+    "step": 1500,
+    "val_loss": 5.243237605044451,
+    "val_bits_per_char": 2.2471405200265715,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.28139214515686,
+      "bits_per_char": 1.841692950509966,
+      "train_loss": 4.235441505908966,
+      "train_bits_per_char": 1.8211240056857723
+     },
+     "fw2_arb": {
+      "loss": 5.246359801292419,
+      "bits_per_char": 2.1269957608534833,
+      "train_loss": 5.2730865478515625,
+      "train_bits_per_char": 2.1665600920856414
+     },
+     "fw2_ars": {
+      "loss": 5.956274676322937,
+      "bits_per_char": 2.7861616682172565,
+      "train_loss": 5.582527828216553,
+      "train_bits_per_char": 2.662920723527788
+     },
+     "fw2_ary": {
+      "loss": 5.465741195375958,
+      "bits_per_char": 2.1585688380307757,
+      "train_loss": 5.449455881118775,
+      "train_bits_per_char": 2.1971906471933798
+     },
+     "fw2_arz": {
+      "loss": 5.582664608955383,
+      "bits_per_char": 2.467270352726104,
+      "train_loss": 5.476808500289917,
+      "train_bits_per_char": 2.4148303169356105
+     },
+     "wiki_ar": {
+      "loss": 4.926993203163147,
+      "bits_per_char": 2.1021535498218453,
+      "train_loss": 4.901738214492798,
+      "train_bits_per_char": 2.1011335296113614
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:47:13+00:00",
+    "step": 1750,
+    "val_loss": 5.086072984574333,
+    "val_bits_per_char": 2.1798984530360284,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.121784150600433,
+      "bits_per_char": 1.7730356286731608,
+      "train_loss": 4.077168500423431,
+      "train_bits_per_char": 1.7530709421882311
+     },
+     "fw2_arb": {
+      "loss": 5.082722878456115,
+      "bits_per_char": 2.060653562762879,
+      "train_loss": 5.114723086357117,
+      "train_bits_per_char": 2.1014930857687815
+     },
+     "fw2_ars": {
+      "loss": 5.815223503112793,
+      "bits_per_char": 2.7201822778413605,
+      "train_loss": 5.439548301696777,
+      "train_bits_per_char": 2.5947180820138027
+     },
+     "fw2_ary": {
+      "loss": 5.327597708929153,
+      "bits_per_char": 2.104012243716857,
+      "train_loss": 5.290516567230225,
+      "train_bits_per_char": 2.13310718976835
+     },
+     "fw2_arz": {
+      "loss": 5.41143012046814,
+      "bits_per_char": 2.391592910787164,
+      "train_loss": 5.304273629188538,
+      "train_bits_per_char": 2.338756370321969
+     },
+     "wiki_ar": {
+      "loss": 4.757679545879364,
+      "bits_per_char": 2.029914094434751,
+      "train_loss": 4.736910152435303,
+      "train_bits_per_char": 2.030479865001959
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:51:23+00:00",
+    "step": 2000,
+    "val_loss": 4.96216673712251,
+    "val_bits_per_char": 2.1268357361663424,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.005380797386169,
+      "bits_per_char": 1.7229633092588,
+      "train_loss": 3.962218868732452,
+      "train_bits_per_char": 1.703645744502198
+     },
+     "fw2_arb": {
+      "loss": 4.95895733833313,
+      "bits_per_char": 2.0104761465825245,
+      "train_loss": 4.9800021886825565,
+      "train_bits_per_char": 2.046140131133402
+     },
+     "fw2_ars": {
+      "loss": 5.699505019187927,
+      "bits_per_char": 2.666052738534299,
+      "train_loss": 5.340236687660218,
+      "train_bits_per_char": 2.547345464582636
+     },
+     "fw2_ary": {
+      "loss": 5.217722264547197,
+      "bits_per_char": 2.06061946278747,
+      "train_loss": 5.162102055549622,
+      "train_bits_per_char": 2.081331164751591
+     },
+     "fw2_arz": {
+      "loss": 5.272044444084168,
+      "bits_per_char": 2.3299911182694513,
+      "train_loss": 5.162465167045593,
+      "train_bits_per_char": 2.276230289017014
+     },
+     "wiki_ar": {
+      "loss": 4.619390559196472,
+      "bits_per_char": 1.9709116415655092,
+      "train_loss": 4.605437755584717,
+      "train_bits_per_char": 1.9741241297192416
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:55:35+00:00",
+    "step": 2250,
+    "val_loss": 4.874314088354666,
+    "val_bits_per_char": 2.0892833519658276,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.9243187308311462,
+      "bits_per_char": 1.6880934745259464,
+      "train_loss": 3.887529134750366,
+      "train_bits_per_char": 1.6715312016987387
+     },
+     "fw2_arb": {
+      "loss": 4.8710082292556764,
+      "bits_per_char": 1.974819541000021,
+      "train_loss": 4.89309549331665,
+      "train_bits_per_char": 2.0104326614747583
+     },
+     "fw2_ars": {
+      "loss": 5.620635724067688,
+      "bits_per_char": 2.6291601137302694,
+      "train_loss": 5.252229714393616,
+      "train_bits_per_char": 2.5053652720716277
+     },
+     "fw2_ary": {
+      "loss": 5.129310600341312,
+      "bits_per_char": 2.0257033084267926,
+      "train_loss": 5.077962803840637,
+      "train_bits_per_char": 2.047406681105918
+     },
+     "fw2_arz": {
+      "loss": 5.169888830184936,
+      "bits_per_char": 2.2848432300846953,
+      "train_loss": 5.060239362716675,
+      "train_bits_per_char": 2.231156963657266
+     },
+     "wiki_ar": {
+      "loss": 4.530722415447235,
+      "bits_per_char": 1.9330804440272407,
+      "train_loss": 4.51199609041214,
+      "train_bits_per_char": 1.9340702942907546
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T04:59:47+00:00",
+    "step": 2500,
+    "val_loss": 4.810123218335803,
+    "val_bits_per_char": 2.0620274775965117,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.8739455103874207,
+      "bits_per_char": 1.6664248205366974,
+      "train_loss": 3.8359591245651243,
+      "train_bits_per_char": 1.6493575077896672
+     },
+     "fw2_arb": {
+      "loss": 4.798062205314636,
+      "bits_per_char": 1.9452455335795829,
+      "train_loss": 4.8186256885528564,
+      "train_bits_per_char": 1.9798351536200118
+     },
+     "fw2_ars": {
+      "loss": 5.573961687088013,
+      "bits_per_char": 2.607327438140163,
+      "train_loss": 5.202258944511414,
+      "train_bits_per_char": 2.481528722969737
+     },
+     "fw2_ary": {
+      "loss": 5.053611369360061,
+      "bits_per_char": 1.995807637333316,
+      "train_loss": 4.994498991966248,
+      "train_bits_per_char": 2.0137545310876184
+     },
+     "fw2_arz": {
+      "loss": 5.100224852561951,
+      "bits_per_char": 2.2540550888149427,
+      "train_loss": 4.982303237915039,
+      "train_bits_per_char": 2.1967934256687633
+     },
+     "wiki_ar": {
+      "loss": 4.460933685302734,
+      "bits_per_char": 1.9033043471743698,
+      "train_loss": 4.442315709590912,
+      "train_bits_per_char": 1.9042017500941895
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T05:03:59+00:00",
+    "step": 2750,
+    "val_loss": 4.752522051965118,
+    "val_bits_per_char": 2.0374015923781488,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.8204678773880003,
+      "bits_per_char": 1.6434207656952355,
+      "train_loss": 3.7789977192878723,
+      "train_bits_per_char": 1.624865661448907
+     },
+     "fw2_arb": {
+      "loss": 4.7404515743255615,
+      "bits_per_char": 1.9218888496053597,
+      "train_loss": 4.757145524024963,
+      "train_bits_per_char": 1.9545747165472955
+     },
+     "fw2_ars": {
+      "loss": 5.51905083656311,
+      "bits_per_char": 2.5816418351054593,
+      "train_loss": 5.150155258178711,
+      "train_bits_per_char": 2.456674751726414
+     },
+     "fw2_ary": {
+      "loss": 4.994607213943723,
+      "bits_per_char": 1.9725053025458985,
+      "train_loss": 4.934719920158386,
+      "train_bits_per_char": 1.9896519380325537
+     },
+     "fw2_arz": {
+      "loss": 5.038113260269165,
+      "bits_per_char": 2.2266047401089195,
+      "train_loss": 4.909885358810425,
+      "train_bits_per_char": 2.164862988455057
+     },
+     "wiki_ar": {
+      "loss": 4.402441549301147,
+      "bits_per_char": 1.8783480612080208,
+      "train_loss": 4.3867709040641785,
+      "train_bits_per_char": 1.8803924301792871
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:18:00+00:00",
+    "step": 3000,
+    "val_loss": 4.703317745526632,
+    "val_bits_per_char": 2.0163284847409435,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.7829311728477477,
+      "bits_per_char": 1.6272738952864225,
+      "train_loss": 3.742975151538849,
+      "train_bits_per_char": 1.6093769425555717
+     },
+     "fw2_arb": {
+      "loss": 4.6912741422653195,
+      "bits_per_char": 1.901951179776457,
+      "train_loss": 4.700299692153931,
+      "train_bits_per_char": 1.9312183939048442
+     },
+     "fw2_ars": {
+      "loss": 5.4666666984558105,
+      "bits_per_char": 2.5571381502439583,
+      "train_loss": 5.099376440048218,
+      "train_bits_per_char": 2.4324527556563758
+     },
+     "fw2_ary": {
+      "loss": 4.944098949432373,
+      "bits_per_char": 1.9525582245668949,
+      "train_loss": 4.880709290504456,
+      "train_bits_per_char": 1.96787514913592
+     },
+     "fw2_arz": {
+      "loss": 4.983196973800659,
+      "bits_per_char": 2.2023343719287842,
+      "train_loss": 4.860914492607117,
+      "train_bits_per_char": 2.1432707906727018
+     },
+     "wiki_ar": {
+      "loss": 4.35173853635788,
+      "bits_per_char": 1.8567150866431432,
+      "train_loss": 4.339720344543457,
+      "train_bits_per_char": 1.8602241747829322
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:22:08+00:00",
+    "step": 3250,
+    "val_loss": 4.6678452988781,
+    "val_bits_per_char": 2.0012315399940754,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.757971501350403,
+      "bits_per_char": 1.6165371887467739,
+      "train_loss": 3.7119319081306457,
+      "train_bits_per_char": 1.596029196941294
+     },
+     "fw2_arb": {
+      "loss": 4.649561834335327,
+      "bits_per_char": 1.885040044150446,
+      "train_loss": 4.654621052742004,
+      "train_bits_per_char": 1.9124503504994173
+     },
+     "fw2_ars": {
+      "loss": 5.436400151252746,
+      "bits_per_char": 2.54298039254657,
+      "train_loss": 5.070590710639953,
+      "train_bits_per_char": 2.4187216793873625
+     },
+     "fw2_ary": {
+      "loss": 4.904843247126019,
+      "bits_per_char": 1.937055087355569,
+      "train_loss": 4.836651110649109,
+      "train_bits_per_char": 1.950111133274091
+     },
+     "fw2_arz": {
+      "loss": 4.945694231987,
+      "bits_per_char": 2.18575995639353,
+      "train_loss": 4.819162034988404,
+      "train_bits_per_char": 2.1248613282168023
+     },
+     "wiki_ar": {
+      "loss": 4.312600827217102,
+      "bits_per_char": 1.840016570771564,
+      "train_loss": 4.296552050113678,
+      "train_bits_per_char": 1.8417200550454955
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:26:17+00:00",
+    "step": 3500,
+    "val_loss": 4.631201721530743,
+    "val_bits_per_char": 1.9855877487535858,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.7221904754638673,
+      "bits_per_char": 1.6011455448835061,
+      "train_loss": 3.6768470644950866,
+      "train_bits_per_char": 1.5809436737694338
+     },
+     "fw2_arb": {
+      "loss": 4.612144017219544,
+      "bits_per_char": 1.869869994554142,
+      "train_loss": 4.6119345903396605,
+      "train_bits_per_char": 1.8949117068466002
+     },
+     "fw2_ars": {
+      "loss": 5.398792266845703,
+      "bits_per_char": 2.5253885836304755,
+      "train_loss": 5.032796692848206,
+      "train_bits_per_char": 2.4006935608898012
+     },
+     "fw2_ary": {
+      "loss": 4.863497181544228,
+      "bits_per_char": 1.9207264092221197,
+      "train_loss": 4.795776581764221,
+      "train_bits_per_char": 1.9336307479781054
+     },
+     "fw2_arz": {
+      "loss": 4.913522958755493,
+      "bits_per_char": 2.171541794599211,
+      "train_loss": 4.774454498291016,
+      "train_bits_per_char": 2.105148914498731
+     },
+     "wiki_ar": {
+      "loss": 4.277063429355621,
+      "bits_per_char": 1.8248541656320603,
+      "train_loss": 4.259986889362335,
+      "train_bits_per_char": 1.8260463731986927
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:30:26+00:00",
+    "step": 3750,
+    "val_loss": 4.603688719253691,
+    "val_bits_per_char": 1.9738772427411926,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6976648449897764,
+      "bits_per_char": 1.5905955463737829,
+      "train_loss": 3.6527254939079286,
+      "train_bits_per_char": 1.5705720581563196
+     },
+     "fw2_arb": {
+      "loss": 4.584551215171814,
+      "bits_per_char": 1.858683233598263,
+      "train_loss": 4.585335779190063,
+      "train_bits_per_char": 1.883983017887926
+     },
+     "fw2_ars": {
+      "loss": 5.3785244703292845,
+      "bits_per_char": 2.5159079332538656,
+      "train_loss": 5.0050173044204715,
+      "train_bits_per_char": 2.3874425191740314
+     },
+     "fw2_ary": {
+      "loss": 4.832379295712426,
+      "bits_per_char": 1.9084371155543634,
+      "train_loss": 4.764478254318237,
+      "train_bits_per_char": 1.9210114344471199
+     },
+     "fw2_arz": {
+      "loss": 4.881794357299805,
+      "bits_per_char": 2.1575192725262378,
+      "train_loss": 4.743583393096924,
+      "train_bits_per_char": 2.091537249833798
+     },
+     "wiki_ar": {
+      "loss": 4.247218132019043,
+      "bits_per_char": 1.8121203551406437,
+      "train_loss": 4.228651666641236,
+      "train_bits_per_char": 1.8126145079631162
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:34:35+00:00",
+    "step": 4000,
+    "val_loss": 4.5785257059114945,
+    "val_bits_per_char": 1.9630591656369163,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.679806339740753,
+      "bits_per_char": 1.5829134929414719,
+      "train_loss": 3.6318410634994507,
+      "train_bits_per_char": 1.5615923242823204
+     },
+     "fw2_arb": {
+      "loss": 4.5608704566955565,
+      "bits_per_char": 1.8490825057030111,
+      "train_loss": 4.55776436328888,
+      "train_bits_per_char": 1.8726547135197493
+     },
+     "fw2_ars": {
+      "loss": 5.346130347251892,
+      "bits_per_char": 2.50075496115328,
+      "train_loss": 4.973861861228943,
+      "train_bits_per_char": 2.372581066105034
+     },
+     "fw2_ary": {
+      "loss": 4.807619677649604,
+      "bits_per_char": 1.89865887357738,
+      "train_loss": 4.7411895275115965,
+      "train_bits_per_char": 1.9116215478527747
+     },
+     "fw2_arz": {
+      "loss": 4.85651969909668,
+      "bits_per_char": 2.14634908423303,
+      "train_loss": 4.7184611558914185,
+      "train_bits_per_char": 2.0804603717523587
+     },
+     "wiki_ar": {
+      "loss": 4.220207715034485,
+      "bits_per_char": 1.8005960762133248,
+      "train_loss": 4.198108446598053,
+      "train_bits_per_char": 1.7995221352318913
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:38:46+00:00",
+    "step": 4250,
+    "val_loss": 4.559952453173026,
+    "val_bits_per_char": 1.955177684698783,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.663944900035858,
+      "bits_per_char": 1.5760905015641256,
+      "train_loss": 3.6116656184196474,
+      "train_bits_per_char": 1.552917434708479
+     },
+     "fw2_arb": {
+      "loss": 4.539281034469605,
+      "bits_per_char": 1.8403296539556793,
+      "train_loss": 4.535838055610657,
+      "train_bits_per_char": 1.8636458222847316
+     },
+     "fw2_ars": {
+      "loss": 5.332244229316712,
+      "bits_per_char": 2.4942594632768746,
+      "train_loss": 4.960065746307373,
+      "train_bits_per_char": 2.3660001834906867
+     },
+     "fw2_ary": {
+      "loss": 4.785129221658858,
+      "bits_per_char": 1.8897767849970064,
+      "train_loss": 4.718545055389404,
+      "train_bits_per_char": 1.9024914212047361
+     },
+     "fw2_arz": {
+      "loss": 4.837694573402405,
+      "bits_per_char": 2.138029280382138,
+      "train_loss": 4.693699193000794,
+      "train_bits_per_char": 2.0695423455529856
+     },
+     "wiki_ar": {
+      "loss": 4.201420760154724,
+      "bits_per_char": 1.7925804240168741,
+      "train_loss": 4.176708018779754,
+      "train_bits_per_char": 1.790348826811603
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:42:56+00:00",
+    "step": 4500,
+    "val_loss": 4.544907902662086,
+    "val_bits_per_char": 1.9487692049698377,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6512746572494508,
+      "bits_per_char": 1.570640242389111,
+      "train_loss": 3.599682605266571,
+      "train_bits_per_char": 1.5477650667952236
+     },
+     "fw2_arb": {
+      "loss": 4.5239707946777346,
+      "bits_per_char": 1.8341225281830749,
+      "train_loss": 4.51859061717987,
+      "train_bits_per_char": 1.8565593442882593
+     },
+     "fw2_ars": {
+      "loss": 5.319829964637757,
+      "bits_per_char": 2.488452452978122,
+      "train_loss": 4.943129539489746,
+      "train_bits_per_char": 2.357921446133632
+     },
+     "fw2_ary": {
+      "loss": 4.766184133196634,
+      "bits_per_char": 1.8822948578207088,
+      "train_loss": 4.702831339836121,
+      "train_bits_per_char": 1.8961557374962108
+     },
+     "fw2_arz": {
+      "loss": 4.817485642433167,
+      "bits_per_char": 2.1290979008826953,
+      "train_loss": 4.676282215118408,
+      "train_bits_per_char": 2.061862864662325
+     },
+     "wiki_ar": {
+      "loss": 4.190702223777771,
+      "bits_per_char": 1.7880072475653133,
+      "train_loss": 4.161642563343048,
+      "train_bits_per_char": 1.7838910087536464
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:47:05+00:00",
+    "step": 4750,
+    "val_loss": 4.532483220604992,
+    "val_bits_per_char": 1.943472437394024,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6393150448799134,
+      "bits_per_char": 1.5654956695387297,
+      "train_loss": 3.589015746116638,
+      "train_bits_per_char": 1.5431786091057216
+     },
+     "fw2_arb": {
+      "loss": 4.50916600227356,
+      "bits_per_char": 1.8281203224868054,
+      "train_loss": 4.504105281829834,
+      "train_bits_per_char": 1.8506077352628671
+     },
+     "fw2_ars": {
+      "loss": 5.3086594343185425,
+      "bits_per_char": 2.4832272232698998,
+      "train_loss": 4.934092998504639,
+      "train_bits_per_char": 2.3536109271360153
+     },
+     "fw2_ary": {
+      "loss": 4.754000762152294,
+      "bits_per_char": 1.877483315499472,
+      "train_loss": 4.688197016716003,
+      "train_bits_per_char": 1.890255258881651
+     },
+     "fw2_arz": {
+      "loss": 4.806117987632751,
+      "bits_per_char": 2.1240739419609826,
+      "train_loss": 4.661761736869812,
+      "train_bits_per_char": 2.0554605062287123
+     },
+     "wiki_ar": {
+      "loss": 4.1776400923728945,
+      "bits_per_char": 1.7824341516082551,
+      "train_loss": 4.151743245124817,
+      "train_bits_per_char": 1.779647659044125
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-03T16:51:15+00:00",
+    "step": 5000,
+    "val_loss": 4.524205777727107,
+    "val_bits_per_char": 1.9399527170613124,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.634350311756134,
+      "bits_per_char": 1.5633600291476553,
+      "train_loss": 3.581213879585266,
+      "train_bits_per_char": 1.5398240198829414
+     },
+     "fw2_arb": {
+      "loss": 4.5007462978363035,
+      "bits_per_char": 1.8247067793208807,
+      "train_loss": 4.496170711517334,
+      "train_bits_per_char": 1.8473476477921023
+     },
+     "fw2_ars": {
+      "loss": 5.299620056152344,
+      "bits_per_char": 2.4789988808377927,
+      "train_loss": 4.9247967004776,
+      "train_bits_per_char": 2.349176501472579
+     },
+     "fw2_ary": {
+      "loss": 4.741942284599183,
+      "bits_per_char": 1.8727210969915304,
+      "train_loss": 4.6780353307724,
+      "train_bits_per_char": 1.886158122983669
+     },
+     "fw2_arz": {
+      "loss": 4.799522066116333,
+      "bits_per_char": 2.1211588605892198,
+      "train_loss": 4.653114223480225,
+      "train_bits_per_char": 2.0516476510780937
+     },
+     "wiki_ar": {
+      "loss": 4.169053649902343,
+      "bits_per_char": 1.7787706554807952,
+      "train_loss": 4.143813908100128,
+      "train_bits_per_char": 1.7762487431573273
+     }
+    }
+   }
+  ]
+ },
+ "m1337": {
+  "run": "modern-17m",
+  "evals": [
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:07:37+00:00",
+    "step": 250,
+    "val_loss": 6.578366294172075,
+    "val_bits_per_char": 2.8153185385939756,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 5.226341629028321,
+      "bits_per_char": 2.2481744742831964,
+      "train_loss": 5.192002201080323,
+      "train_bits_per_char": 2.2324189421030733
+     },
+     "fw2_arb": {
+      "loss": 6.698057794570923,
+      "bits_per_char": 2.7155477463620312,
+      "train_loss": 6.73525640964508,
+      "train_bits_per_char": 2.7673237703724918
+     },
+     "fw2_ars": {
+      "loss": 7.057853746414184,
+      "bits_per_char": 3.301446396740451,
+      "train_loss": 6.7985745668411255,
+      "train_bits_per_char": 3.2429869875407116
+     },
+     "fw2_ary": {
+      "loss": 6.960692564646403,
+      "bits_per_char": 2.748965515211291,
+      "train_loss": 6.883880281448365,
+      "train_bits_per_char": 2.7755426781603867
+     },
+     "fw2_arz": {
+      "loss": 6.94713146686554,
+      "bits_per_char": 3.0702993472314715,
+      "train_loss": 6.927806258201599,
+      "train_bits_per_char": 3.0546031655618213
+     },
+     "wiki_ar": {
+      "loss": 6.58012056350708,
+      "bits_per_char": 2.8074777517354126,
+      "train_loss": 6.450783729553223,
+      "train_bits_per_char": 2.7651329780038423
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:10:34+00:00",
+    "step": 500,
+    "val_loss": 5.735863549621016,
+    "val_bits_per_char": 2.4569722998917913,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.522843432426453,
+      "bits_per_char": 1.9455561610217598,
+      "train_loss": 4.494240140914917,
+      "train_bits_per_char": 1.932400340441079
+     },
+     "fw2_arb": {
+      "loss": 5.797948813438415,
+      "bits_per_char": 2.3506227203080896,
+      "train_loss": 5.827750968933105,
+      "train_bits_per_char": 2.3944558014220787
+     },
+     "fw2_ars": {
+      "loss": 6.4062751770019535,
+      "bits_per_char": 2.9966580294167136,
+      "train_loss": 6.099378633499145,
+      "train_bits_per_char": 2.9094636450699705
+     },
+     "fw2_ary": {
+      "loss": 6.040059990353054,
+      "bits_per_char": 2.385382843600916,
+      "train_loss": 6.02171823978424,
+      "train_bits_per_char": 2.4279236835974554
+     },
+     "fw2_arz": {
+      "loss": 6.1373145341873165,
+      "bits_per_char": 2.7123990524640886,
+      "train_loss": 6.0672856092453005,
+      "train_bits_per_char": 2.675183043178726
+     },
+     "wiki_ar": {
+      "loss": 5.510739350318909,
+      "bits_per_char": 2.3512149925391794,
+      "train_loss": 5.452141809463501,
+      "train_bits_per_char": 2.3370644173099904
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:13:32+00:00",
+    "step": 750,
+    "val_loss": 5.4011610072125835,
+    "val_bits_per_char": 2.3145918525733093,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.28378803730011,
+      "bits_per_char": 1.8427235726816344,
+      "train_loss": 4.243024921417236,
+      "train_bits_per_char": 1.8243846669433843
+     },
+     "fw2_arb": {
+      "loss": 5.426226568222046,
+      "bits_per_char": 2.1999179135970848,
+      "train_loss": 5.463284063339233,
+      "train_bits_per_char": 2.244706798560111
+     },
+     "fw2_ars": {
+      "loss": 6.135283422470093,
+      "bits_per_char": 2.8698964410230565,
+      "train_loss": 5.820056080818176,
+      "train_bits_per_char": 2.7762240380368852
+     },
+     "fw2_ary": {
+      "loss": 5.666071081918384,
+      "bits_per_char": 2.237684521514391,
+      "train_loss": 5.656129288673401,
+      "train_bits_per_char": 2.2805202287165502
+     },
+     "fw2_arz": {
+      "loss": 5.794531226158142,
+      "bits_per_char": 2.560905249316202,
+      "train_loss": 5.718061876296997,
+      "train_bits_per_char": 2.5212035754517923
+     },
+     "wiki_ar": {
+      "loss": 5.101065707206726,
+      "bits_per_char": 2.176423417307488,
+      "train_loss": 5.084979939460754,
+      "train_bits_per_char": 2.179680223764802
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:16:31+00:00",
+    "step": 1000,
+    "val_loss": 5.2139228322203195,
+    "val_bits_per_char": 2.234880461674189,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.1460015892982485,
+      "bits_per_char": 1.7834530547385652,
+      "train_loss": 4.102105414867401,
+      "train_bits_per_char": 1.7637931333596324
+     },
+     "fw2_arb": {
+      "loss": 5.220380067825317,
+      "bits_per_char": 2.1164629752563124,
+      "train_loss": 5.2486690282821655,
+      "train_bits_per_char": 2.1565276333033503
+     },
+     "fw2_ars": {
+      "loss": 5.9763569116592405,
+      "bits_per_char": 2.7955555187944547,
+      "train_loss": 5.608700251579284,
+      "train_bits_per_char": 2.6754052270900077
+     },
+     "fw2_ary": {
+      "loss": 5.450792335328602,
+      "bits_per_char": 2.152665129401175,
+      "train_loss": 5.4270308256149296,
+      "train_bits_per_char": 2.1881489881193867
+     },
+     "fw2_arz": {
+      "loss": 5.589649105072022,
+      "bits_per_char": 2.470357165458803,
+      "train_loss": 5.48511016368866,
+      "train_bits_per_char": 2.4184906801663524
+     },
+     "wiki_ar": {
+      "loss": 4.900356984138488,
+      "bits_per_char": 2.090788926395824,
+      "train_loss": 4.871316146850586,
+      "train_bits_per_char": 2.088093088941935
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:19:28+00:00",
+    "step": 1250,
+    "val_loss": 5.074501376240342,
+    "val_bits_per_char": 2.175234109126133,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.045372986793518,
+      "bits_per_char": 1.7401664363748923,
+      "train_loss": 4.000597596168518,
+      "train_bits_per_char": 1.7201475476185868
+     },
+     "fw2_arb": {
+      "loss": 5.080851745605469,
+      "bits_per_char": 2.059894962172744,
+      "train_loss": 5.103895044326782,
+      "train_bits_per_char": 2.097044153720073
+     },
+     "fw2_ars": {
+      "loss": 5.831820917129517,
+      "bits_per_char": 2.72794603643845,
+      "train_loss": 5.468434238433838,
+      "train_bits_per_char": 2.6084969581650044
+     },
+     "fw2_ary": {
+      "loss": 5.304613643222385,
+      "bits_per_char": 2.0949352153262972,
+      "train_loss": 5.284906935691834,
+      "train_bits_per_char": 2.1308454171768765
+     },
+     "fw2_arz": {
+      "loss": 5.441053771972657,
+      "bits_per_char": 2.40468514580686,
+      "train_loss": 5.313871288299561,
+      "train_bits_per_char": 2.342988163015047
+     },
+     "wiki_ar": {
+      "loss": 4.743295192718506,
+      "bits_per_char": 2.023776858637556,
+      "train_loss": 4.710117769241333,
+      "train_bits_per_char": 2.0189952911214935
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:22:26+00:00",
+    "step": 1500,
+    "val_loss": 4.93980833326698,
+    "val_bits_per_char": 2.117786718088547,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.955665850639343,
+      "bits_per_char": 1.7015778197137272,
+      "train_loss": 3.908812379837036,
+      "train_bits_per_char": 1.6806824149765414
+     },
+     "fw2_arb": {
+      "loss": 4.934787058830262,
+      "bits_per_char": 2.0006769555265502,
+      "train_loss": 4.948730397224426,
+      "train_bits_per_char": 2.0332914485323523
+     },
+     "fw2_ars": {
+      "loss": 5.709227538108825,
+      "bits_per_char": 2.67060063315098,
+      "train_loss": 5.335831785202027,
+      "train_bits_per_char": 2.5452442827521127
+     },
+     "fw2_ary": {
+      "loss": 5.154459991152325,
+      "bits_per_char": 2.035635482190533,
+      "train_loss": 5.135523080825806,
+      "train_bits_per_char": 2.070614668288614
+     },
+     "fw2_arz": {
+      "loss": 5.284871053695679,
+      "bits_per_char": 2.3356598653350917,
+      "train_loss": 5.160920286178589,
+      "train_bits_per_char": 2.275549121297986
+     },
+     "wiki_ar": {
+      "loss": 4.599838507175446,
+      "bits_per_char": 1.962569552614399,
+      "train_loss": 4.561987066268921,
+      "train_bits_per_char": 1.955498961215503
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:25:24+00:00",
+    "step": 1750,
+    "val_loss": 4.826564567934269,
+    "val_bits_per_char": 2.0692823068645594,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.8548688888549805,
+      "bits_per_char": 1.658218779556409,
+      "train_loss": 3.7999967694282533,
+      "train_bits_per_char": 1.6338946786727064
+     },
+     "fw2_arb": {
+      "loss": 4.817651653289795,
+      "bits_per_char": 1.9531875494493978,
+      "train_loss": 4.835275602340698,
+      "train_bits_per_char": 1.9866761258707142
+     },
+     "fw2_ars": {
+      "loss": 5.593310618400574,
+      "bits_per_char": 2.6163782717020077,
+      "train_loss": 5.236441731452942,
+      "train_bits_per_char": 2.4978342488059804
+     },
+     "fw2_ary": {
+      "loss": 5.046923599545917,
+      "bits_per_char": 1.9931664563844367,
+      "train_loss": 5.015649151802063,
+      "train_bits_per_char": 2.0222821592383315
+     },
+     "fw2_arz": {
+      "loss": 5.160056447982788,
+      "bits_per_char": 2.28049778811329,
+      "train_loss": 5.026711177825928,
+      "train_bits_per_char": 2.2163737413953024
+     },
+     "wiki_ar": {
+      "loss": 4.486576199531555,
+      "bits_per_char": 1.9142449959818142,
+      "train_loss": 4.4602796077728275,
+      "train_bits_per_char": 1.911901987671331
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:28:23+00:00",
+    "step": 2000,
+    "val_loss": 4.7473960586956565,
+    "val_bits_per_char": 2.035335530102991,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.774303674697876,
+      "bits_per_char": 1.6235626719309229,
+      "train_loss": 3.7131821274757386,
+      "train_bits_per_char": 1.5965667570654385
+     },
+     "fw2_arb": {
+      "loss": 4.735464668273925,
+      "bits_per_char": 1.919867042403156,
+      "train_loss": 4.748473453521728,
+      "train_bits_per_char": 1.9510116113910339
+     },
+     "fw2_ars": {
+      "loss": 5.519726371765136,
+      "bits_per_char": 2.581957829646963,
+      "train_loss": 5.1547931432724,
+      "train_bits_per_char": 2.4588870685673445
+     },
+     "fw2_ary": {
+      "loss": 4.984793322426932,
+      "bits_per_char": 1.9686295316942009,
+      "train_loss": 4.940953302383423,
+      "train_bits_per_char": 1.9921652034711608
+     },
+     "fw2_arz": {
+      "loss": 5.067052245140076,
+      "bits_per_char": 2.2393943852714555,
+      "train_loss": 4.932365870475769,
+      "train_bits_per_char": 2.174775078882689
+     },
+     "wiki_ar": {
+      "loss": 4.403036069869995,
+      "bits_per_char": 1.878601719671248,
+      "train_loss": 4.382503724098205,
+      "train_bits_per_char": 1.8785633004887454
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:31:22+00:00",
+    "step": 2250,
+    "val_loss": 4.676775235032278,
+    "val_bits_per_char": 2.005252137511607,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.715266299247742,
+      "bits_per_char": 1.5981670261930956,
+      "train_loss": 3.659426045417786,
+      "train_bits_per_char": 1.573453112041472
+     },
+     "fw2_arb": {
+      "loss": 4.663989901542664,
+      "bits_per_char": 1.8908895167275561,
+      "train_loss": 4.678087925910949,
+      "train_bits_per_char": 1.9220922159291793
+     },
+     "fw2_ars": {
+      "loss": 5.4638570070266725,
+      "bits_per_char": 2.555823863213089,
+      "train_loss": 5.086805081367492,
+      "train_bits_per_char": 2.426456093824329
+     },
+     "fw2_ary": {
+      "loss": 4.9041802769615535,
+      "bits_per_char": 1.9367932625295474,
+      "train_loss": 4.865181851387024,
+      "train_bits_per_char": 1.961614571062081
+     },
+     "fw2_arz": {
+      "loss": 4.982935500144959,
+      "bits_per_char": 2.202218813097309,
+      "train_loss": 4.850583791732788,
+      "train_bits_per_char": 2.1387157857523724
+     },
+     "wiki_ar": {
+      "loss": 4.330422425270081,
+      "bits_per_char": 1.8476203433090455,
+      "train_loss": 4.310078060626983,
+      "train_bits_per_char": 1.8475179889554203
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:34:22+00:00",
+    "step": 2500,
+    "val_loss": 4.6226568132796615,
+    "val_bits_per_char": 1.982253448507805,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6640170335769655,
+      "bits_per_char": 1.576121530684946,
+      "train_loss": 3.617808151245117,
+      "train_bits_per_char": 1.5555585558214893
+     },
+     "fw2_arb": {
+      "loss": 4.605342006683349,
+      "bits_per_char": 1.8671123019589442,
+      "train_loss": 4.614136719703675,
+      "train_bits_per_char": 1.8958164986709685
+     },
+     "fw2_ars": {
+      "loss": 5.422549796104431,
+      "bits_per_char": 2.5365016233993334,
+      "train_loss": 5.047637557983398,
+      "train_bits_per_char": 2.4077727996396434
+     },
+     "fw2_ary": {
+      "loss": 4.839922624921042,
+      "bits_per_char": 1.9114161800183926,
+      "train_loss": 4.790726208686829,
+      "train_bits_per_char": 1.9315944653230004
+     },
+     "fw2_arz": {
+      "loss": 4.926821231842041,
+      "bits_per_char": 2.177418994328577,
+      "train_loss": 4.778875732421875,
+      "train_bits_per_char": 2.1070983217524093
+     },
+     "wiki_ar": {
+      "loss": 4.27728818655014,
+      "bits_per_char": 1.8249500606566365,
+      "train_loss": 4.252833509445191,
+      "train_bits_per_char": 1.8229800718712328
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:37:21+00:00",
+    "step": 2750,
+    "val_loss": 4.576893770316291,
+    "val_bits_per_char": 1.962646056578281,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.629518413543701,
+      "bits_per_char": 1.5612815293107536,
+      "train_loss": 3.574357342720032,
+      "train_bits_per_char": 1.5368758965612697
+     },
+     "fw2_arb": {
+      "loss": 4.560059213638306,
+      "bits_per_char": 1.8487536089804935,
+      "train_loss": 4.564106011390686,
+      "train_bits_per_char": 1.875260314920512
+     },
+     "fw2_ars": {
+      "loss": 5.37158682346344,
+      "bits_per_char": 2.5126627159300106,
+      "train_loss": 4.997333550453186,
+      "train_bits_per_char": 2.383777292899556
+     },
+     "fw2_ary": {
+      "loss": 4.792151973361061,
+      "bits_per_char": 1.8925502593419732,
+      "train_loss": 4.746003198623657,
+      "train_bits_per_char": 1.9135623935769743
+     },
+     "fw2_arz": {
+      "loss": 4.87748396396637,
+      "bits_per_char": 2.155614285136683,
+      "train_loss": 4.721922302246094,
+      "train_bits_per_char": 2.0819864578202174
+     },
+     "wiki_ar": {
+      "loss": 4.230562233924866,
+      "bits_per_char": 1.8050139407697723,
+      "train_loss": 4.205968713760376,
+      "train_bits_per_char": 1.802891444273657
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:40:21+00:00",
+    "step": 3000,
+    "val_loss": 4.53294561271945,
+    "val_bits_per_char": 1.9438365914318734,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.5950680017471313,
+      "bits_per_char": 1.5464622652964353,
+      "train_loss": 3.543440043926239,
+      "train_bits_per_char": 1.523582303686528
+     },
+     "fw2_arb": {
+      "loss": 4.517092323303222,
+      "bits_per_char": 1.831333836593311,
+      "train_loss": 4.513730525970459,
+      "train_bits_per_char": 1.8545624721408644
+     },
+     "fw2_ars": {
+      "loss": 5.3243903636932375,
+      "bits_per_char": 2.490585667064212,
+      "train_loss": 4.956167840957642,
+      "train_bits_per_char": 2.364140844271331
+     },
+     "fw2_ary": {
+      "loss": 4.744542084042988,
+      "bits_per_char": 1.8737478280173743,
+      "train_loss": 4.69708149433136,
+      "train_bits_per_char": 1.8938374314044706
+     },
+     "fw2_arz": {
+      "loss": 4.830814909934998,
+      "bits_per_char": 2.134988798659013,
+      "train_loss": 4.679371905326843,
+      "train_bits_per_char": 2.063225168563379
+     },
+     "wiki_ar": {
+      "loss": 4.1857659935951235,
+      "bits_per_char": 1.785901152960894,
+      "train_loss": 4.156530666351318,
+      "train_bits_per_char": 1.7816997905165142
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:43:23+00:00",
+    "step": 3250,
+    "val_loss": 4.50066002392895,
+    "val_bits_per_char": 1.9300843098862224,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.568784236907959,
+      "bits_per_char": 1.5351559838870288,
+      "train_loss": 3.512828326225281,
+      "train_bits_per_char": 1.5104201023238801
+     },
+     "fw2_arb": {
+      "loss": 4.480133128166199,
+      "bits_per_char": 1.8163497229681569,
+      "train_loss": 4.472385358810425,
+      "train_bits_per_char": 1.837574928250458
+     },
+     "fw2_ars": {
+      "loss": 5.297878003120422,
+      "bits_per_char": 2.478184002135029,
+      "train_loss": 4.926918911933899,
+      "train_bits_per_char": 2.3501888172264067
+     },
+     "fw2_ary": {
+      "loss": 4.709553658016144,
+      "bits_per_char": 1.8599299534760068,
+      "train_loss": 4.647759747505188,
+      "train_bits_per_char": 1.8739511742819606
+     },
+     "fw2_arz": {
+      "loss": 4.793077182769776,
+      "bits_per_char": 2.1183105308539476,
+      "train_loss": 4.63320140838623,
+      "train_bits_per_char": 2.042867707506584
+     },
+     "wiki_ar": {
+      "loss": 4.154533934593201,
+      "bits_per_char": 1.772575665997164,
+      "train_loss": 4.1284918785095215,
+      "train_bits_per_char": 1.7696809444080315
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:47:33+00:00",
+    "step": 3500,
+    "val_loss": 4.468287772429052,
+    "val_bits_per_char": 1.9162513790857414,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.542150044441223,
+      "bits_per_char": 1.5236989617677164,
+      "train_loss": 3.486726200580597,
+      "train_bits_per_char": 1.4991969022053935
+     },
+     "fw2_arb": {
+      "loss": 4.448280453681946,
+      "bits_per_char": 1.803435911074592,
+      "train_loss": 4.438678812980652,
+      "train_bits_per_char": 1.823725874878369
+     },
+     "fw2_ars": {
+      "loss": 5.263582372665406,
+      "bits_per_char": 2.4621415635045634,
+      "train_loss": 4.889554262161255,
+      "train_bits_per_char": 2.332365511500277
+     },
+     "fw2_ary": {
+      "loss": 4.672183892083546,
+      "bits_per_char": 1.8451716234813753,
+      "train_loss": 4.614778208732605,
+      "train_bits_per_char": 1.8606531991993012
+     },
+     "fw2_arz": {
+      "loss": 4.7613574981689455,
+      "bits_per_char": 2.104291949603713,
+      "train_loss": 4.5919523477554325,
+      "train_bits_per_char": 2.0246802024749413
+     },
+     "wiki_ar": {
+      "loss": 4.122172373533249,
+      "bits_per_char": 1.7587682650824887,
+      "train_loss": 4.096223318576813,
+      "train_bits_per_char": 1.7558490035209349
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:52:06+00:00",
+    "step": 3750,
+    "val_loss": 4.442385362285786,
+    "val_bits_per_char": 1.9052773788545734,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.522890770435333,
+      "bits_per_char": 1.5154143506024647,
+      "train_loss": 3.463260865211487,
+      "train_bits_per_char": 1.4891074497876147
+     },
+     "fw2_arb": {
+      "loss": 4.418420052528381,
+      "bits_per_char": 1.7913298129271922,
+      "train_loss": 4.407030534744263,
+      "train_bits_per_char": 1.8107225046533684
+     },
+     "fw2_ars": {
+      "loss": 5.246084666252136,
+      "bits_per_char": 2.4539566758793896,
+      "train_loss": 4.865736436843872,
+      "train_bits_per_char": 2.3210041743822702
+     },
+     "fw2_ary": {
+      "loss": 4.638899402012901,
+      "bits_per_char": 1.8320266792756337,
+      "train_loss": 4.581101894378662,
+      "train_bits_per_char": 1.847075094422493
+     },
+     "fw2_arz": {
+      "loss": 4.732686185836792,
+      "bits_per_char": 2.0916206028820423,
+      "train_loss": 4.56416609287262,
+      "train_bits_per_char": 2.0124287077072194
+     },
+     "wiki_ar": {
+      "loss": 4.09533109664917,
+      "bits_per_char": 1.7473161515607183,
+      "train_loss": 4.062376916408539,
+      "train_bits_per_char": 1.741340719450968
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T14:56:35+00:00",
+    "step": 4000,
+    "val_loss": 4.420632708419568,
+    "val_bits_per_char": 1.8958987571668955,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.504176115989685,
+      "bits_per_char": 1.5073640141709448,
+      "train_loss": 3.4454649806022646,
+      "train_bits_per_char": 1.4814557061337235
+     },
+     "fw2_arb": {
+      "loss": 4.397326993942261,
+      "bits_per_char": 1.7827781984944462,
+      "train_loss": 4.3834610223770145,
+      "train_bits_per_char": 1.8010384677195153
+     },
+     "fw2_ars": {
+      "loss": 5.216386461257935,
+      "bits_per_char": 2.4400647711459458,
+      "train_loss": 4.8377519130706785,
+      "train_bits_per_char": 2.3076552810875457
+     },
+     "fw2_ary": {
+      "loss": 4.61998180359129,
+      "bits_per_char": 1.8245556086589316,
+      "train_loss": 4.561963677406311,
+      "train_bits_per_char": 1.8393586705715717
+     },
+     "fw2_arz": {
+      "loss": 4.709952402114868,
+      "bits_per_char": 2.0815733594040062,
+      "train_loss": 4.540716218948364,
+      "train_bits_per_char": 2.0020892067957647
+     },
+     "wiki_ar": {
+      "loss": 4.075972473621368,
+      "bits_per_char": 1.739056591127099,
+      "train_loss": 4.0401222705841064,
+      "train_bits_per_char": 1.7318012498821758
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T15:00:09+00:00",
+    "step": 4250,
+    "val_loss": 4.403450235424849,
+    "val_bits_per_char": 1.888597191573072,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.492319369316101,
+      "bits_per_char": 1.5022636902519073,
+      "train_loss": 3.4260013103485107,
+      "train_bits_per_char": 1.4730868602676161
+     },
+     "fw2_arb": {
+      "loss": 4.3802549839019775,
+      "bits_per_char": 1.7758568102633179,
+      "train_loss": 4.361476564407349,
+      "train_bits_per_char": 1.792005684196814
+     },
+     "fw2_ars": {
+      "loss": 5.20329897403717,
+      "bits_per_char": 2.4339428480968417,
+      "train_loss": 4.82466607093811,
+      "train_bits_per_char": 2.3014132055848493
+     },
+     "fw2_ary": {
+      "loss": 4.598647193303184,
+      "bits_per_char": 1.8161299947681029,
+      "train_loss": 4.542747902870178,
+      "train_bits_per_char": 1.8316109759373873
+     },
+     "fw2_arz": {
+      "loss": 4.691448402404785,
+      "bits_per_char": 2.0733954778564914,
+      "train_loss": 4.517432785034179,
+      "train_bits_per_char": 1.9918230924893465
+     },
+     "wiki_ar": {
+      "loss": 4.054732489585876,
+      "bits_per_char": 1.7299943282017707,
+      "train_loss": 4.020091843605042,
+      "train_bits_per_char": 1.7232151932841901
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T15:03:06+00:00",
+    "step": 4500,
+    "val_loss": 4.388835993014946,
+    "val_bits_per_char": 1.8823644714047036,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.4782251954078673,
+      "bits_per_char": 1.496200909770699,
+      "train_loss": 3.4135936498641968,
+      "train_bits_per_char": 1.4677519056162867
+     },
+     "fw2_arb": {
+      "loss": 4.363140082359314,
+      "bits_per_char": 1.768918032823825,
+      "train_loss": 4.344525933265686,
+      "train_bits_per_char": 1.7850411558064816
+     },
+     "fw2_ars": {
+      "loss": 5.191646456718445,
+      "bits_per_char": 2.4284921597293745,
+      "train_loss": 4.809152102470398,
+      "train_bits_per_char": 2.2940128899199608
+     },
+     "fw2_ary": {
+      "loss": 4.583843079824296,
+      "bits_per_char": 1.810283450468268,
+      "train_loss": 4.528219199180603,
+      "train_bits_per_char": 1.8257530824964692
+     },
+     "fw2_arz": {
+      "loss": 4.672530221939087,
+      "bits_per_char": 2.065034548253867,
+      "train_loss": 4.500181007385254,
+      "train_bits_per_char": 1.9842164515623444
+     },
+     "wiki_ar": {
+      "loss": 4.043630921840668,
+      "bits_per_char": 1.725257727382189,
+      "train_loss": 4.005511581897736,
+      "train_bits_per_char": 1.7169653538592384
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T15:06:03+00:00",
+    "step": 4750,
+    "val_loss": 4.378186418628567,
+    "val_bits_per_char": 1.8778228984969265,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.469198489189148,
+      "bits_per_char": 1.4923179622046494,
+      "train_loss": 3.40491726398468,
+      "train_bits_per_char": 1.4640212969924309
+     },
+     "fw2_arb": {
+      "loss": 4.351125907897949,
+      "bits_per_char": 1.7640472082678764,
+      "train_loss": 4.333861398696899,
+      "train_bits_per_char": 1.7806594042862427
+     },
+     "fw2_ars": {
+      "loss": 5.18208167552948,
+      "bits_per_char": 2.4240180499608117,
+      "train_loss": 4.800319838523865,
+      "train_bits_per_char": 2.2897998130804664
+     },
+     "fw2_ary": {
+      "loss": 4.572848039960104,
+      "bits_per_char": 1.8059412122291376,
+      "train_loss": 4.5137699842453,
+      "train_bits_per_char": 1.8199272384842013
+     },
+     "fw2_arz": {
+      "loss": 4.661663031578064,
+      "bits_per_char": 2.0602317706425857,
+      "train_loss": 4.485531878471375,
+      "train_bits_per_char": 1.9777573685733991
+     },
+     "wiki_ar": {
+      "loss": 4.032201367616653,
+      "bits_per_char": 1.720381187676498,
+      "train_loss": 3.997878110408783,
+      "train_bits_per_char": 1.7136932609422098
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-05T15:09:00+00:00",
+    "step": 5000,
+    "val_loss": 4.370737128125296,
+    "val_bits_per_char": 1.8746312175468243,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.463910925388336,
+      "bits_per_char": 1.4900434522678891,
+      "train_loss": 3.3975757122039796,
+      "train_bits_per_char": 1.460864630522556
+     },
+     "fw2_arb": {
+      "loss": 4.345882749557495,
+      "bits_per_char": 1.761921510453387,
+      "train_loss": 4.325378847122193,
+      "train_bits_per_char": 1.777174167024528
+     },
+     "fw2_ars": {
+      "loss": 5.17284471988678,
+      "bits_per_char": 2.4196972868762927,
+      "train_loss": 4.789902687072754,
+      "train_bits_per_char": 2.2848307293010572
+     },
+     "fw2_ary": {
+      "loss": 4.562080065409343,
+      "bits_per_char": 1.8016886482157435,
+      "train_loss": 4.504322671890259,
+      "train_bits_per_char": 1.8161181340891128
+     },
+     "fw2_arz": {
+      "loss": 4.652834701538086,
+      "bits_per_char": 2.056330071633697,
+      "train_loss": 4.476997327804566,
+      "train_bits_per_char": 1.9739943208622108
+     },
+     "wiki_ar": {
+      "loss": 4.026869606971741,
+      "bits_per_char": 1.7181063358339366,
+      "train_loss": 3.9929871797561645,
+      "train_bits_per_char": 1.7115967600815891
+     }
+    }
+   }
+  ]
+ },
+ "b2024": {
+  "run": "local-17m-seed2024",
+  "evals": [
+   {
+    "event": "eval",
+    "time": "2026-11-06T01:32:11+00:00",
+    "step": 250,
+    "val_loss": 6.848731549517819,
+    "val_bits_per_char": 2.9304581675205057,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 5.718072295188904,
+      "bits_per_char": 2.459698406385972,
+      "train_loss": 5.692048692703247,
+      "train_bits_per_char": 2.4474252569307
+     },
+     "fw2_arb": {
+      "loss": 6.962415504455566,
+      "bits_per_char": 2.822724484056433,
+      "train_loss": 6.991712021827698,
+      "train_bits_per_char": 2.872694029271928
+     },
+     "fw2_ars": {
+      "loss": 7.235480952262878,
+      "bits_per_char": 3.384534927585991,
+      "train_loss": 6.988117980957031,
+      "train_bits_per_char": 3.333401061771794
+     },
+     "fw2_ary": {
+      "loss": 7.197437929728674,
+      "bits_per_char": 2.8424626548210385,
+      "train_loss": 7.13941638469696,
+      "train_bits_per_char": 2.8785734299136774
+     },
+     "fw2_arz": {
+      "loss": 7.131273531913758,
+      "bits_per_char": 3.1516813197494744,
+      "train_loss": 7.1356773853302,
+      "train_bits_per_char": 3.146257547813665
+     },
+     "wiki_ar": {
+      "loss": 6.847709083557129,
+      "bits_per_char": 2.9216472125241246,
+      "train_loss": 6.74211814403534,
+      "train_bits_per_char": 2.8900136794636224
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T01:36:19+00:00",
+    "step": 500,
+    "val_loss": 6.179887377080463,
+    "val_bits_per_char": 2.6462712743195786,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 5.101121711730957,
+      "bits_per_char": 2.1943096025005753,
+      "train_loss": 5.064640235900879,
+      "train_bits_per_char": 2.177656780501736
+     },
+     "fw2_arb": {
+      "loss": 6.217851686477661,
+      "bits_per_char": 2.5208610693257554,
+      "train_loss": 6.252579617500305,
+      "train_bits_per_char": 2.569005714003237
+     },
+     "fw2_ars": {
+      "loss": 6.730117630958557,
+      "bits_per_char": 3.1481415456726016,
+      "train_loss": 6.455844235420227,
+      "train_bits_per_char": 3.0795012459185642
+     },
+     "fw2_ary": {
+      "loss": 6.453044550759452,
+      "bits_per_char": 2.5484816019971723,
+      "train_loss": 6.422619891166687,
+      "train_bits_per_char": 2.5895650250594318
+     },
+     "fw2_arz": {
+      "loss": 6.516257548332215,
+      "bits_per_char": 2.8798737136989003,
+      "train_loss": 6.470091199874878,
+      "train_bits_per_char": 2.8527877836095747
+     },
+     "wiki_ar": {
+      "loss": 6.060931134223938,
+      "bits_per_char": 2.585960112722466,
+      "train_loss": 5.950854969024658,
+      "train_bits_per_char": 2.5508381635525357
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T01:40:29+00:00",
+    "step": 750,
+    "val_loss": 5.807999446909264,
+    "val_bits_per_char": 2.487606893970629,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.822103047370911,
+      "bits_per_char": 2.0742863274091095,
+      "train_loss": 4.791204619407654,
+      "train_bits_per_char": 2.0600869440370873
+     },
+     "fw2_arb": {
+      "loss": 5.838804221153259,
+      "bits_per_char": 2.3671864487424235,
+      "train_loss": 5.869021892547607,
+      "train_bits_per_char": 2.4114128407680626
+     },
+     "fw2_ars": {
+      "loss": 6.396751976013183,
+      "bits_per_char": 2.99220336958393,
+      "train_loss": 6.102490043640136,
+      "train_bits_per_char": 2.910947818333194
+     },
+     "fw2_ary": {
+      "loss": 6.060993641141861,
+      "bits_per_char": 2.3936501077548,
+      "train_loss": 6.048610234260559,
+      "train_bits_per_char": 2.4387663879034887
+     },
+     "fw2_arz": {
+      "loss": 6.138483047485352,
+      "bits_per_char": 2.712915479371122,
+      "train_loss": 6.068398594856262,
+      "train_bits_per_char": 2.6756737799637573
+     },
+     "wiki_ar": {
+      "loss": 5.590860748291016,
+      "bits_per_char": 2.385399630962391,
+      "train_loss": 5.5294209003448485,
+      "train_bits_per_char": 2.3701901539126915
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T01:44:38+00:00",
+    "step": 1000,
+    "val_loss": 5.561723184617108,
+    "val_bits_per_char": 2.3826315398307387,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.612243938446045,
+      "bits_per_char": 1.9840128769977903,
+      "train_loss": 4.570107769966126,
+      "train_bits_per_char": 1.965021345908127
+     },
+     "fw2_arb": {
+      "loss": 5.575568437576294,
+      "bits_per_char": 2.2604645659551963,
+      "train_loss": 5.609057211875916,
+      "train_bits_per_char": 2.304600806225494
+     },
+     "fw2_ars": {
+      "loss": 6.188708806037903,
+      "bits_per_char": 2.8948871884105376,
+      "train_loss": 5.8613663673400875,
+      "train_bits_per_char": 2.7959294513297754
+     },
+     "fw2_ary": {
+      "loss": 5.806473648737347,
+      "bits_per_char": 2.293133287689296,
+      "train_loss": 5.792115712165833,
+      "train_bits_per_char": 2.3353492069413466
+     },
+     "fw2_arz": {
+      "loss": 5.891681241989136,
+      "bits_per_char": 2.6038409029182783,
+      "train_loss": 5.796319389343262,
+      "train_bits_per_char": 2.5557088197052837
+     },
+     "wiki_ar": {
+      "loss": 5.295663034915924,
+      "bits_per_char": 2.2594504170133347,
+      "train_loss": 5.267802977561951,
+      "train_bits_per_char": 2.258047447498636
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T01:48:48+00:00",
+    "step": 1250,
+    "val_loss": 5.390226935268079,
+    "val_bits_per_char": 2.3097444913959095,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.4385826826095585,
+      "bits_per_char": 1.9093103737448336,
+      "train_loss": 4.399107956886292,
+      "train_bits_per_char": 1.8914961032308273
+     },
+     "fw2_arb": {
+      "loss": 5.391178274154663,
+      "bits_per_char": 2.185708523519015,
+      "train_loss": 5.421279335021973,
+      "train_bits_per_char": 2.2274482598986975
+     },
+     "fw2_ars": {
+      "loss": 6.072133660316467,
+      "bits_per_char": 2.8403569291249773,
+      "train_loss": 5.707488799095154,
+      "train_bits_per_char": 2.722528336642202
+     },
+     "fw2_ary": {
+      "loss": 5.628627746824234,
+      "bits_per_char": 2.2228971370706216,
+      "train_loss": 5.603702521324157,
+      "train_bits_per_char": 2.25938204439223
+     },
+     "fw2_arz": {
+      "loss": 5.73097186088562,
+      "bits_per_char": 2.5328150543001113,
+      "train_loss": 5.6304080247879025,
+      "train_bits_per_char": 2.482555304655191
+     },
+     "wiki_ar": {
+      "loss": 5.0798673868179325,
+      "bits_per_char": 2.167378930615898,
+      "train_loss": 5.059972739219665,
+      "train_bits_per_char": 2.168960869811361
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T01:52:58+00:00",
+    "step": 1500,
+    "val_loss": 5.219486160442312,
+    "val_bits_per_char": 2.236882693827894,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.255710291862488,
+      "bits_per_char": 1.8306455886788895,
+      "train_loss": 4.212121200561524,
+      "train_bits_per_char": 1.8110969122106526
+     },
+     "fw2_arb": {
+      "loss": 5.214082145690918,
+      "bits_per_char": 2.1139096517730938,
+      "train_loss": 5.24538414478302,
+      "train_bits_per_char": 2.155177968845577
+     },
+     "fw2_ars": {
+      "loss": 5.9324866771698,
+      "bits_per_char": 2.7750343755711477,
+      "train_loss": 5.569656801223755,
+      "train_bits_per_char": 2.656781116961213
+     },
+     "fw2_ary": {
+      "loss": 5.462396856338259,
+      "bits_per_char": 2.1572480682078847,
+      "train_loss": 5.429426598548889,
+      "train_bits_per_char": 2.1891149505930962
+     },
+     "fw2_arz": {
+      "loss": 5.552063918113708,
+      "bits_per_char": 2.4537463131186574,
+      "train_loss": 5.449491500854492,
+      "train_bits_per_char": 2.402785725929573
+     },
+     "wiki_ar": {
+      "loss": 4.900177073478699,
+      "bits_per_char": 2.0907121656176915,
+      "train_loss": 4.880573511123657,
+      "train_bits_per_char": 2.0920612646418255
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T01:57:08+00:00",
+    "step": 1750,
+    "val_loss": 5.064377508970796,
+    "val_bits_per_char": 2.1706266902774636,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.093947792053223,
+      "bits_per_char": 1.7610614801798357,
+      "train_loss": 4.066034662723541,
+      "train_bits_per_char": 1.7482836964943897
+     },
+     "fw2_arb": {
+      "loss": 5.051035642623901,
+      "bits_per_char": 2.047806823530148,
+      "train_loss": 5.085297799110412,
+      "train_bits_per_char": 2.08940307881207
+     },
+     "fw2_ars": {
+      "loss": 5.800507831573486,
+      "bits_per_char": 2.713298740363166,
+      "train_loss": 5.424131751060486,
+      "train_bits_per_char": 2.587364235613397
+     },
+     "fw2_ary": {
+      "loss": 5.314787736014714,
+      "bits_per_char": 2.0989532393914203,
+      "train_loss": 5.273509764671326,
+      "train_bits_per_char": 2.126250140489256
+     },
+     "fw2_arz": {
+      "loss": 5.380824851989746,
+      "bits_per_char": 2.3780668480835523,
+      "train_loss": 5.268441796302795,
+      "train_bits_per_char": 2.322957425305126
+     },
+     "wiki_ar": {
+      "loss": 4.7451611995697025,
+      "bits_per_char": 2.02457301011666,
+      "train_loss": 4.722821116447449,
+      "train_bits_per_char": 2.0244405898267868
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:01:18+00:00",
+    "step": 2000,
+    "val_loss": 4.949792186797612,
+    "val_bits_per_char": 2.121579363157825,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.995721709728241,
+      "bits_per_char": 1.7188083351184171,
+      "train_loss": 3.963410496711731,
+      "train_bits_per_char": 1.7041581119415508
+     },
+     "fw2_arb": {
+      "loss": 4.939847111701965,
+      "bits_per_char": 2.0027284181435743,
+      "train_loss": 4.961911988258362,
+      "train_bits_per_char": 2.0387073863943925
+     },
+     "fw2_ars": {
+      "loss": 5.689870166778564,
+      "bits_per_char": 2.6615458516090524,
+      "train_loss": 5.320798015594482,
+      "train_bits_per_char": 2.5380730266701774
+     },
+     "fw2_ary": {
+      "loss": 5.204093410855248,
+      "bits_per_char": 2.055237060323481,
+      "train_loss": 5.147233510017395,
+      "train_bits_per_char": 2.0753362489483513
+     },
+     "fw2_arz": {
+      "loss": 5.254499554634094,
+      "bits_per_char": 2.3222371175163725,
+      "train_loss": 5.12299678325653,
+      "train_bits_per_char": 2.2588279186896174
+     },
+     "wiki_ar": {
+      "loss": 4.614721167087555,
+      "bits_per_char": 1.9689193962360516,
+      "train_loss": 4.597385847568512,
+      "train_bits_per_char": 1.970672673690812
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:05:29+00:00",
+    "step": 2250,
+    "val_loss": 4.864372661599407,
+    "val_bits_per_char": 2.085114022401319,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.91741064786911,
+      "bits_per_char": 1.6851218785446929,
+      "train_loss": 3.886847674846649,
+      "train_bits_per_char": 1.6712381925784758
+     },
+     "fw2_arb": {
+      "loss": 4.852572584152222,
+      "bits_per_char": 1.967345303534648,
+      "train_loss": 4.875256824493408,
+      "train_bits_per_char": 2.0031032638595954
+     },
+     "fw2_ars": {
+      "loss": 5.615610575675964,
+      "bits_per_char": 2.626809504232394,
+      "train_loss": 5.248138737678528,
+      "train_bits_per_char": 2.503413835910573
+     },
+     "fw2_ary": {
+      "loss": 5.11770682864719,
+      "bits_per_char": 2.0211206655450282,
+      "train_loss": 5.060081148147583,
+      "train_bits_per_char": 2.040196895853552
+     },
+     "fw2_arz": {
+      "loss": 5.1636581182479855,
+      "bits_per_char": 2.2820895538538584,
+      "train_loss": 5.031413817405701,
+      "train_bits_per_char": 2.2184472257295194
+     },
+     "wiki_ar": {
+      "loss": 4.519277215003967,
+      "bits_per_char": 1.928197228697292,
+      "train_loss": 4.5009117603302,
+      "train_bits_per_char": 1.9293189884132633
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:09:39+00:00",
+    "step": 2500,
+    "val_loss": 4.79777083923577,
+    "val_bits_per_char": 2.0567369882504587,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.8669835329055786,
+      "bits_per_char": 1.663430041171667,
+      "train_loss": 3.828219676017761,
+      "train_bits_per_char": 1.6460297565928417
+     },
+     "fw2_arb": {
+      "loss": 4.779739451408386,
+      "bits_per_char": 1.9378170648199387,
+      "train_loss": 4.804538583755493,
+      "train_bits_per_char": 1.97404716611212
+     },
+     "fw2_ars": {
+      "loss": 5.558115458488464,
+      "bits_per_char": 2.599915060923012,
+      "train_loss": 5.187106418609619,
+      "train_bits_per_char": 2.4743008189665123
+     },
+     "fw2_ary": {
+      "loss": 5.043469830164834,
+      "bits_per_char": 1.9918024695630225,
+      "train_loss": 4.982271456718445,
+      "train_bits_per_char": 2.008824456109347
+     },
+     "fw2_arz": {
+      "loss": 5.089993143081665,
+      "bits_per_char": 2.249533163314006,
+      "train_loss": 4.953352928161621,
+      "train_bits_per_char": 2.1840286766961583
+     },
+     "wiki_ar": {
+      "loss": 4.448323619365692,
+      "bits_per_char": 1.897924129711106,
+      "train_loss": 4.429735875129699,
+      "train_bits_per_char": 1.8988093952137792
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:13:50+00:00",
+    "step": 2750,
+    "val_loss": 4.751424532151096,
+    "val_bits_per_char": 2.0369168240274345,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.8246294975280763,
+      "bits_per_char": 1.6452109372597228,
+      "train_loss": 3.7796962022781373,
+      "train_bits_per_char": 1.625165990030794
+     },
+     "fw2_arb": {
+      "loss": 4.733604001998901,
+      "bits_per_char": 1.919112685205168,
+      "train_loss": 4.75779116153717,
+      "train_bits_per_char": 1.9548399904917313
+     },
+     "fw2_ars": {
+      "loss": 5.510537338256836,
+      "bits_per_char": 2.5776594830595294,
+      "train_loss": 5.1466642141342165,
+      "train_bits_per_char": 2.455009489354439
+     },
+     "fw2_ary": {
+      "loss": 4.994683462475973,
+      "bits_per_char": 1.9725354151509007,
+      "train_loss": 4.928433346748352,
+      "train_bits_per_char": 1.9871172262006291
+     },
+     "fw2_arz": {
+      "loss": 5.04422128200531,
+      "bits_per_char": 2.2293041931477466,
+      "train_loss": 4.898013973236084,
+      "train_bits_per_char": 2.159628665986519
+     },
+     "wiki_ar": {
+      "loss": 4.400871610641479,
+      "bits_per_char": 1.877678230341539,
+      "train_loss": 4.379374349117279,
+      "train_bits_per_char": 1.8772218917044676
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:18:00+00:00",
+    "step": 3000,
+    "val_loss": 4.703981252858248,
+    "val_bits_per_char": 2.016698466650863,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.785795879364014,
+      "bits_per_char": 1.628506183667727,
+      "train_loss": 3.747039783000946,
+      "train_bits_per_char": 1.6111246229141751
+     },
+     "fw2_arb": {
+      "loss": 4.680049753189087,
+      "bits_per_char": 1.8974005525058233,
+      "train_loss": 4.6985207319259645,
+      "train_bits_per_char": 1.9304874701469381
+     },
+     "fw2_ars": {
+      "loss": 5.4685896873474125,
+      "bits_per_char": 2.558037665163827,
+      "train_loss": 5.100295090675354,
+      "train_bits_per_char": 2.432890961047905
+     },
+     "fw2_ary": {
+      "loss": 4.943476714785137,
+      "bits_per_char": 1.9523124872969702,
+      "train_loss": 4.872206974029541,
+      "train_bits_per_char": 1.9644470618835967
+     },
+     "fw2_arz": {
+      "loss": 4.994584441184998,
+      "bits_per_char": 2.207367087063586,
+      "train_loss": 4.837513160705567,
+      "train_bits_per_char": 2.1329526928736744
+     },
+     "wiki_ar": {
+      "loss": 4.3513910412788395,
+      "bits_per_char": 1.8565668242072457,
+      "train_loss": 4.326058804988861,
+      "train_bits_per_char": 1.8543681462542354
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:22:10+00:00",
+    "step": 3250,
+    "val_loss": 4.668583370737298,
+    "val_bits_per_char": 2.001516141541789,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.750290906429291,
+      "bits_per_char": 1.6132332873421957,
+      "train_loss": 3.7134671807289124,
+      "train_bits_per_char": 1.5966893221679261
+     },
+     "fw2_arb": {
+      "loss": 4.643764042854309,
+      "bits_per_char": 1.8826894852163447,
+      "train_loss": 4.662921714782715,
+      "train_bits_per_char": 1.9158608545660765
+     },
+     "fw2_ars": {
+      "loss": 5.434566617012024,
+      "bits_per_char": 2.542122721754595,
+      "train_loss": 5.066394710540772,
+      "train_bits_per_char": 2.4167201460383376
+     },
+     "fw2_ary": {
+      "loss": 4.913417240929982,
+      "bits_per_char": 1.9404411891084952,
+      "train_loss": 4.834773015975952,
+      "train_bits_per_char": 1.9493538958286605
+     },
+     "fw2_arz": {
+      "loss": 4.950232315063476,
+      "bits_per_char": 2.1877655717433826,
+      "train_loss": 4.794637775421142,
+      "train_bits_per_char": 2.114048109989383
+     },
+     "wiki_ar": {
+      "loss": 4.319229102134704,
+      "bits_per_char": 1.84284459408572,
+      "train_loss": 4.2912679553031925,
+      "train_bits_per_char": 1.8394550240923675
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:26:20+00:00",
+    "step": 3500,
+    "val_loss": 4.631370550772501,
+    "val_bits_per_char": 1.9855676577697265,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.722489821910858,
+      "bits_per_char": 1.601274312401755,
+      "train_loss": 3.683558392524719,
+      "train_bits_per_char": 1.5838293612633456
+     },
+     "fw2_arb": {
+      "loss": 4.608291244506836,
+      "bits_per_char": 1.8683079912722769,
+      "train_loss": 4.6235727071762085,
+      "train_bits_per_char": 1.8996934754097141
+     },
+     "fw2_ars": {
+      "loss": 5.38993878364563,
+      "bits_per_char": 2.521247197132585,
+      "train_loss": 5.034323835372925,
+      "train_bits_per_char": 2.4014220229059333
+     },
+     "fw2_ary": {
+      "loss": 4.87178559530349,
+      "bits_per_char": 1.9239997277013376,
+      "train_loss": 4.79608314037323,
+      "train_bits_per_char": 1.9337543507236317
+     },
+     "fw2_arz": {
+      "loss": 4.91295804977417,
+      "bits_per_char": 2.17129213188808,
+      "train_loss": 4.759764933586121,
+      "train_bits_per_char": 2.0986720025909857
+     },
+     "wiki_ar": {
+      "loss": 4.282759809494019,
+      "bits_per_char": 1.827284586222326,
+      "train_loss": 4.2522265076637265,
+      "train_bits_per_char": 1.8227198801311277
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:30:30+00:00",
+    "step": 3750,
+    "val_loss": 4.606156214645931,
+    "val_bits_per_char": 1.9748515234339996,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.699186992645264,
+      "bits_per_char": 1.591250316717564,
+      "train_loss": 3.655152475833893,
+      "train_bits_per_char": 1.5716155940050789
+     },
+     "fw2_arb": {
+      "loss": 4.5847285985946655,
+      "bits_per_char": 1.858755148945807,
+      "train_loss": 4.592519497871399,
+      "train_bits_per_char": 1.886934601949085
+     },
+     "fw2_ars": {
+      "loss": 5.370125818252563,
+      "bits_per_char": 2.511979302733538,
+      "train_loss": 5.012115406990051,
+      "train_bits_per_char": 2.3908283839671673
+     },
+     "fw2_ary": {
+      "loss": 4.8391627584184915,
+      "bits_per_char": 1.9111160882111085,
+      "train_loss": 4.763582444190979,
+      "train_bits_per_char": 1.9206502487294608
+     },
+     "fw2_arz": {
+      "loss": 4.88754551410675,
+      "bits_per_char": 2.160061008359856,
+      "train_loss": 4.729111909866333,
+      "train_bits_per_char": 2.085156494246962
+     },
+     "wiki_ar": {
+      "loss": 4.256187605857849,
+      "bits_per_char": 1.8159472756361246,
+      "train_loss": 4.226580381393433,
+      "train_bits_per_char": 1.8117266500863571
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:34:40+00:00",
+    "step": 4000,
+    "val_loss": 4.58478467984805,
+    "val_bits_per_char": 1.9657400621891234,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6799758076667786,
+      "bits_per_char": 1.5829863916328595,
+      "train_loss": 3.637660467624664,
+      "train_bits_per_char": 1.5640945088919835
+     },
+     "fw2_arb": {
+      "loss": 4.560155057907105,
+      "bits_per_char": 1.8487924664666668,
+      "train_loss": 4.568903970718384,
+      "train_bits_per_char": 1.877231658858926
+     },
+     "fw2_ars": {
+      "loss": 5.352449178695679,
+      "bits_per_char": 2.5037107157000924,
+      "train_loss": 4.98954827785492,
+      "train_bits_per_char": 2.380063641238842
+     },
+     "fw2_ary": {
+      "loss": 4.818609805334182,
+      "bits_per_char": 1.9029991718640935,
+      "train_loss": 4.738046550750733,
+      "train_bits_per_char": 1.9103543169045907
+     },
+     "fw2_arz": {
+      "loss": 4.865403461456299,
+      "bits_per_char": 2.150275281672044,
+      "train_loss": 4.702976369857788,
+      "train_bits_per_char": 2.0736328314497734
+     },
+     "wiki_ar": {
+      "loss": 4.232114768028259,
+      "bits_per_char": 1.8056763457989835,
+      "train_loss": 4.203776681423188,
+      "train_bits_per_char": 1.801951828072196
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:38:50+00:00",
+    "step": 4250,
+    "val_loss": 4.563253478493009,
+    "val_bits_per_char": 1.9564855379419301,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.664412462711334,
+      "bits_per_char": 1.5762916293408278,
+      "train_loss": 3.619304323196411,
+      "train_bits_per_char": 1.556201868839349
+     },
+     "fw2_arb": {
+      "loss": 4.541328310966492,
+      "bits_per_char": 1.8411596672592083,
+      "train_loss": 4.544633674621582,
+      "train_bits_per_char": 1.8672596899808773
+     },
+     "fw2_ars": {
+      "loss": 5.3234601497650145,
+      "bits_per_char": 2.490150541666057,
+      "train_loss": 4.9743345260620115,
+      "train_bits_per_char": 2.3728065318829024
+     },
+     "fw2_ary": {
+      "loss": 4.79505797794887,
+      "bits_per_char": 1.893697919050363,
+      "train_loss": 4.718265533447266,
+      "train_bits_per_char": 1.90237871949463
+     },
+     "fw2_arz": {
+      "loss": 4.845191097259521,
+      "bits_per_char": 2.141342384850477,
+      "train_loss": 4.681905150413513,
+      "train_bits_per_char": 2.0643421250965854
+     },
+     "wiki_ar": {
+      "loss": 4.210070872306824,
+      "bits_per_char": 1.796271085484647,
+      "train_loss": 4.180877149105072,
+      "train_bits_per_char": 1.7921359274547883
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:43:01+00:00",
+    "step": 4500,
+    "val_loss": 4.548632305355929,
+    "val_bits_per_char": 1.9502864250792837,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.650434422492981,
+      "bits_per_char": 1.5702788051800678,
+      "train_loss": 3.6032705187797545,
+      "train_bits_per_char": 1.5493077714743149
+     },
+     "fw2_arb": {
+      "loss": 4.524307894706726,
+      "bits_per_char": 1.8342591963415322,
+      "train_loss": 4.532389283180237,
+      "train_bits_per_char": 1.8622288205635145
+     },
+     "fw2_ars": {
+      "loss": 5.316297459602356,
+      "bits_per_char": 2.486800056025788,
+      "train_loss": 4.958364939689636,
+      "train_bits_per_char": 2.3651888819927893
+     },
+     "fw2_ary": {
+      "loss": 4.778173825097462,
+      "bits_per_char": 1.8870299110165338,
+      "train_loss": 4.699480867385864,
+      "train_bits_per_char": 1.8948048454269881
+     },
+     "fw2_arz": {
+      "loss": 4.824337768554687,
+      "bits_per_char": 2.1321262124179516,
+      "train_loss": 4.662565279006958,
+      "train_bits_per_char": 2.055814803428188
+     },
+     "wiki_ar": {
+      "loss": 4.198242461681366,
+      "bits_per_char": 1.7912243694938286,
+      "train_loss": 4.164636290073394,
+      "train_bits_per_char": 1.7851742718200063
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:47:12+00:00",
+    "step": 4750,
+    "val_loss": 4.537627880314671,
+    "val_bits_per_char": 1.9456285443973804,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.639532971382141,
+      "bits_per_char": 1.5655894132765782,
+      "train_loss": 3.5912818789482115,
+      "train_bits_per_char": 1.5441529842432118
+     },
+     "fw2_arb": {
+      "loss": 4.511993622779846,
+      "bits_per_char": 1.8292667053232803,
+      "train_loss": 4.5189570665359495,
+      "train_bits_per_char": 1.856709907823192
+     },
+     "fw2_ars": {
+      "loss": 5.3073811531066895,
+      "bits_per_char": 2.4826292827269927,
+      "train_loss": 4.94600727558136,
+      "train_bits_per_char": 2.3592941545752217
+     },
+     "fw2_ary": {
+      "loss": 4.763175979493156,
+      "bits_per_char": 1.881106856667301,
+      "train_loss": 4.682407641410828,
+      "train_bits_per_char": 1.8879210145917402
+     },
+     "fw2_arz": {
+      "loss": 4.8172025918960575,
+      "bits_per_char": 2.12897280610315,
+      "train_loss": 4.650436568260193,
+      "train_bits_per_char": 2.05046702133665
+     },
+     "wiki_ar": {
+      "loss": 4.186480963230133,
+      "bits_per_char": 1.7862062022869793,
+      "train_loss": 4.154562258720398,
+      "train_bits_per_char": 1.7808560312025141
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:51:23+00:00",
+    "step": 5000,
+    "val_loss": 4.530992043049878,
+    "val_bits_per_char": 1.9427535545053487,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6351914525032045,
+      "bits_per_char": 1.5637218560795838,
+      "train_loss": 3.5865141272544863,
+      "train_bits_per_char": 1.5421029814157665
+     },
+     "fw2_arb": {
+      "loss": 4.505068516731262,
+      "bits_per_char": 1.826459106956662,
+      "train_loss": 4.508277177810669,
+      "train_bits_per_char": 1.8523218477202272
+     },
+     "fw2_ars": {
+      "loss": 5.297885465621948,
+      "bits_per_char": 2.4781874928631824,
+      "train_loss": 4.936316394805909,
+      "train_bits_per_char": 2.354671509056869
+     },
+     "fw2_ary": {
+      "loss": 4.758665478418743,
+      "bits_per_char": 1.8793255379558758,
+      "train_loss": 4.680072212219239,
+      "train_bits_per_char": 1.8869793823831518
+     },
+     "fw2_arz": {
+      "loss": 4.807583689689636,
+      "bits_per_char": 2.1247217120643636,
+      "train_loss": 4.642690539360046,
+      "train_bits_per_char": 2.047051648054392
+     },
+     "wiki_ar": {
+      "loss": 4.181557655334473,
+      "bits_per_char": 1.7841056211124235,
+      "train_loss": 4.146090316772461,
+      "train_bits_per_char": 1.7772245273341307
+     }
+    }
+   }
+  ]
+ },
+ "m2024": {
+  "run": "modern-17m-seed2024",
+  "evals": [
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:54:28+00:00",
+    "step": 250,
+    "val_loss": 6.566102186586491,
+    "val_bits_per_char": 2.8100364816627916,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 5.236347270011902,
+      "bits_per_char": 2.252478522555355,
+      "train_loss": 5.21112802028656,
+      "train_bits_per_char": 2.2406425212591765
+     },
+     "fw2_arb": {
+      "loss": 6.690560412406922,
+      "bits_per_char": 2.7125081340052124,
+      "train_loss": 6.7301623821258545,
+      "train_bits_per_char": 2.7652307805019505
+     },
+     "fw2_ars": {
+      "loss": 7.043400239944458,
+      "bits_per_char": 3.2946854919995463,
+      "train_loss": 6.775798916816711,
+      "train_bits_per_char": 3.2321227782957034
+     },
+     "fw2_ary": {
+      "loss": 6.939162443554591,
+      "bits_per_char": 2.7404626888229635,
+      "train_loss": 6.8865971326828,
+      "train_bits_per_char": 2.7766380976393847
+     },
+     "fw2_arz": {
+      "loss": 6.909202003479004,
+      "bits_per_char": 3.0535363412005725,
+      "train_loss": 6.885260963439942,
+      "train_bits_per_char": 3.035844125944501
+     },
+     "wiki_ar": {
+      "loss": 6.57794075012207,
+      "bits_per_char": 2.8065477113930988,
+      "train_loss": 6.469767928123474,
+      "train_bits_per_char": 2.7732705680593086
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T02:57:27+00:00",
+    "step": 500,
+    "val_loss": 5.74155460551933,
+    "val_bits_per_char": 2.4596654925804557,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.524373555183411,
+      "bits_per_char": 1.9462143619525232,
+      "train_loss": 4.486789131164551,
+      "train_bits_per_char": 1.9291966100379887
+     },
+     "fw2_arb": {
+      "loss": 5.766939330101013,
+      "bits_per_char": 2.3380507576324328,
+      "train_loss": 5.805221509933472,
+      "train_bits_per_char": 2.3851990926004167
+     },
+     "fw2_ars": {
+      "loss": 6.425687527656555,
+      "bits_per_char": 3.005738528591616,
+      "train_loss": 6.124903082847595,
+      "train_bits_per_char": 2.9216390586492946
+     },
+     "fw2_ary": {
+      "loss": 6.038815233442518,
+      "bits_per_char": 2.3848912554737143,
+      "train_loss": 6.0183799266815186,
+      "train_bits_per_char": 2.4265776941103003
+     },
+     "fw2_arz": {
+      "loss": 6.143123531341553,
+      "bits_per_char": 2.714966350960711,
+      "train_loss": 6.067317104339599,
+      "train_bits_per_char": 2.6751969299722016
+     },
+     "wiki_ar": {
+      "loss": 5.55038845539093,
+      "bits_per_char": 2.3681317008717375,
+      "train_loss": 5.46914050579071,
+      "train_bits_per_char": 2.344350920433959
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:00:24+00:00",
+    "step": 750,
+    "val_loss": 5.399114971186118,
+    "val_bits_per_char": 2.3137216871206285,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.292099261283875,
+      "bits_per_char": 1.8462987468544383,
+      "train_loss": 4.249221587181092,
+      "train_bits_per_char": 1.8270490637393324
+     },
+     "fw2_arb": {
+      "loss": 5.41947226524353,
+      "bits_per_char": 2.1971795627506023,
+      "train_loss": 5.449762082099914,
+      "train_bits_per_char": 2.2391510041210885
+     },
+     "fw2_ars": {
+      "loss": 6.116836214065552,
+      "bits_per_char": 2.861267405638463,
+      "train_loss": 5.799984335899353,
+      "train_bits_per_char": 2.7666496181420945
+     },
+     "fw2_ary": {
+      "loss": 5.650551061781626,
+      "bits_per_char": 2.2315552463373742,
+      "train_loss": 5.655836772918701,
+      "train_bits_per_char": 2.280402287972666
+     },
+     "fw2_arz": {
+      "loss": 5.801729464530945,
+      "bits_per_char": 2.5640865258880705,
+      "train_loss": 5.70483124256134,
+      "train_bits_per_char": 2.5153699342982914
+     },
+     "wiki_ar": {
+      "loss": 5.1140015602111815,
+      "bits_per_char": 2.181942635254822,
+      "train_loss": 5.067612600326538,
+      "train_bits_per_char": 2.1722357016426006
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:03:21+00:00",
+    "step": 1000,
+    "val_loss": 5.214913208617104,
+    "val_bits_per_char": 2.235136224599508,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.146902000904083,
+      "bits_per_char": 1.7838403777519214,
+      "train_loss": 4.107002103328705,
+      "train_bits_per_char": 1.7658985754706396
+     },
+     "fw2_arb": {
+      "loss": 5.2215651512146,
+      "bits_per_char": 2.116943435506988,
+      "train_loss": 5.252669930458069,
+      "train_bits_per_char": 2.1581714893083657
+     },
+     "fw2_ars": {
+      "loss": 5.961012697219848,
+      "bits_per_char": 2.788377968324883,
+      "train_loss": 5.596813821792603,
+      "train_bits_per_char": 2.6697352830822543
+     },
+     "fw2_ary": {
+      "loss": 5.464587052663167,
+      "bits_per_char": 2.158113035897924,
+      "train_loss": 5.467361688613892,
+      "train_bits_per_char": 2.204410170319538
+     },
+     "fw2_arz": {
+      "loss": 5.595521640777588,
+      "bits_per_char": 2.4729525449516756,
+      "train_loss": 5.48431134223938,
+      "train_bits_per_char": 2.418138464409048
+     },
+     "wiki_ar": {
+      "loss": 4.89989070892334,
+      "bits_per_char": 2.090589985163656,
+      "train_loss": 4.877364826202393,
+      "train_bits_per_char": 2.0906858595958986
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:06:18+00:00",
+    "step": 1250,
+    "val_loss": 5.07036231239006,
+    "val_bits_per_char": 2.1736438154666176,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 4.02246001958847,
+      "bits_per_char": 1.7303101446020077,
+      "train_loss": 3.975807011127472,
+      "train_bits_per_char": 1.7094882740882456
+     },
+     "fw2_arb": {
+      "loss": 5.064537405967712,
+      "bits_per_char": 2.0532807510692503,
+      "train_loss": 5.081813049316406,
+      "train_bits_per_char": 2.0879712950235656
+     },
+     "fw2_ars": {
+      "loss": 5.844446158409118,
+      "bits_per_char": 2.73385173508681,
+      "train_loss": 5.4646549940109255,
+      "train_bits_per_char": 2.6066942213757343
+     },
+     "fw2_ary": {
+      "loss": 5.296871011219327,
+      "bits_per_char": 2.0918774408051983,
+      "train_loss": 5.288890385627747,
+      "train_bits_per_char": 2.132451522287862
+     },
+     "fw2_arz": {
+      "loss": 5.442567086219787,
+      "bits_per_char": 2.40535395821775,
+      "train_loss": 5.327862405776978,
+      "train_bits_per_char": 2.349157116092462
+     },
+     "wiki_ar": {
+      "loss": 4.751292192935944,
+      "bits_per_char": 2.0271888630186905,
+      "train_loss": 4.718690896034241,
+      "train_bits_per_char": 2.022670167944766
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:09:15+00:00",
+    "step": 1500,
+    "val_loss": 4.93961263302142,
+    "val_bits_per_char": 2.1177802325006536,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.9039087533950805,
+      "bits_per_char": 1.6793138742721851,
+      "train_loss": 3.853644514083862,
+      "train_bits_per_char": 1.6569617415767572
+     },
+     "fw2_arb": {
+      "loss": 4.92732310295105,
+      "bits_per_char": 1.9976508949596847,
+      "train_loss": 4.944779014587402,
+      "train_bits_per_char": 2.031667938686222
+     },
+     "fw2_ars": {
+      "loss": 5.73454749584198,
+      "bits_per_char": 2.682444528792232,
+      "train_loss": 5.354764223098755,
+      "train_bits_per_char": 2.5542752419830332
+     },
+     "fw2_ary": {
+      "loss": 5.17609635610429,
+      "bits_per_char": 2.0441802671490827,
+      "train_loss": 5.156869268417358,
+      "train_bits_per_char": 2.0792213337525736
+     },
+     "fw2_arz": {
+      "loss": 5.293406534194946,
+      "bits_per_char": 2.3394321388742063,
+      "train_loss": 5.170272707939148,
+      "train_bits_per_char": 2.2796727841215025
+     },
+     "wiki_ar": {
+      "loss": 4.602393555641174,
+      "bits_per_char": 1.9636596909565323,
+      "train_loss": 4.569695830345154,
+      "train_bits_per_char": 1.9588033283529696
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:12:11+00:00",
+    "step": 1750,
+    "val_loss": 4.8291486744842835,
+    "val_bits_per_char": 2.0705658246824883,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.8218845248222353,
+      "bits_per_char": 1.6440301538345443,
+      "train_loss": 3.778839373588562,
+      "train_bits_per_char": 1.624797577129053
+     },
+     "fw2_arb": {
+      "loss": 4.818697762489319,
+      "bits_per_char": 1.9536116663451222,
+      "train_loss": 4.836621379852295,
+      "train_bits_per_char": 1.9872290672690756
+     },
+     "fw2_ars": {
+      "loss": 5.626951694488525,
+      "bits_per_char": 2.632114529978748,
+      "train_loss": 5.238953328132629,
+      "train_bits_per_char": 2.4990323051441283
+     },
+     "fw2_ary": {
+      "loss": 5.053028288341704,
+      "bits_per_char": 1.995577362889049,
+      "train_loss": 5.030832505226135,
+      "train_bits_per_char": 2.0284040038525784
+     },
+     "fw2_arz": {
+      "loss": 5.16230537891388,
+      "bits_per_char": 2.2814917078631374,
+      "train_loss": 5.040738725662232,
+      "train_bits_per_char": 2.222558757319372
+     },
+     "wiki_ar": {
+      "loss": 4.492024397850036,
+      "bits_per_char": 1.9165695271843286,
+      "train_loss": 4.4637286305427555,
+      "train_bits_per_char": 1.9133804137049497
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:15:08+00:00",
+    "step": 2000,
+    "val_loss": 4.744071832504222,
+    "val_bits_per_char": 2.0341308819184247,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.7636798858642577,
+      "bits_per_char": 1.6189927198360854,
+      "train_loss": 3.7142701268196108,
+      "train_bits_per_char": 1.5970345670258714
+     },
+     "fw2_arb": {
+      "loss": 4.729156494140625,
+      "bits_per_char": 1.9173095625221632,
+      "train_loss": 4.741721272468567,
+      "train_bits_per_char": 1.9482373337698413
+     },
+     "fw2_ars": {
+      "loss": 5.5352551460266115,
+      "bits_per_char": 2.58922171151153,
+      "train_loss": 5.15666983127594,
+      "train_bits_per_char": 2.45978226721749
+     },
+     "fw2_ary": {
+      "loss": 4.968821699657138,
+      "bits_per_char": 1.9623219064387594,
+      "train_loss": 4.936746501922608,
+      "train_bits_per_char": 1.9904690446566387
+     },
+     "fw2_arz": {
+      "loss": 5.069670462608338,
+      "bits_per_char": 2.2405515119822503,
+      "train_loss": 4.926807975769043,
+      "train_bits_per_char": 2.172324496096121
+     },
+     "wiki_ar": {
+      "loss": 4.397847306728363,
+      "bits_per_char": 1.8763878792197606,
+      "train_loss": 4.369802474975586,
+      "train_bits_per_char": 1.8731189011284168
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:18:05+00:00",
+    "step": 2250,
+    "val_loss": 4.678737353143238,
+    "val_bits_per_char": 2.0062914993919327,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.713942515850067,
+      "bits_per_char": 1.5975975846495876,
+      "train_loss": 3.6622296810150146,
+      "train_bits_per_char": 1.5746585986671724
+     },
+     "fw2_arb": {
+      "loss": 4.6610853433609005,
+      "bits_per_char": 1.8897119415756878,
+      "train_loss": 4.670242094993592,
+      "train_bits_per_char": 1.9188685889318706
+     },
+     "fw2_ars": {
+      "loss": 5.476781368255615,
+      "bits_per_char": 2.5618694809522133,
+      "train_loss": 5.091320943832398,
+      "train_bits_per_char": 2.4286102046702465
+     },
+     "fw2_ary": {
+      "loss": 4.890131609780448,
+      "bits_per_char": 1.9312450643787356,
+      "train_loss": 4.8617658615112305,
+      "train_bits_per_char": 1.960237262727132
+     },
+     "fw2_arz": {
+      "loss": 4.9946448802948,
+      "bits_per_char": 2.2073937982551417,
+      "train_loss": 4.850028991699219,
+      "train_bits_per_char": 2.1384711637355847
+     },
+     "wiki_ar": {
+      "loss": 4.335838401317597,
+      "bits_per_char": 1.8499311265402312,
+      "train_loss": 4.3114459156990055,
+      "train_bits_per_char": 1.8481043209930998
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:21:02+00:00",
+    "step": 2500,
+    "val_loss": 4.624261765189902,
+    "val_bits_per_char": 1.9830379409944099,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.670207130908966,
+      "bits_per_char": 1.5787842764070852,
+      "train_loss": 3.6167988181114197,
+      "train_bits_per_char": 1.5551245701798637
+     },
+     "fw2_arb": {
+      "loss": 4.604372525215149,
+      "bits_per_char": 1.8667192517200757,
+      "train_loss": 4.614774417877197,
+      "train_bits_per_char": 1.8960785105687468
+     },
+     "fw2_ars": {
+      "loss": 5.426993274688721,
+      "bits_per_char": 2.5385801456935293,
+      "train_loss": 5.044425630569458,
+      "train_bits_per_char": 2.4062406786478205
+     },
+     "fw2_ary": {
+      "loss": 4.83193311994038,
+      "bits_per_char": 1.9082609086899331,
+      "train_loss": 4.795204758644104,
+      "train_bits_per_char": 1.933400192040269
+     },
+     "fw2_arz": {
+      "loss": 4.934660315513611,
+      "bits_per_char": 2.180883493826608,
+      "train_loss": 4.782229661941528,
+      "train_bits_per_char": 2.108577133853379
+     },
+     "wiki_ar": {
+      "loss": 4.277404224872589,
+      "bits_per_char": 1.8249995696292276,
+      "train_loss": 4.245892071723938,
+      "train_bits_per_char": 1.8200046197149526
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:23:59+00:00",
+    "step": 2750,
+    "val_loss": 4.5760732705000216,
+    "val_bits_per_char": 1.9624475437583124,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6382421255111694,
+      "bits_per_char": 1.565034140211145,
+      "train_loss": 3.5827577352523803,
+      "train_bits_per_char": 1.540487835594426
+     },
+     "fw2_arb": {
+      "loss": 4.554812502861023,
+      "bits_per_char": 1.8466264709258455,
+      "train_loss": 4.563760781288147,
+      "train_bits_per_char": 1.875118469768539
+     },
+     "fw2_ars": {
+      "loss": 5.378015422821045,
+      "bits_per_char": 2.5156698165228835,
+      "train_loss": 4.9951869487762455,
+      "train_bits_per_char": 2.3827533427704055
+     },
+     "fw2_ary": {
+      "loss": 4.778542980315193,
+      "bits_per_char": 1.8871757003835943,
+      "train_loss": 4.734010529518128,
+      "train_bits_per_char": 1.9087270153358455
+     },
+     "fw2_arz": {
+      "loss": 4.882144474983216,
+      "bits_per_char": 2.1576740077719947,
+      "train_loss": 4.720034384727478,
+      "train_bits_per_char": 2.081154038636748
+     },
+     "wiki_ar": {
+      "loss": 4.224682116508484,
+      "bits_per_char": 1.8025051267344128,
+      "train_loss": 4.18982652425766,
+      "train_bits_per_char": 1.7959720834017898
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:26:57+00:00",
+    "step": 3000,
+    "val_loss": 4.537690357461808,
+    "val_bits_per_char": 1.9461449757569065,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.6072418451309205,
+      "bits_per_char": 1.5516989922255253,
+      "train_loss": 3.553031837940216,
+      "train_bits_per_char": 1.5277065127712426
+     },
+     "fw2_arb": {
+      "loss": 4.509431052207947,
+      "bits_per_char": 1.8282277798683437,
+      "train_loss": 4.51284122467041,
+      "train_bits_per_char": 1.8541970837314308
+     },
+     "fw2_ars": {
+      "loss": 5.352075314521789,
+      "bits_per_char": 2.5035358335653664,
+      "train_loss": 4.953948307037353,
+      "train_bits_per_char": 2.363082104744224
+     },
+     "fw2_ary": {
+      "loss": 4.7351271992637995,
+      "bits_per_char": 1.8700296357042807,
+      "train_loss": 4.687659859657288,
+      "train_bits_per_char": 1.8900386801091589
+     },
+     "fw2_arz": {
+      "loss": 4.834852576255798,
+      "bits_per_char": 2.136773253772353,
+      "train_loss": 4.6664416790008545,
+      "train_bits_per_char": 2.057523982820773
+     },
+     "wiki_ar": {
+      "loss": 4.187414157390594,
+      "bits_per_char": 1.7866043594055698,
+      "train_loss": 4.1532498598098755,
+      "train_bits_per_char": 1.780293470487425
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:29:55+00:00",
+    "step": 3250,
+    "val_loss": 4.500471020596368,
+    "val_bits_per_char": 1.9301422917347753,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.5748059153556824,
+      "bits_per_char": 1.537746282175859,
+      "train_loss": 3.5187604069709777,
+      "train_bits_per_char": 1.512970734798578
+     },
+     "fw2_arb": {
+      "loss": 4.473218035697937,
+      "bits_per_char": 1.8135461843389002,
+      "train_loss": 4.474825024604797,
+      "train_bits_per_char": 1.838577316984295
+     },
+     "fw2_ars": {
+      "loss": 5.307054567337036,
+      "bits_per_char": 2.482476515972227,
+      "train_loss": 4.920405793190002,
+      "train_bits_per_char": 2.3470819954761852
+     },
+     "fw2_ary": {
+      "loss": 4.700427191598075,
+      "bits_per_char": 1.8563256653644429,
+      "train_loss": 4.65250141620636,
+      "train_bits_per_char": 1.875862989029998
+     },
+     "fw2_arz": {
+      "loss": 4.79287691116333,
+      "bits_per_char": 2.1182220203967224,
+      "train_loss": 4.62050085067749,
+      "train_bits_per_char": 2.0372677870793074
+     },
+     "wiki_ar": {
+      "loss": 4.1544435024261475,
+      "bits_per_char": 1.7725370821605013,
+      "train_loss": 4.117609679698944,
+      "train_bits_per_char": 1.7650162822420272
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:32:53+00:00",
+    "step": 3500,
+    "val_loss": 4.4677132636150985,
+    "val_bits_per_char": 1.9160843495050788,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.550212526321411,
+      "bits_per_char": 1.5271671364966193,
+      "train_loss": 3.4958380460739136,
+      "train_bits_per_char": 1.503114746553103
+     },
+     "fw2_arb": {
+      "loss": 4.44258668422699,
+      "bits_per_char": 1.801127525078842,
+      "train_loss": 4.444660997390747,
+      "train_bits_per_char": 1.82618378295342
+     },
+     "fw2_ars": {
+      "loss": 5.265432214736938,
+      "bits_per_char": 2.463006862597039,
+      "train_loss": 4.8841430187225345,
+      "train_bits_per_char": 2.329784295116511
+     },
+     "fw2_ary": {
+      "loss": 4.6644394814022005,
+      "bits_per_char": 1.842113146512175,
+      "train_loss": 4.613782191276551,
+      "train_bits_per_char": 1.8602516104376665
+     },
+     "fw2_arz": {
+      "loss": 4.761199855804444,
+      "bits_per_char": 2.1042222792295253,
+      "train_loss": 4.5868569135665895,
+      "train_bits_per_char": 2.0224335274348126
+     },
+     "wiki_ar": {
+      "loss": 4.122408819198609,
+      "bits_per_char": 1.7588691471162727,
+      "train_loss": 4.0905809760093685,
+      "train_bits_per_char": 1.7534304094150808
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:35:51+00:00",
+    "step": 3750,
+    "val_loss": 4.443947416543961,
+    "val_bits_per_char": 1.905903198784383,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.528005588054657,
+      "bits_per_char": 1.5176145516663424,
+      "train_loss": 3.468030881881714,
+      "train_bits_per_char": 1.4911584264930073
+     },
+     "fw2_arb": {
+      "loss": 4.418790721893311,
+      "bits_per_char": 1.7914800908718522,
+      "train_loss": 4.413607263565064,
+      "train_bits_per_char": 1.8134246939822012
+     },
+     "fw2_ars": {
+      "loss": 5.242385601997375,
+      "bits_per_char": 2.4522263676590756,
+      "train_loss": 4.860242509841919,
+      "train_bits_per_char": 2.3183835171249783
+     },
+     "fw2_ary": {
+      "loss": 4.642535209655762,
+      "bits_per_char": 1.8334625579238202,
+      "train_loss": 4.584636521339417,
+      "train_bits_per_char": 1.8485002365777667
+     },
+     "fw2_arz": {
+      "loss": 4.7335703611373905,
+      "bits_per_char": 2.092011366013734,
+      "train_loss": 4.556249761581421,
+      "train_bits_per_char": 2.008938244821785
+     },
+     "wiki_ar": {
+      "loss": 4.0983970165252686,
+      "bits_per_char": 1.7486242585714749,
+      "train_loss": 4.063221001625061,
+      "train_bits_per_char": 1.7417025371720865
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:38:49+00:00",
+    "step": 4000,
+    "val_loss": 4.421956436138935,
+    "val_bits_per_char": 1.8965777773716466,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.510058891773224,
+      "bits_per_char": 1.5098945617878525,
+      "train_loss": 3.450498330593109,
+      "train_bits_per_char": 1.4836199089646573
+     },
+     "fw2_arb": {
+      "loss": 4.394412422180176,
+      "bits_per_char": 1.7815965636052167,
+      "train_loss": 4.38727753162384,
+      "train_bits_per_char": 1.8026065619562042
+     },
+     "fw2_ars": {
+      "loss": 5.226613163948059,
+      "bits_per_char": 2.4448485073864425,
+      "train_loss": 4.839162373542786,
+      "train_bits_per_char": 2.3083280846160665
+     },
+     "fw2_ary": {
+      "loss": 4.614577694544717,
+      "bits_per_char": 1.8224213800212639,
+      "train_loss": 4.554141926765442,
+      "train_bits_per_char": 1.8362049837214143
+     },
+     "fw2_arz": {
+      "loss": 4.710673880577088,
+      "bits_per_char": 2.081892218326161,
+      "train_loss": 4.527851557731628,
+      "train_bits_per_char": 1.9964169299722034
+     },
+     "wiki_ar": {
+      "loss": 4.075402563810348,
+      "bits_per_char": 1.7388134331029423,
+      "train_loss": 4.038901233673096,
+      "train_bits_per_char": 1.7312778515523688
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:41:47+00:00",
+    "step": 4250,
+    "val_loss": 4.401598365376235,
+    "val_bits_per_char": 1.887824006512444,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.4949514746665953,
+      "bits_per_char": 1.5033959224101991,
+      "train_loss": 3.434665846824646,
+      "train_bits_per_char": 1.4768123739721064
+     },
+     "fw2_arb": {
+      "loss": 4.378123021125793,
+      "bits_per_char": 1.774992463180961,
+      "train_loss": 4.363134813308716,
+      "train_bits_per_char": 1.7926870111312088
+     },
+     "fw2_ars": {
+      "loss": 5.199365329742432,
+      "bits_per_char": 2.43210281056567,
+      "train_loss": 4.824768137931824,
+      "train_bits_per_char": 2.301461892545508
+     },
+     "fw2_ary": {
+      "loss": 4.592163570343502,
+      "bits_per_char": 1.813569436926442,
+      "train_loss": 4.536656141281128,
+      "train_bits_per_char": 1.829154811160502
+     },
+     "fw2_arz": {
+      "loss": 4.691649389266968,
+      "bits_per_char": 2.0734843044224927,
+      "train_loss": 4.506958818435669,
+      "train_bits_per_char": 1.9872049189528214
+     },
+     "wiki_ar": {
+      "loss": 4.053337407112122,
+      "bits_per_char": 1.7293991015688999,
+      "train_loss": 4.019231307506561,
+      "train_bits_per_char": 1.7228463238809624
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:44:45+00:00",
+    "step": 4500,
+    "val_loss": 4.387680170081911,
+    "val_bits_per_char": 1.8819439664168414,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.4821563005447387,
+      "bits_per_char": 1.4978919225003973,
+      "train_loss": 3.419586741924286,
+      "train_bits_per_char": 1.4703287712874773
+     },
+     "fw2_arb": {
+      "loss": 4.36244900226593,
+      "bits_per_char": 1.7686378529496434,
+      "train_loss": 4.352000164985657,
+      "train_bits_per_char": 1.7881121033467011
+     },
+     "fw2_ars": {
+      "loss": 5.194370150566101,
+      "bits_per_char": 2.4297662197428367,
+      "train_loss": 4.8108590841293335,
+      "train_bits_per_char": 2.2948271369732915
+     },
+     "fw2_ary": {
+      "loss": 4.574746472494943,
+      "bits_per_char": 1.8066909545173886,
+      "train_loss": 4.515878415107727,
+      "train_bits_per_char": 1.8207773462146315
+     },
+     "fw2_arz": {
+      "loss": 4.6729721307754515,
+      "bits_per_char": 2.0652298507925186,
+      "train_loss": 4.488906693458557,
+      "train_bits_per_char": 1.9792453894791266
+     },
+     "wiki_ar": {
+      "loss": 4.039386963844299,
+      "bits_per_char": 1.7234469979982645,
+      "train_loss": 4.003048932552337,
+      "train_bits_per_char": 1.7159097374870722
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:47:44+00:00",
+    "step": 4750,
+    "val_loss": 4.3776616145221015,
+    "val_bits_per_char": 1.8776557455612626,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.472802150249481,
+      "bits_per_char": 1.493868120878704,
+      "train_loss": 3.408761036396027,
+      "train_bits_per_char": 1.4656740139998388
+     },
+     "fw2_arb": {
+      "loss": 4.352114033699036,
+      "bits_per_char": 1.7644478173510698,
+      "train_loss": 4.340243864059448,
+      "train_bits_per_char": 1.7832817763292828
+     },
+     "fw2_ars": {
+      "loss": 5.183313941955566,
+      "bits_per_char": 2.424594466205523,
+      "train_loss": 4.7980334758758545,
+      "train_bits_per_char": 2.2887091955924332
+     },
+     "fw2_ary": {
+      "loss": 4.564408552078974,
+      "bits_per_char": 1.8026082304983966,
+      "train_loss": 4.504241037368774,
+      "train_bits_per_char": 1.816085219498921
+     },
+     "fw2_arz": {
+      "loss": 4.663654756546021,
+      "bits_per_char": 2.0611120176766526,
+      "train_loss": 4.479463219642639,
+      "train_bits_per_char": 1.9750815800513075
+     },
+     "wiki_ar": {
+      "loss": 4.029676252603531,
+      "bits_per_char": 1.7193038207572309,
+      "train_loss": 3.9946990847587585,
+      "train_bits_per_char": 1.7123305693637385
+     }
+    }
+   },
+   {
+    "event": "eval",
+    "time": "2026-11-06T03:50:43+00:00",
+    "step": 5000,
+    "val_loss": 4.368910039133496,
+    "val_bits_per_char": 1.8738855248172035,
+    "best": true,
+    "sources": {
+     "fineweb_edu_10bt": {
+      "loss": 3.468813109397888,
+      "bits_per_char": 1.4921521863960414,
+      "train_loss": 3.4007424473762513,
+      "train_bits_per_char": 1.4622262400345345
+     },
+     "fw2_arb": {
+      "loss": 4.341422295570373,
+      "bits_per_char": 1.7601131391099363,
+      "train_loss": 4.328733158111572,
+      "train_bits_per_char": 1.778552357247671
+     },
+     "fw2_ars": {
+      "loss": 5.170161485671997,
+      "bits_per_char": 2.418442152631763,
+      "train_loss": 4.787977147102356,
+      "train_bits_per_char": 2.2839122277818644
+     },
+     "fw2_ary": {
+      "loss": 4.556198755900065,
+      "bits_per_char": 1.7993659602252692,
+      "train_loss": 4.495203614234924,
+      "train_bits_per_char": 1.812441380184023
+     },
+     "fw2_arz": {
+      "loss": 4.653809070587158,
+      "bits_per_char": 2.0567606960820175,
+      "train_loss": 4.467455506324768,
+      "train_bits_per_char": 1.9697871480558249
+     },
+     "wiki_ar": {
+      "loss": 4.023055517673493,
+      "bits_per_char": 1.7164790144581934,
+      "train_loss": 3.984332025051117,
+      "train_bits_per_char": 1.7078867219361449
+     }
+    }
+   }
+  ]
+ }
+}
