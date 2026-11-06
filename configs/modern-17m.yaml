@@ -1,0 +1,49 @@
+# Modern architecture against the GPT-2 baseline (D-027): the same run as `local-17m` (5,000 steps,
+# peak learning rate 6e-4 to 6e-5, 200 warmup steps, seed 1337, natural mix, same validation
+# windows) with the three changes switched on together: RMSNorm instead of LayerNorm, rotary
+# position embeddings instead of learned ones, SwiGLU instead of GELU in the feed-forward.
+#
+# Fixed before the run (D-023 rule, D-025). Compared with the baseline `local-17m`, by bits per
+# character on the validation split at step 5,000, in-training evaluation: the mean of the five
+# Arabic sources (arb, ars, ary, arz, wiki_ar) is 2.0153 for the baseline. The change counts as an
+# improvement only if
+#   1. that mean falls by at least 0.03 (a claim about one source needs at least 0.04), and
+#   2. English (baseline 1.5634) does not get worse by 0.03 or more.
+# If the package passes, its parts are separated in later runs; if it fails, the result stays in
+# the log. A pass with a mean gain below 0.03 is not a pass.
+# Caveats fixed now: rotary embeddings remove the 196,608 position-table parameters (16,913,280
+# instead of 17,109,888, -1.15%); SwiGLU's width (1,024) keeps the feed-forward parameters equal.
+# One seed; the baseline was stopped once at step 2,990 and resumed (D-026), this run should not be.
+name: modern-17m
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  norm: rmsnorm
+  position: rope
+  ffn: swiglu
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
