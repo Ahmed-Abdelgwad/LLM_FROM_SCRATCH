@@ -1614,3 +1614,107 @@ if anything works against it. The advantage narrows with training. Generalizatio
 - A longer run, to see if the advantage keeps narrowing.
 - Why the unseen dialects do not follow; the rotary embeddings, which generalize position differently, are the first suspect, but nothing here shows it.
 - A key/value cache and grouped-query attention (not built).
+
+## D-029 (2026-11-06): the modern architecture, repeated with a second seed: the result holds on both, and the Moroccan Wikipedia is worse on both
+
+Code: none changed. Added: `configs/local-17m-seed2024.yaml` and `configs/modern-17m-seed2024.yaml`. Evidence kept in git:
+`reports/eval/final-local-17m-seed2024/`, `reports/eval/final-modern-17m-seed2024/` (full evaluations) and
+`reports/eval/final-d029-seed-replicate/evals.json` (the evaluation events of the four runs). Script: `scripts/d029_entry.py`
+computed the tables and numbers (prose by hand; comparisons guarded by asserts). Not in git: the runs (`runs/`, ignored).
+
+**What was run.** D-028 left one step open: the same two configurations again with a different seed. The new pair differs from
+`local-17m` and `modern-17m` only in `train.seed` (1337 -> 2024), which changes the initialization and the data order; the script checks
+that the stored configurations are otherwise identical, and that all four runs ended at step 5,000 with 163,840,000 tokens and no skipped
+step. The new runs were not interrupted (the first baseline was, once, at step 2,990). The criterion was written in the two new
+config headers before the runs: per seed, the Arabic mean at least 0.03 lower, a claim about one source 0.04, English not worse by 0.03 or more;
+superiority is claimed only if both seeds pass; nothing about seed 1337 is touched.
+
+| seed | run | arb | ars | ary | arz | wiki_ar | Arabic mean | English |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 1337 | baseline | 1.825 | 2.479 | 1.873 | 2.121 | 1.779 | 2.0153 | 1.5634 |
+| 1337 | modern | 1.762 | 2.420 | 1.802 | 2.056 | 1.718 | 1.9515 | 1.4900 |
+| 1337 | change | -0.063 | -0.059 | -0.071 | -0.065 | -0.061 | -0.0637 | -0.0733 |
+| 2024 | baseline | 1.826 | 2.478 | 1.879 | 2.125 | 1.784 | 2.0186 | 1.5637 |
+| 2024 | modern | 1.760 | 2.418 | 1.799 | 2.057 | 1.716 | 1.9502 | 1.4922 |
+| 2024 | change | -0.066 | -0.060 | -0.080 | -0.068 | -0.068 | -0.0683 | -0.0716 |
+
+**By the rule, both seeds pass.** Seed 1337: Arabic mean -0.0637, smallest per-source gain 0.059, English -0.0733.
+Seed 2024: Arabic mean -0.0683, smallest per-source gain 0.060, English -0.0716. The two seeds agree to 0.005 bits/char on the Arabic mean.
+
+**Seed noise at the full length** (the same configuration, seed 2024 minus seed 1337):
+
+| run pair (seed 2024 minus 1337) | arb | ars | ary | arz | wiki_ar | Arabic mean | English |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| baseline | +0.002 | -0.001 | +0.007 | +0.004 | +0.005 | +0.0033 | +0.0004 |
+| modern | -0.002 | -0.001 | -0.002 | +0.000 | -0.002 | -0.0013 | +0.0021 |
+
+The largest difference between seeds is 0.0033 on the Arabic mean and 0.007 on any one source. The 0.013 quoted in D-023 and D-024 was measured at 800 steps;
+at 5,000 steps the noise is much smaller, and the threshold of 0.03 is at least 9 times it. Two seeds are a rough estimate of noise, not a
+precise one. The seed-1337 baseline was interrupted once, at step 2,990; its distance to the seed-2024 baseline (+0.0033) is not larger than the modern pair's (-0.0013), neither of which was interrupted, so the interruption is not visible at this level (two seeds cannot exclude a small effect).
+
+The advantage over training, seed 2024, has the same shape as seed 1337 (D-028): large early, narrowing, and flat for the last 1,500 steps:
+
+| step | Arabic mean: modern minus baseline | English: modern minus baseline |
+|---:|---:|---:|
+| 500 | -0.174 | -0.248 |
+| 1,000 | -0.137 | -0.200 |
+| 1,500 | -0.113 | -0.151 |
+| 2,000 | -0.085 | -0.100 |
+| 2,500 | -0.072 | -0.085 |
+| 3,000 | -0.069 | -0.077 |
+| 3,500 | -0.069 | -0.074 |
+| 4,000 | -0.068 | -0.073 |
+| 4,500 | -0.068 | -0.072 |
+| 5,000 | -0.068 | -0.072 |
+
+**Full evaluation** (modern minus baseline, bits per character; negative is lower):
+
+| source | split | seed 1337 change | seed 2024 change |
+|---|---|---:|---:|
+| edu | val | -0.071 | -0.073 |
+| edu | test | -0.068 | -0.073 |
+| arb | val | -0.064 | -0.067 |
+| arb | test | -0.062 | -0.065 |
+| ars | val | -0.058 | -0.059 |
+| ars | test | -0.059 | -0.059 |
+| ary | val | -0.071 | -0.080 |
+| ary | test | -0.066 | -0.072 |
+| arz | val | -0.064 | -0.066 |
+| arz | test | -0.062 | -0.066 |
+| wiki_ar | val | -0.060 | -0.065 |
+| wiki_ar | test | -0.062 | -0.064 |
+| acm | eval | -0.029 | -0.026 |
+| apc | eval | -0.044 | -0.048 |
+| wiki_ary | eval | +0.095 | +0.087 |
+| **trained Arabic, val (mean)** | | **-0.063** | **-0.067** |
+| **trained Arabic, test (mean)** | | **-0.062** | **-0.065** |
+| **unseen dialects (mean)** | | **+0.007** | **+0.005** |
+
+On every trained source, English included, the modern model has a lower bits/char on test in both seeds. **On the unseen Moroccan Wikipedia (`wiki_ary`) it is higher in both seeds,
+by +0.095 and +0.087**. The seed-to-seed difference on the three unseen sources, measured the same way (seed 2024 minus 1337, per model), reaches 0.032, larger than on
+the trained sources, so the unseen dialects are noisier; the loss on `wiki_ary` is 2.7 to 2.9 times that, and it appears in both seeds with the same sign. On the two other unseen dialects it is lower in both seeds
+(`acm` -0.029 and -0.026, `apc` -0.044 and -0.048). The `acm` differences are within the unseen-source noise just given, the `apc` ones a little above it. The mean over the three unseen dialects is +0.007 and +0.005, which is no improvement.
+`wiki_ary` is Moroccan Wikipedia text; the training mix has Moroccan web text (`ary`) and Arabic Wikipedia (`wiki_ar`) but no Moroccan Wikipedia. Why only this
+source is hurt was not investigated.
+
+**What is claimed, and what is not.**
+
+- Claimed, with two seeds, at this size (17M parameters, 6 layers) and this budget (164M tokens): on the Arabic sources and the English source it trains on,
+  RMSNorm + rotary embeddings + SwiGLU together reach a lower bits/char than the GPT-2 parts, by about 0.07 on the Arabic mean and 0.07 on English, and the rule is met on both seeds.
+- Not claimed: that it is better at other sizes or longer runs (the advantage narrowed with training and its limit is unknown); that it is better on
+  text unlike the training sources (the Moroccan Wikipedia is worse in both seeds); which of the three changes does the work, or whether one of them is the cause of the `wiki_ary` loss;
+  that it matters for downstream use, which has not been tested at all. Two seeds are still few.
+- The model has 1.15% fewer parameters (no position table); this works against the modern one, and was not compensated.
+
+**Decisions.**
+
+1. The claim above is recorded. `configs/modern-17m.yaml` is the reference architecture for later experiments, as D-028 said it would be if this held; `local-17m` stays the baseline of record for earlier numbers.
+2. The GPT-2 parts stay available as the code default (D-027).
+3. `wiki_ary` is added to what is reported next to every later architecture comparison, because it is the one source on which this change lost, and a
+   later change that fixes it would be visible.
+
+**Not decided, and not tested here.**
+
+- Which of the three changes helps and which hurts `wiki_ary`: three runs with one switch each (or one removed). Rotary embeddings are the first suspect for the generalization difference; nothing here shows it.
+- A longer run, to see where the narrowing advantage ends.
+- A key/value cache and grouped-query attention (not built).
