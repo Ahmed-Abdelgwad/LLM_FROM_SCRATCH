@@ -1,0 +1,44 @@
+# Second seed of the comparison between the GPT-2 baseline and the modern architecture (D-028, "not
+# decided"): the GPT-2 baseline, identical to `local-17m` in every setting and in the token budget (5,000 steps of
+# 32,768 tokens, natural mix, same validation windows) except `train.seed`, 1337 -> 2024. The seed changes
+# the initialization and the data order; it is the seed of the learning-rate repeat of D-023. Run one after the
+# other on the same GPU, baseline first.
+#
+# Fixed before the runs. Per seed, by bits per character on the validation split at step 5,000 (in-training
+# evaluation): the modern run counts as ahead of the baseline of the same seed only if the Arabic mean
+# (arb, ars, ary, arz, wiki_ar) is at least 0.03 lower, a claim about one source needs 0.04, and English is not
+# worse by 0.03 or more (D-023, D-025). Superiority is claimed only if BOTH seeds pass; if one passes and the other
+# does not, the result is reported as inconsistent and nothing is claimed. The numbers of seed 1337 (`local-17m`,
+# `modern-17m`) are not touched. Also reported, outside the rule: the unseen dialects of the full evaluation
+# (wiki_ary was worse by 0.095 at seed 1337), and the distance between the two baselines (seed 1337 against 2024) as a
+# measure of seed noise at the full length.
+name: local-17m-seed2024
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 2024
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
