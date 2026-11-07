@@ -1817,3 +1817,97 @@ against RoPE and is not compensated.
 only for unresolved ones. Effects might differ at other sizes or lengths. If all three switches look neutral, the package's gain would have to come from an interaction, which only stage 2 can show.
 
 **Not started.** No run exists for this plan. Training starts only when the project says so.
+
+## D-032 (2026-11-07): ablation stage 1: rotary embeddings carry the gain; SwiGLU brings the speed and most of the `wiki_ary` loss; RMSNorm shows no measurable effect
+
+Code: none changed. Evidence kept in git: the full evaluations `reports/eval/final-ablation-{rmsnorm,rope,swiglu}-only/` and
+`reports/eval/final-d032-ablation-stage1/evals.json` (the evaluation events of the five runs compared). Script: `scripts/d032_entry.py` computed
+the tables, the classifications and the decisions of this entry by the rules of D-031 (prose by hand; comparison sentences guarded by asserts).
+Not in git: the runs (`runs/`, ignored). The plan, the thresholds and the rules were committed before the first of these runs (D-031).
+
+**What was run.** The three configs of stage 1 (`configs/ablation-*-only.yaml`), each the baseline `local-17m` with one switch on; the script checks that
+the stored configurations differ from the baseline's in that switch only. All runs: seed 1337, 5,000 steps, 163,840,000 tokens, none interrupted, 0 skipped steps.
+Effects are against the baseline, bits per character at step 5,000 (in-training validation), the thresholds of D-031: Arabic mean and English, helps at -0.01 or lower, hurts at +0.01 or higher,
+sizes from 0.005 to 0.015 unresolved, below 0.005 neutral; speed and memory count at 10%.
+
+| run | Arabic mean | effect | class | English | effect | class | median tokens/s | vs baseline | peak memory MiB | vs baseline | parameters |
+|---|---:|---:|---|---:|---:|---|---:|---:|---:|---:|---:|
+| baseline (`local-17m`) | 2.0153 | | | 1.5634 | | | 34,424 | | 2,081 | | 17,109,888 |
+| RMSNorm | 2.0105 | -0.0048 | neutral | 1.5576 | -0.0057 | unresolved | 35,983 | +5% | 1,935 | -7% | 17,109,888 |
+| rotary embeddings | 1.9563 | -0.0590 | helps | 1.5012 | -0.0621 | helps | 32,382 | -6% | 2,053 | -1% | 16,913,280 |
+| SwiGLU | 2.0065 | -0.0087 | unresolved | 1.5521 | -0.0113 | unresolved | 49,639 | +44% | 1,652 | -21% | 17,109,888 |
+| all three (`modern-17m`) | 1.9515 | -0.0637 | helps | 1.4900 | -0.0733 | helps | 48,316 | +40% | 1,607 | -23% | 16,913,280 |
+
+Per source (the same effects):
+
+| effect on bits/char | arb | ars | ary | arz | wiki_ar |
+|---|---:|---:|---:|---:|---:|
+| RMSNorm | -0.006 | -0.005 | -0.004 | -0.005 | -0.004 |
+| rotary embeddings | -0.058 | -0.057 | -0.062 | -0.062 | -0.057 |
+| SwiGLU | -0.009 | -0.006 | -0.014 | -0.007 | -0.008 |
+| all three | -0.063 | -0.059 | -0.071 | -0.065 | -0.061 |
+
+**Results by D-031.**
+
+- **Rotary embeddings: helps.** Arabic mean -0.0590, English -0.0621, every Arabic source between -0.057 and -0.062.
+  Alone it gives 93% of the Arabic-mean effect of the whole package at this seed and 85% of the English one. It does not make training faster (-6%, inside the 10% band)
+  and uses about the same memory (-1%); it has 196,608 fewer parameters.
+- **SwiGLU: unresolved on Arabic** (-0.0087, between 0.005 and 0.015), unresolved on English (-0.0113). All five Arabic sources move the same way (between -0.006 and
+  -0.014). It is **+44% faster and uses -21% peak memory**, with exactly the parameters of the baseline. So most of the speed of the modern package is SwiGLU's.
+- **RMSNorm: neutral on Arabic** (-0.0048, 0.0002 below the unresolved band), unresolved on English (-0.0057, which is inside it).
+  Speed +5% and memory -7%: no difference by the 10% rule. All six sources move by -0.004 to -0.006, in the same direction, and the size is within about 1.4 times the seed noise measured at this length (0.0033, D-029).
+  It is classified neutral because the rule says so; it sits next to the boundary, so one more seed could move it.
+
+**Additivity (decides stage 2).** The three single effects add to -0.0725 on the Arabic mean; the package's total effect is -0.0660 (D-029), a gap of -0.0065, inside 0.01: **the effects are taken as additive and stage 2 is not run.**
+Against the package at seed 1337 alone (-0.0637) the gap is -0.0088, also inside. The sum is a little larger than the package (-0.0725 against -0.0637), i.e. the three together gain slightly less than their separate gains added up
+(the parts overlap a little). On English the singles add to -0.0791 against -0.0733.
+
+**The unseen dialects** (full evaluation, change in bits/char against the baseline, negative is lower; `wiki_ary` counts only from 0.05):
+
+| change vs baseline | RMSNorm | rotary embeddings | SwiGLU | all three |
+|---|---:|---:|---:|---:|
+| arb test | -0.005 | -0.057 | -0.010 | -0.062 |
+| ars test | -0.005 | -0.051 | -0.007 | -0.059 |
+| ary test | -0.003 | -0.056 | -0.016 | -0.066 |
+| arz test | -0.004 | -0.059 | -0.008 | -0.062 |
+| wiki_ar test | -0.006 | -0.060 | -0.010 | -0.062 |
+| edu test | -0.004 | -0.060 | -0.008 | -0.068 |
+| acm eval | -0.003 | -0.035 | +0.002 | -0.029 |
+| apc eval | -0.002 | -0.046 | -0.004 | -0.044 |
+| wiki_ary eval | -0.001 | +0.029 | +0.071 | +0.095 |
+| unseen dialects (mean) | -0.002 | -0.017 | +0.023 | +0.007 |
+
+`wiki_ary`: RMSNorm -0.001, rotary embeddings +0.029, SwiGLU +0.071, all three +0.095.
+**SwiGLU alone carries most of the `wiki_ary` loss, not the rotary embeddings.** SwiGLU's +0.071 is above the 0.05 line, rotary embeddings' +0.029 is below it (no difference by the rule),
+RMSNorm's -0.001 is nothing. The three singles add to +0.099 against +0.095 for the package, so the loss is additive too. This is **not** what D-029 guessed: it named the rotary embeddings as the first suspect,
+"nothing here shows it", and the ablation shows it was the wrong suspect. SwiGLU does nothing for the other unseen dialects either (`acm` +0.002, `apc` -0.004): its small gain on the trained Arabic sources
+does not carry over to unseen text, and on `wiki_ary` it reverses. The unseen sources are noisier (up to 0.032 between seeds, D-029), so 0.071 is about 2.2 times that noise, one seed.
+
+**Keep / drop by D-031 (rules 1 to 5).**
+
+- Rotary embeddings: **keep (rule 1)**. They help Arabic and English, and their `wiki_ary` change (+0.029) is under the 0.05 line, so rule 4 does not apply to them.
+- SwiGLU: **open: unresolved on Arabic and `wiki_ary` worse by 0.05 or more; if the Arabic effect resolves to helps, rule 4 (a trade-off, left to the project), if to neutral, rule 5 (candidate to drop); the rules do not decide it until a second seed resolves the Arabic effect**. It is +44% faster and -21% in memory, which would count for it only under rule 2 (neutral Arabic effect, no `wiki_ary` loss); rule 5 comes first when `wiki_ary` is worse.
+- RMSNorm: **candidate to drop (rule 2: neutral, no speed or memory gain)**. By the rule it is a candidate to drop: simpler code with no gain in quality, speed or memory at this size.
+
+Nothing is removed from the code (D-027), and `configs/modern-17m.yaml` is not changed by this entry: dropping RMSNorm from the reference would need a run of the package without it (rotary embeddings and SwiGLU), which is a cell of stage 2 and has not been run.
+
+**What this does not show.** One seed per cell. The attribution is on top of GPT-2: a component's effect on top of the others comes only from stage 2, which the additivity test says is not needed for the Arabic mean (and the `wiki_ary` sums agree), but which was not run.
+The SwiGLU Arabic effect is unresolved, not zero, and the `wiki_ary` numbers sit on the noisy unseen sources. Rotary embeddings remove the position table, so their cell is 1.15% smaller; this works against them. Speeds are medians over whole runs on a GPU whose throughput
+varies from run to run (D-030); the SwiGLU speed difference is far outside that variation but its exact size is not precise. Whether the effects hold at other sizes or longer runs is not known.
+
+**Decisions.**
+
+1. The gain of the modern architecture on the trained languages is attributed mainly to rotary embeddings; SwiGLU adds a small gain that D-031 leaves unresolved and most of the speed and memory saving; RMSNorm contributes nothing measurable.
+2. The loss on the unseen Moroccan Wikipedia is attributed mainly to SwiGLU, not to rotary embeddings (this replaces the suspicion in D-029).
+3. Rotary embeddings are kept (rule 1). RMSNorm is a candidate to drop, not dropped. **SwiGLU is open**: by the pre-registered rules its fate depends on how its Arabic effect resolves, so the second seed that D-031 reserves for unresolved effects is now needed for it; the run and how it will be judged are written below, before it is run.
+4. Stage 2 is not run (the effects are additive by the rule of D-031).
+
+**The follow-up, registered here before it is run.** `configs/ablation-swiglu-only-seed2024.yaml`: the baseline with SwiGLU on, seed 2024, compared with the baseline of the same seed (`local-17m-seed2024`, already run). Judged only by the rules of D-031, with these two additions fixed now:
+the Arabic effect is classified on the mean of the two seeds' effects (-0.0087 at seed 1337 and the new one), with the same bands; `wiki_ary` counts as worse only if it is 0.05 or more at both seeds (if only at one, it is "no difference"). Then rules 1 to 5 are applied as written;
+if the Arabic mean still falls in the unresolved band, SwiGLU stays open and nothing more is run for it without a new decision. No other threshold changes.
+
+**Not decided, and not tested here.**
+
+- Whether to drop RMSNorm from the reference: a run of rotary embeddings + SwiGLU (no RMSNorm) would show that dropping it costs nothing; not run.
+- What SwiGLU does to `wiki_ary` on top of rotary embeddings and the reverse: the stage-2 cells would show interactions; not run.
+- A second seed for the borderline RMSNorm effect; it changes no decision above.
