@@ -1963,3 +1963,23 @@ On the other two unseen dialects SwiGLU alone does nothing (`acm` +0.002 and +0.
 4. Rotary embeddings stay kept (D-032, rule 1); RMSNorm stays a candidate to drop, not dropped.
 
 **Not decided, and not tested here.** A second seed for rotary embeddings alone (to see how much of `wiki_ary` they carry); a run of the package without RMSNorm; whether `wiki_ary` should matter more than a 0.01 to 0.02 gain on the trained languages, a project decision (as in D-024, D-025) now that no component is shown to cause it alone.
+
+## D-034 (2026-11-07): two follow-up runs, registered before they are run: RoPE alone at a second seed, and the package without RMSNorm
+
+Plan only; written, with the configs, before either run. Two questions left by D-032 and D-033.
+
+**A. How much of the `wiki_ary` loss do rotary embeddings carry?** `configs/ablation-rope-only-seed2024.yaml`: the baseline with rotary embeddings alone, seed 2024, against `local-17m-seed2024`.
+So far (bits/char against the baseline of the same seed): rotary alone +0.029 at seed 1337 (no second seed yet); SwiGLU alone +0.071 and +0.040; the package +0.095 and +0.087. D-033 weakened the attribution to SwiGLU and left the rest unattributed.
+Criterion: the Arabic effect is classified on the mean of the two seeds with the D-031 bands; `wiki_ary` counts as worse only at 0.05 or more at **both** seeds; rules 1 to 5 of D-031 as written; the share of the package's `wiki_ary` loss is reported per seed and is not a criterion.
+What the result can and cannot show: with rotary alone at two seeds and SwiGLU alone at two seeds, the shares of the package's loss can be compared at both seeds; it cannot show interactions (stage 2 was not run), nor RMSNorm's share at seed 2024.
+
+**B. Does dropping RMSNorm cost anything?** `configs/ablation-rope-swiglu.yaml`: rotary embeddings and SwiGLU on, LayerNorm kept; it differs from `modern-17m` in that one line (checked by diff); seed 1337.
+Let D be this run minus `modern-17m` (all three), bits/char at step 5,000. Dropping counts as costing nothing only if **all** hold: Arabic-mean D below +0.005; English D below +0.005; `wiki_ary` D below +0.05 (full evaluation);
+speed not more than 10% below `modern-17m`'s median tokens/s and memory not more than 10% above. A gain is fine; +0.005 or more is not "nothing". The 0.005 is the neutral bound of D-031.
+- All hold: RMSNorm is a *candidate to drop at one seed*. The reference config is changed only after the same test also holds at seed 2024 (a second run, written then, with this same criterion).
+- Any fails: RMSNorm stays in the reference. A difference between +0.005 and +0.015 on Arabic or English is "unresolved" and RMSNorm stays too: dropping needs evidence of no cost, keeping is the default. Nothing more is run for it without a new decision.
+Why the asymmetry: RMSNorm alone gave -0.0048 on the Arabic mean (at the neutral boundary) and a small English gain at seed 1337; a one-seed "no difference" is weak evidence of no cost.
+
+**Order and cost.** B first (about an hour at the package's speed), then A (about an hour and a half at rotary-alone speed), each followed by its full evaluation (about five minutes). The existing baseline and package results are not touched.
+
+**Not started.** The two runs start after the commit of this entry and the two configs.
