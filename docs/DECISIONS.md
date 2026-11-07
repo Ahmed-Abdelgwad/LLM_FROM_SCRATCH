@@ -1911,3 +1911,55 @@ if the Arabic mean still falls in the unresolved band, SwiGLU stays open and not
 - Whether to drop RMSNorm from the reference: a run of rotary embeddings + SwiGLU (no RMSNorm) would show that dropping it costs nothing; not run.
 - What SwiGLU does to `wiki_ary` on top of rotary embeddings and the reverse: the stage-2 cells would show interactions; not run.
 - A second seed for the borderline RMSNorm effect; it changes no decision above.
+
+## D-033 (2026-11-07): SwiGLU alone at a second seed: the Arabic effect is still unresolved, `wiki_ary` is not worse at both seeds, and the keep decision does not depend on the first
+
+Code: none changed. Added: `configs/ablation-swiglu-only-seed2024.yaml`, committed before the run with its criterion in the header. Evidence kept in git:
+`reports/eval/final-ablation-swiglu-only-seed2024/` (full evaluation) and `reports/eval/final-d033-swiglu-seeds/evals.json` (the evaluation events of the four runs compared).
+Script: `scripts/d033_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+
+**Why it was run.** D-032 left SwiGLU open: its Arabic effect at seed 1337 (-0.0087) lay in the unresolved band of D-031, and `wiki_ary` was worse by +0.071, so the rules answered differently by how the Arabic effect resolved.
+**The criterion** (in the config header, before the run): the Arabic effect classified on the mean of the two seeds' effects, with the D-031 bands; `wiki_ary` worse only if 0.05 or more at both seeds; then rules 1 to 5 of D-031; if the Arabic mean is still
+unresolved, SwiGLU stays open and nothing more is run for it without a new decision.
+
+The second run is the baseline with SwiGLU on, seed 2024, 5,000 steps, 163,840,000 tokens, not interrupted, 0 skipped steps; the script checks that it differs from the seed-1337 SwiGLU run in the seed only. Effects are against the baseline of the same seed:
+
+| seed | Arabic effect | arb | ars | ary | arz | wiki_ar | English effect | speed | peak memory |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1337 | -0.0087 | -0.009 | -0.006 | -0.014 | -0.007 | -0.008 | -0.0113 | +44% | -21% |
+| 2024 | -0.0144 | -0.015 | -0.009 | -0.020 | -0.014 | -0.014 | -0.0147 | +45% | -18% |
+| **mean of the two** | **-0.0115** | | | | | | -0.0130 | | |
+
+**Applying the criterion.**
+
+- *Arabic mean:* the two effects are -0.0087 and -0.0144; their mean -0.0115 is 0.0115 in size, inside the unresolved band (0.005 to 0.015). **It is still unresolved.** The sign and the order of magnitude are the same at both seeds and
+  all five sources move the same way at both; the second seed's effect is the larger (the difference between the seeds, 0.0056, is larger than the 0.0033 seen between baselines in D-029). The band decides nothing further here.
+- *`wiki_ary`:* +0.071 at seed 1337 and +0.040 at seed 2024. It reaches 0.05 at one seed and not at the other, so **by the criterion it is "no difference"**.
+- *Speed and memory:* +44% and +45% in tokens per second, -21% and -18% in peak memory: beyond the 10% line at both seeds.
+- *Rules:* with `wiki_ary` not counted as worse, the rules give the same answer for either way the Arabic effect could resolve: if it helps, rule 1 (keep); if it is neutral, rule 2 (keep, since it is faster and lighter at both seeds).
+  **Under the registered rules SwiGLU is kept whichever way the unresolved Arabic effect would fall.** The sentence in the header, "SwiGLU stays open", refers to the Arabic classification, which does stay unresolved; this entry does not rewrite it. Whether the project treats the keep as settled is its decision.
+
+**Unseen dialects and the trained languages** (full evaluation, bits/char change against the baseline of the same seed):
+
+| change vs the baseline of the same seed | seed 1337 SwiGLU | seed 2024 SwiGLU | seed 1337 all three | seed 2024 all three |
+|---|---:|---:|---:|---:|
+| acm | +0.002 | +0.000 | -0.029 | -0.026 |
+| apc | -0.004 | -0.007 | -0.044 | -0.048 |
+| wiki_ary | +0.071 | +0.040 | +0.095 | +0.087 |
+| trained Arabic val (mean) | -0.010 | -0.014 | -0.063 | -0.067 |
+| trained Arabic test (mean) | -0.010 | -0.015 | -0.062 | -0.065 |
+
+**What the second seed does to D-032.** D-032 attributed most of the `wiki_ary` loss of the modern package to SwiGLU: +0.071 of +0.095 at seed 1337 (75%). At seed 2024 SwiGLU alone gives +0.040 against +0.087 for the package (46%).
+The share is not stable: with unseen sources whose seed-to-seed difference reaches 0.03 (D-029), two seeds give +0.071 and +0.040, mean +0.055, against a package mean of +0.091.
+So **the attribution of the `wiki_ary` loss to SwiGLU is weakened, not confirmed**: SwiGLU contributes something, probably less than D-032 said. The rotary embeddings alone gave +0.029 at seed 1337 (under the 0.05 line) and have no second seed;
+nothing here says which of the two, or their combination, is responsible for the rest. D-032's decision 2 is restated as: SwiGLU contributes to the `wiki_ary` loss (about 61% of the package's on average over two seeds); the rest is not attributed.
+On the other two unseen dialects SwiGLU alone does nothing (`acm` +0.002 and +0.000, `apc` -0.004 and -0.007), at both seeds.
+
+**Decisions.**
+
+1. SwiGLU's Arabic effect stays **unresolved** (-0.0115, two seeds); no further run is made for it (as registered).
+2. By the registered rules SwiGLU is **kept** under either resolution of that effect (rules 1 and 2), pending the project's confirmation that the header's "stays open" does not hold the keep back: it improves the trained languages slightly at both seeds, and it is +44% faster and -19% in peak memory. `configs/modern-17m.yaml` keeps it.
+3. The `wiki_ary` loss is not attributed to a single component: SwiGLU contributes part of it, and the rotary embeddings' contribution rests on one seed.
+4. Rotary embeddings stay kept (D-032, rule 1); RMSNorm stays a candidate to drop, not dropped.
+
+**Not decided, and not tested here.** A second seed for rotary embeddings alone (to see how much of `wiki_ary` they carry); a run of the package without RMSNorm; whether `wiki_ary` should matter more than a 0.01 to 0.02 gain on the trained languages, a project decision (as in D-024, D-025) now that no component is shown to cause it alone.
