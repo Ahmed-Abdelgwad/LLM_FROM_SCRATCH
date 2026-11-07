@@ -1,0 +1,42 @@
+# Follow-up to the architecture ablation (D-032, D-033): rotary embeddings alone, second seed. Identical to
+# `ablation-rope-only` in every setting and the token budget except `train.seed`, 1337 -> 2024. Compared with
+# the baseline of the same seed, `local-17m-seed2024` (already run).
+#
+# Question (D-034): how much of the `wiki_ary` loss of the modern package do rotary embeddings carry? At seed 1337
+# they gave +0.029 (under the 0.05 line), SwiGLU +0.071 at seed 1337 and +0.040 at seed 2024, the package +0.095 and +0.087.
+#
+# Fixed before the run (D-034): the Arabic effect is classified on the MEAN of the two seeds' effects with the bands of
+# D-031 (helps: size over 0.015 and negative; unresolved 0.005 to 0.015; neutral under 0.005; hurts: over 0.015 and positive).
+# `wiki_ary` counts as worse only if it is 0.05 or more at BOTH seeds. Rules 1 to 5 of D-031 as written. The share of the
+# package's `wiki_ary` loss is reported for each seed and is not a criterion. No other threshold changes.
+name: ablation-rope-only-seed2024
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  position: rope
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 2024
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10

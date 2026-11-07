@@ -1,0 +1,47 @@
+# The modern package without RMSNorm (D-034): rotary embeddings and SwiGLU on, LayerNorm kept. Identical to
+# `modern-17m` except `norm: layernorm` instead of `rmsnorm`; seed 1337, 5,000 steps, same token budget. (D-032 left
+# RMSNorm as a candidate to drop: neutral on quality, no speed or memory gain.)
+#
+# Fixed before the run (D-034). Let D be (this run) minus `modern-17m` (all three), bits per character at step 5,000.
+# Dropping RMSNorm from the reference counts as costing nothing only if ALL of:
+#   - Arabic mean: D < +0.005   (a gain is fine; +0.005 or more is not "nothing")
+#   - English:     D < +0.005
+#   - `wiki_ary` (full evaluation): D < +0.05
+#   - speed: not more than 10% below `modern-17m`'s median tokens per second; memory not more than 10% above.
+# If all hold, RMSNorm is a candidate to drop at one seed; the reference config is changed only after the same test
+# also holds at seed 2024 (a second run, written then). If any fails, RMSNorm stays in the reference. If the Arabic or
+# English difference falls between +0.005 and +0.015 the result is "unresolved" and RMSNorm stays too (dropping needs
+# evidence of no cost; keeping is the default); nothing more is run for it without a new decision.
+# `modern-17m`: Arabic mean 1.9515, English 1.4900 (seed 1337); `wiki_ary` 2.977 (full evaluation).
+name: ablation-rope-swiglu
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  position: rope
+  ffn: swiglu
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
