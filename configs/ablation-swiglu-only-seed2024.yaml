@@ -1,0 +1,44 @@
+# Follow-up to stage 1 of the architecture ablation (D-032): SwiGLU alone, second seed. Identical to
+# `ablation-swiglu-only` in every setting and the token budget except `train.seed`, 1337 -> 2024.
+# Compared with the baseline of the same seed, `local-17m-seed2024` (already run).
+#
+# Why: at seed 1337 the Arabic effect of SwiGLU alone was -0.0087, in the unresolved band of D-031 (0.005 to
+# 0.015), while `wiki_ary` was worse by 0.071 (0.05 or more); the rules give different answers depending on how
+# the Arabic effect resolves, so a second seed decides it.
+#
+# Fixed before the run (D-032): the Arabic effect is classified on the MEAN of the two seeds' effects, with the
+# bands of D-031 (helps <= -0.015, unresolved 0.005 to 0.015 in size, neutral < 0.005, hurts >= +0.015). `wiki_ary`
+# counts as worse only if it is 0.05 or more at BOTH seeds (at only one: no difference). Then rules 1 to 5 of D-031 are
+# applied as written. If the Arabic mean is still unresolved, SwiGLU stays open and nothing more is run for it
+# without a new decision. Speed and memory: 10% or more counts, as in D-031. No other threshold changes.
+name: ablation-swiglu-only-seed2024
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  ffn: swiglu
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 2024
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
