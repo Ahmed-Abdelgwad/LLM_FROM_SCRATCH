@@ -84,7 +84,7 @@ hashes; `data verify` and `data verify-tokens` re-check them.
 | `src/scratchllm/training/` | Config, schedule, batches, trainer, checkpoints, log, evaluation |
 | `src/scratchllm/finetune/` | Empty: LoRA/SFT is not built |
 | `configs/` | The configs in use: `smoke`, `local-17m` (the baseline of record), `reference-17m` (rotary + SwiGLU + LayerNorm, D-036). `configs/experiments/` keeps the config of every finished experiment (pilot, ablations, seeds), unchanged |
-| `scripts/` | Diagnostics on a checkpoint and on the token files, and the scripts that build the tables of a decision entry (D-023, D-024); each states how to run it |
+| `scripts/` | Diagnostics that apply to any checkpoint (environment, checkpoint, token files, one-batch overfit, key/value cache). `scripts/archive/` keeps the script that computed each decision entry's tables (D-023 to D-036); each states how it was run |
 | `tests/` | Unit tests that define each component's contract |
 | `docs/` | Problem statement, decision log, data plan |
 | `reports/` | Tracked reports only (`final-*`); working runs are ignored. `reports/diagnostics/final-d023/` holds the outputs of the diagnostic scripts |

@@ -7,14 +7,14 @@ Also writes the evaluation events of the four runs to reports/eval/final-d033-sw
 Needs runs/{local-17m,local-17m-seed2024,ablation-swiglu-only,ablation-swiglu-only-seed2024} and the full
 evaluations reports/eval/final-{local-17m,local-17m-seed2024,modern-17m,modern-17m-seed2024,
 ablation-swiglu-only,ablation-swiglu-only-seed2024}.
-Run from the repository root: uv run python scripts/d033_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d033_entry.py OUT.md"""
 
 import json
 import statistics
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 EVIDENCE = ROOT / "reports/eval/final-d033-swiglu-seeds"
 AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]
 EN = "fineweb_edu_10bt"
@@ -160,7 +160,7 @@ text = f"""## D-033 (2026-11-07): SwiGLU alone at a second seed: the Arabic effe
 
 Code: none changed. Added: `configs/experiments/ablation-swiglu-only-seed2024.yaml`, committed before the run with its criterion in the header. Evidence kept in git:
 `reports/eval/final-ablation-swiglu-only-seed2024/` (full evaluation) and `reports/eval/final-d033-swiglu-seeds/evals.json` (the evaluation events of the four runs compared).
-Script: `scripts/d033_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+Script: `scripts/archive/d033_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
 **Why it was run.** D-032 left SwiGLU open: its Arabic effect at seed 1337 ({res["1337"]["ar"]:+.4f}) lay in the unresolved band of D-031, and `wiki_ary` was worse by {w["1337"]:+.3f}, so the rules answered differently by how the Arabic effect resolved.
 **The criterion** (in the config header, before the run): the Arabic effect classified on the mean of the two seeds' effects, with the D-031 bands; `wiki_ary` worse only if {WIKI} or more at both seeds; then rules 1 to 5 of D-031; if the Arabic mean is still

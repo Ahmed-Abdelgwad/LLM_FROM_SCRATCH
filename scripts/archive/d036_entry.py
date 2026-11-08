@@ -7,14 +7,14 @@ comparison sentences are guarded by asserts.
 Also writes the evaluation events of the four runs to reports/eval/final-d036-no-rmsnorm/evals.json.
 Needs runs/{modern-17m,modern-17m-seed2024,ablation-rope-swiglu,ablation-rope-swiglu-seed2024} and the full
 evaluations final-{modern-17m,modern-17m-seed2024,ablation-rope-swiglu,ablation-rope-swiglu-seed2024} in reports/eval.
-Run from the repository root: uv run python scripts/d036_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d036_entry.py OUT.md"""
 
 import json
 import statistics
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 EVIDENCE = ROOT / "reports/eval/final-d036-no-rmsnorm"
 AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]
 EN = "fineweb_edu_10bt"
@@ -124,7 +124,7 @@ text = f"""## D-036 (2026-11-08): RMSNorm is dropped from the reference: the pac
 
 Code: none changed. Added: `configs/experiments/ablation-rope-swiglu-seed2024.yaml` (committed with its criterion before the run), `configs/reference-17m.yaml` (the new reference), and a test that every shipped config loads and
 that the reference is rotary + SwiGLU + LayerNorm with 16,913,280 parameters. Evidence kept in git: `reports/eval/final-ablation-rope-swiglu-seed2024/` (full evaluation) and `reports/eval/final-d036-no-rmsnorm/evals.json`
-(the evaluation events of the four runs). Script: `scripts/d036_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+(the evaluation events of the four runs). Script: `scripts/archive/d036_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
 **What was run.** The package without RMSNorm (rotary embeddings, SwiGLU, LayerNorm) at seed 2024, against `modern-17m-seed2024` (all three); the script checks that each pair of configs differs in the norm only.
 The run was not interrupted, 0 skipped steps, 163,840,000 tokens; the machine's sleep was inhibited during it. The criterion is D-034's, unchanged: dropping RMSNorm costs nothing only if all five conditions hold.

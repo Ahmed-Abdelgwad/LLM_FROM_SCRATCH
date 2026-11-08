@@ -1072,7 +1072,7 @@ Code: `model/generate.py`, `training/evaluation.py`, commands `scratchllm genera
 Code: none changed. Evidence kept in git: `reports/eval/final-local-17m` (full evaluation of the
 final checkpoint) and `reports/diagnostics/final-d023/` (outputs of the diagnostic scripts).
 Scripts: `scripts/diagnose_checkpoint.py`, `scripts/diagnose_tokens.py` and `scripts/overfit_one_batch.py`
-made the files in `reports/diagnostics/final-d023/`; `scripts/d023_entry.py` computed the tables and numbers
+made the files in `reports/diagnostics/final-d023/`; `scripts/archive/d023_entry.py` computed the tables and numbers
 of this entry from the runs and those files (the prose around them is written by hand). Not in git:
 the runs (`runs/local-17m`, `runs/diag-lr-*`, ignored), so the entry can be regenerated only on the machine
 that has them. Rerunning `diagnose_checkpoint.py` on the same checkpoint gives identical output except
@@ -1266,7 +1266,7 @@ Code: none changed. Added: `configs/experiments/ablation-arabic-only.yaml`, `con
 `configs/experiments/ablation-english-20-long.yaml` (5,000 steps), each with the question and the rule of D-023 in its header, written
 before the run. Evidence kept in git: `reports/eval/final-ablation-english-20-long/` (full evaluation of the 5,000-step
 checkpoint) and `reports/eval/final-d024-mix-ablation/evals.json` (the evaluation events of the six runs below, copied from
-their `metrics.jsonl`). Script: `scripts/d024_entry.py` computed the tables and numbers of this entry from those runs and the
+their `metrics.jsonl`). Script: `scripts/archive/d024_entry.py` computed the tables and numbers of this entry from those runs and the
 two full evaluations (prose by hand; sentences that depend on a comparison are guarded by an assert in the script). Not in git:
 the runs themselves (`runs/`, ignored). The first attempt of the Arabic-only arm was killed when the session restarted, at step 370,
 and rerun from step 0; its directory was kept aside and is not used.
@@ -1424,7 +1424,7 @@ against it. The model's own bits per character, and every model-to-model compari
 are not affected. Fix: the report keeps the pooled columns and adds `unigram_same_language_*`, which
 counts only the training sources in the scored source's language (from the source registry; empty for a
 source not in it). The reports already in git are not rewritten: a unigram baseline does not depend
-on the model, so `scripts/d026_unigram.py` computes the same-language baseline for each of their rows
+on the model, so `scripts/archive/d026_unigram.py` computes the same-language baseline for each of their rows
 into `reports/eval/final-d026-unigram/`. Mean over each group, model bits/char divided by the baseline:
 
 | report | trained Arabic, val: pooled → same-language | unseen dialects | English, val |
@@ -1516,7 +1516,7 @@ and neither separates the parts.
 Code: none changed (D-027 built the options). Added: `configs/experiments/modern-17m.yaml`. Evidence kept in git:
 `reports/eval/final-modern-17m/` (full evaluation of the 5,000-step checkpoint) and
 `reports/eval/final-d028-modern-arch/evals.json` (the evaluation events of both runs). Script:
-`scripts/d028_entry.py` computed the tables and numbers of this entry (prose by hand; sentences that depend on a
+`scripts/archive/d028_entry.py` computed the tables and numbers of this entry (prose by hand; sentences that depend on a
 comparison are guarded by an assert). Not in git: the runs (`runs/`, ignored).
 
 **What was run.** The baseline `local-17m` and `modern-17m` are identical in every setting (seed 1337, natural mix, 5,000
@@ -1619,7 +1619,7 @@ if anything works against it. The advantage narrows with training. Generalizatio
 
 Code: none changed. Added: `configs/experiments/local-17m-seed2024.yaml` and `configs/experiments/modern-17m-seed2024.yaml`. Evidence kept in git:
 `reports/eval/final-local-17m-seed2024/`, `reports/eval/final-modern-17m-seed2024/` (full evaluations) and
-`reports/eval/final-d029-seed-replicate/evals.json` (the evaluation events of the four runs). Script: `scripts/d029_entry.py`
+`reports/eval/final-d029-seed-replicate/evals.json` (the evaluation events of the four runs). Script: `scripts/archive/d029_entry.py`
 computed the tables and numbers (prose by hand; comparisons guarded by asserts). Not in git: the runs (`runs/`, ignored).
 
 **What was run.** D-028 left one step open: the same two configurations again with a different seed. The new pair differs from
@@ -1821,7 +1821,7 @@ only for unresolved ones. Effects might differ at other sizes or lengths. If all
 ## D-032 (2026-11-07): ablation stage 1: rotary embeddings carry the gain; SwiGLU brings the speed and most of the `wiki_ary` loss; RMSNorm shows no measurable effect
 
 Code: none changed. Evidence kept in git: the full evaluations `reports/eval/final-ablation-{rmsnorm,rope,swiglu}-only/` and
-`reports/eval/final-d032-ablation-stage1/evals.json` (the evaluation events of the five runs compared). Script: `scripts/d032_entry.py` computed
+`reports/eval/final-d032-ablation-stage1/evals.json` (the evaluation events of the five runs compared). Script: `scripts/archive/d032_entry.py` computed
 the tables, the classifications and the decisions of this entry by the rules of D-031 (prose by hand; comparison sentences guarded by asserts).
 Not in git: the runs (`runs/`, ignored). The plan, the thresholds and the rules were committed before the first of these runs (D-031).
 
@@ -1916,7 +1916,7 @@ if the Arabic mean still falls in the unresolved band, SwiGLU stays open and not
 
 Code: none changed. Added: `configs/experiments/ablation-swiglu-only-seed2024.yaml`, committed before the run with its criterion in the header. Evidence kept in git:
 `reports/eval/final-ablation-swiglu-only-seed2024/` (full evaluation) and `reports/eval/final-d033-swiglu-seeds/evals.json` (the evaluation events of the four runs compared).
-Script: `scripts/d033_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+Script: `scripts/archive/d033_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
 **Why it was run.** D-032 left SwiGLU open: its Arabic effect at seed 1337 (-0.0087) lay in the unresolved band of D-031, and `wiki_ary` was worse by +0.071, so the rules answered differently by how the Arabic effect resolved.
 **The criterion** (in the config header, before the run): the Arabic effect classified on the mean of the two seeds' effects, with the D-031 bands; `wiki_ary` worse only if 0.05 or more at both seeds; then rules 1 to 5 of D-031; if the Arabic mean is still
@@ -1988,7 +1988,7 @@ Why the asymmetry: RMSNorm alone gave -0.0048 on the Arabic mean (at the neutral
 
 Code: none changed. Added: `configs/experiments/ablation-rope-swiglu.yaml` and `configs/experiments/ablation-rope-only-seed2024.yaml`, committed with their criteria before the runs (D-034). Evidence kept in git: the full evaluations
 `reports/eval/final-ablation-rope-swiglu/` and `reports/eval/final-ablation-rope-only-seed2024/`, and `reports/eval/final-d035-followups/evals.json` (the evaluation events of the eight runs compared).
-Script: `scripts/d035_entry.py` computed the tables and the application of the criteria (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+Script: `scripts/archive/d035_entry.py` computed the tables and the application of the criteria (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
 **An interruption to disclose.** `ablation-rope-only-seed2024` was stopped once. The machine suspended at 19:34 on 2026-11-07, right after step 4,560 (systemd-logind: "The system will suspend now"); the process survived but its GPU context did not, and it made no progress
 for about six and a half hours. It was killed, and resumed from `last.pt` at step 4,500 (`resume` event in its log), with sleep inhibited for the rest. The losses logged for steps 4,510 to 4,550 after the resume equal those logged before the suspend to four decimals,
@@ -2047,7 +2047,7 @@ Neither alone reaches the 0.05 line at both seeds, so rule 4 does not apply to e
 
 Code: none changed. Added: `configs/experiments/ablation-rope-swiglu-seed2024.yaml` (committed with its criterion before the run), `configs/reference-17m.yaml` (the new reference), and a test that every shipped config loads and
 that the reference is rotary + SwiGLU + LayerNorm with 16,913,280 parameters. Evidence kept in git: `reports/eval/final-ablation-rope-swiglu-seed2024/` (full evaluation) and `reports/eval/final-d036-no-rmsnorm/evals.json`
-(the evaluation events of the four runs). Script: `scripts/d036_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+(the evaluation events of the four runs). Script: `scripts/archive/d036_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
 **What was run.** The package without RMSNorm (rotary embeddings, SwiGLU, LayerNorm) at seed 2024, against `modern-17m-seed2024` (all three); the script checks that each pair of configs differs in the norm only.
 The run was not interrupted, 0 skipped steps, 163,840,000 tokens; the machine's sleep was inhibited during it. The criterion is D-034's, unchanged: dropping RMSNorm costs nothing only if all five conditions hold.
@@ -2092,3 +2092,11 @@ is done one group at a time, each tested and committed on its own; nothing that 
    unchanged, to `configs/experiments/`. Every path to them in this log and in the scripts was updated to the new place; the
    runs' logs store each config's contents, not its path, so no result is affected. A test checks that exactly these three
    are at the top, and that every config in both places loads and carries its file's name as its run name.
+2. **Entry scripts.** The nine scripts that built the tables of D-023, D-024, D-026, D-028, D-029, D-032, D-033, D-035 and D-036 moved,
+   unchanged except for one line, to `scripts/archive/`. They were written once per entry, repeat the same helpers and need `runs/`,
+   which git does not hold; they are kept as the record of how each entry's numbers were computed, not as tools. The one line: each
+   finds the repository root from its own location, so `parent.parent` became `parents[2]`. Check: every entry was regenerated from the
+   archive and compared with its text in this log (blank lines ignored): all eight are identical, and regenerating rewrote no file in
+   `reports/`. They were not merged into one general tool: that would be new code for comparisons that are finished. `scripts/` keeps
+   the tools that still apply to any checkpoint (`check_env.py`, `diagnose_checkpoint.py`, `diagnose_tokens.py`, `overfit_one_batch.py`,
+   `check_kv_cache.py`).

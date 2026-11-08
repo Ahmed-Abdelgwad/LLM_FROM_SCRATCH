@@ -2,7 +2,7 @@
 """Builds the D-023 entry of docs/DECISIONS.md from the run files and the diagnostic outputs.
 Every table and every number in the text comes from a file (runs/, reports/); the prose around
 them is written here. Needs runs/ as it was when D-023 was written (they are not in git).
-Run from the repository root: uv run python scripts/d023_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d023_entry.py OUT.md"""
 
 import json
 import math
@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 DIAG = ROOT / "reports/diagnostics/final-d023"
 SHORT = {
     "fineweb_edu_10bt": "edu", "fw2_arb": "arb", "fw2_ars": "ars", "fw2_ary": "ary",
@@ -295,7 +295,7 @@ text = f"""
 Code: none changed. Evidence kept in git: `reports/eval/final-local-17m` (full evaluation of the
 final checkpoint) and `reports/diagnostics/final-d023/` (outputs of the diagnostic scripts).
 Scripts: `scripts/diagnose_checkpoint.py`, `scripts/diagnose_tokens.py` and `scripts/overfit_one_batch.py`
-made the files in `reports/diagnostics/final-d023/`; `scripts/d023_entry.py` computed the tables and numbers
+made the files in `reports/diagnostics/final-d023/`; `scripts/archive/d023_entry.py` computed the tables and numbers
 of this entry from the runs and those files (the prose around them is written by hand). Not in git:
 the runs (`runs/local-17m`, `runs/diag-lr-*`, ignored), so the entry can be regenerated only on the machine
 that has them. Rerunning `diagnose_checkpoint.py` on the same checkpoint gives identical output except

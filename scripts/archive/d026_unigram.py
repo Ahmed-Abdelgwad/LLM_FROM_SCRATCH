@@ -7,7 +7,7 @@ so it can be added without re-scoring any checkpoint and without rewriting those
 script computes, for every row of each report, the unigram loss with the training sources of the
 row's own language only, and writes reports/eval/final-d026-unigram/{report.json,report.md}.
 
-Run from the repository root: uv run python scripts/d026_unigram.py
+Run from the repository root: uv run python scripts/archive/d026_unigram.py
 """
 
 import json
@@ -18,7 +18,7 @@ from scratchllm.data.sources import SOURCES
 from scratchllm.training.batches import bits_per_char
 from scratchllm.training.evaluation import token_counts, unigram_loss
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 REPORTS = ["final-pilot-17m", "final-local-17m", "final-ablation-english-20-long"]
 OUT = ROOT / "reports/eval/final-d026-unigram"
 TRAINED_AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]

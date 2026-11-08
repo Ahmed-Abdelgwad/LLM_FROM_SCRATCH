@@ -7,7 +7,7 @@ print a claim the numbers do not support.
 Also writes the evaluation events of the runs to reports/eval/final-d032-ablation-stage1/evals.json.
 Needs runs/{local-17m,modern-17m,ablation-{rmsnorm,rope,swiglu}-only} and the full evaluations
 reports/eval/final-{local-17m,modern-17m,ablation-{rmsnorm,rope,swiglu}-only}.
-Run from the repository root: uv run python scripts/d032_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d032_entry.py OUT.md"""
 
 import json
 import statistics
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 EVIDENCE = ROOT / "reports/eval/final-d032-ablation-stage1"
 AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]
 EN = "fineweb_edu_10bt"
@@ -225,7 +225,7 @@ assert decision["swiglu"].startswith("open")
 text = f"""## D-032 (2026-11-07): ablation stage 1: rotary embeddings carry the gain; SwiGLU brings the speed and most of the `wiki_ary` loss; RMSNorm shows no measurable effect
 
 Code: none changed. Evidence kept in git: the full evaluations `reports/eval/final-ablation-{{rmsnorm,rope,swiglu}}-only/` and
-`reports/eval/final-d032-ablation-stage1/evals.json` (the evaluation events of the five runs compared). Script: `scripts/d032_entry.py` computed
+`reports/eval/final-d032-ablation-stage1/evals.json` (the evaluation events of the five runs compared). Script: `scripts/archive/d032_entry.py` computed
 the tables, the classifications and the decisions of this entry by the rules of D-031 (prose by hand; comparison sentences guarded by asserts).
 Not in git: the runs (`runs/`, ignored). The plan, the thresholds and the rules were committed before the first of these runs (D-031).
 

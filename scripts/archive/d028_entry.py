@@ -6,14 +6,14 @@ prose is written here, and sentences that depend on a comparison are guarded by 
 Also writes the evaluation events of the two runs to
 reports/eval/final-d028-modern-arch/evals.json so the numbers stay checkable without runs/.
 Needs runs/local-17m, runs/modern-17m and reports/eval/final-{local,modern}-17m.
-Run from the repository root: uv run python scripts/d028_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d028_entry.py OUT.md"""
 
 import json
 import statistics
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 EVIDENCE = ROOT / "reports/eval/final-d028-modern-arch"
 AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]
 EN = "fineweb_edu_10bt"
@@ -128,7 +128,7 @@ text = f"""## D-028 (2026-11-06): RMSNorm + rotary embeddings + SwiGLU against t
 Code: none changed (D-027 built the options). Added: `configs/experiments/modern-17m.yaml`. Evidence kept in git:
 `reports/eval/final-modern-17m/` (full evaluation of the 5,000-step checkpoint) and
 `reports/eval/final-d028-modern-arch/evals.json` (the evaluation events of both runs). Script:
-`scripts/d028_entry.py` computed the tables and numbers of this entry (prose by hand; sentences that depend on a
+`scripts/archive/d028_entry.py` computed the tables and numbers of this entry (prose by hand; sentences that depend on a
 comparison are guarded by an assert). Not in git: the runs (`runs/`, ignored).
 
 **What was run.** The baseline `local-17m` and `modern-17m` are identical in every setting (seed 1337, natural mix, 5,000

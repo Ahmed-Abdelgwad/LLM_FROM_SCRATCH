@@ -6,7 +6,7 @@ comparison is guarded by an assert, so the script stops rather than print a clai
 
 Also writes the evaluation events of the four runs to reports/eval/final-d029-seed-replicate/evals.json.
 Needs runs/{local,modern}-17m[-seed2024] and reports/eval/final-{local,modern}-17m[-seed2024].
-Run from the repository root: uv run python scripts/d029_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d029_entry.py OUT.md"""
 
 import json
 import statistics
@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 EVIDENCE = ROOT / "reports/eval/final-d029-seed-replicate"
 AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]
 EN = "fineweb_edu_10bt"
@@ -194,7 +194,7 @@ text = f"""## D-029 (2026-11-06): the modern architecture, repeated with a secon
 
 Code: none changed. Added: `configs/experiments/local-17m-seed2024.yaml` and `configs/experiments/modern-17m-seed2024.yaml`. Evidence kept in git:
 `reports/eval/final-local-17m-seed2024/`, `reports/eval/final-modern-17m-seed2024/` (full evaluations) and
-`reports/eval/final-d029-seed-replicate/evals.json` (the evaluation events of the four runs). Script: `scripts/d029_entry.py`
+`reports/eval/final-d029-seed-replicate/evals.json` (the evaluation events of the four runs). Script: `scripts/archive/d029_entry.py`
 computed the tables and numbers (prose by hand; comparisons guarded by asserts). Not in git: the runs (`runs/`, ignored).
 
 **What was run.** D-028 left one step open: the same two configurations again with a different seed. The new pair differs from

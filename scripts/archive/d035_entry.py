@@ -8,14 +8,14 @@ Also writes the evaluation events of the runs compared to reports/eval/final-d03
 Needs runs/{local-17m,local-17m-seed2024,modern-17m,ablation-rope-only,ablation-rope-only-seed2024,
 ablation-rope-swiglu,ablation-swiglu-only,ablation-swiglu-only-seed2024} and the full evaluations of the
 same names in reports/eval (final-<name>; the modern package is final-modern-17m[-seed2024]).
-Run from the repository root: uv run python scripts/d035_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d035_entry.py OUT.md"""
 
 import json
 import statistics
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 EVIDENCE = ROOT / "reports/eval/final-d035-followups"
 AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]
 EN = "fineweb_edu_10bt"
@@ -196,7 +196,7 @@ text = f"""## D-035 (2026-11-08): the two follow-ups: dropping RMSNorm costs not
 
 Code: none changed. Added: `configs/experiments/ablation-rope-swiglu.yaml` and `configs/experiments/ablation-rope-only-seed2024.yaml`, committed with their criteria before the runs (D-034). Evidence kept in git: the full evaluations
 `reports/eval/final-ablation-rope-swiglu/` and `reports/eval/final-ablation-rope-only-seed2024/`, and `reports/eval/final-d035-followups/evals.json` (the evaluation events of the eight runs compared).
-Script: `scripts/d035_entry.py` computed the tables and the application of the criteria (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+Script: `scripts/archive/d035_entry.py` computed the tables and the application of the criteria (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
 **An interruption to disclose.** `ablation-rope-only-seed2024` was stopped once. The machine suspended at 19:34 on 2026-11-07, right after step 4,560 (systemd-logind: "The system will suspend now"); the process survived but its GPU context did not, and it made no progress
 for about six and a half hours. It was killed, and resumed from `last.pt` at step 4,500 (`resume` event in its log), with sleep inhibited for the rest. The losses logged for steps 4,510 to 4,550 after the resume equal those logged before the suspend to four decimals,

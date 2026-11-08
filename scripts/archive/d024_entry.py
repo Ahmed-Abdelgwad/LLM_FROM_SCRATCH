@@ -8,14 +8,14 @@ It also writes the evaluation events of the runs it read to
 reports/eval/final-d024-mix-ablation/evals.json, so the numbers stay checkable without runs/ (which
 git ignores). Needs runs/ as it was when D-024 was written, and the reports of the two full
 evaluations (reports/eval/final-local-17m and reports/eval/final-ablation-english-20-long).
-Run from the repository root: uv run python scripts/d024_entry.py OUT.md"""
+Run from the repository root: uv run python scripts/archive/d024_entry.py OUT.md"""
 
 import json
 import statistics
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]  # scripts/archive/ -> the repository root
 EVIDENCE = ROOT / "reports/eval/final-d024-mix-ablation"
 AR = ["fw2_arb", "fw2_ars", "fw2_ary", "fw2_arz", "wiki_ar"]
 EN = "fineweb_edu_10bt"
@@ -268,7 +268,7 @@ Code: none changed. Added: `configs/experiments/ablation-arabic-only.yaml`, `con
 `configs/experiments/ablation-english-20-long.yaml` (5,000 steps), each with the question and the rule of D-023 in its header, written
 before the run. Evidence kept in git: `reports/eval/final-ablation-english-20-long/` (full evaluation of the 5,000-step
 checkpoint) and `reports/eval/final-d024-mix-ablation/evals.json` (the evaluation events of the six runs below, copied from
-their `metrics.jsonl`). Script: `scripts/d024_entry.py` computed the tables and numbers of this entry from those runs and the
+their `metrics.jsonl`). Script: `scripts/archive/d024_entry.py` computed the tables and numbers of this entry from those runs and the
 two full evaluations (prose by hand; sentences that depend on a comparison are guarded by an assert in the script). Not in git:
 the runs themselves (`runs/`, ignored). The first attempt of the Arabic-only arm was killed when the session restarted, at step 370,
 and rerun from step 0; its directory was kept aside and is not used.
