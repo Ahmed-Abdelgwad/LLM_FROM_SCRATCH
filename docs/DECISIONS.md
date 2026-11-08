@@ -2100,3 +2100,7 @@ is done one group at a time, each tested and committed on its own; nothing that 
    `reports/`. They were not merged into one general tool: that would be new code for comparisons that are finished. `scripts/` keeps
    the tools that still apply to any checkpoint (`check_env.py`, `diagnose_checkpoint.py`, `diagnose_tokens.py`, `overfit_one_batch.py`,
    `check_kv_cache.py`).
+3. **`make_loader` removed** (`training/dataset.py`, with its one test). It built a seeded `DataLoader` over `TokenWindows`
+   (D-017), but training has drawn its batches from `TrainSampler` since D-020, and evaluation reads windows directly; no command,
+   script or module called it, only its own test. `TokenWindows` and `window_count` stay: the sampler and both evaluations use them.
+   Tests: 587 (one fewer), all passing.

@@ -5,7 +5,7 @@ import pytest
 import torch
 
 from scratchllm.data.tokens import DTYPE
-from scratchllm.training.dataset import TokenWindows, make_loader, window_count
+from scratchllm.training.dataset import TokenWindows, window_count
 
 
 def token_file(path: Path, ids: list[int]) -> Path:
@@ -87,16 +87,3 @@ def test_ids_above_32767_are_not_turned_negative(tmp_path: Path):
     data = TokenWindows([token_file(tmp_path / "a.bin", [65535, 40000, 32768, 1, 2])], 3)
     x, y = data[0]
     assert x.tolist() == [65535, 40000, 32768] and y.tolist() == [40000, 32768, 1]
-
-
-def test_the_loader_batches_and_repeats_exactly_for_a_seed(tmp_path: Path):
-    data = TokenWindows([token_file(tmp_path / "a.bin", list(range(200)))], 8)
-    first = [x for x, _ in make_loader(data, batch_size=4, shuffle=True, seed=7)]
-    again = [x for x, _ in make_loader(data, batch_size=4, shuffle=True, seed=7)]
-    other = [x for x, _ in make_loader(data, batch_size=4, shuffle=True, seed=8)]
-    assert all(torch.equal(a, b) for a, b in zip(first, again, strict=True))
-    assert not all(torch.equal(a, b) for a, b in zip(first, other, strict=True))
-    assert first[0].shape == (4, 8)
-    assert sum(b.shape[0] for b in first) == (len(data) // 4) * 4  # drop_last
-    seen = torch.cat(first)[:, 0].sort().values
-    assert seen.unique().numel() == seen.numel()  # no window twice in one epoch

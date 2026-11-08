@@ -27,7 +27,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 
 from scratchllm.data.tokens import DTYPE
 
@@ -66,13 +66,3 @@ class TokenWindows(Dataset[tuple[torch.Tensor, torch.Tensor]]):
         chunk = self._arrays[which][start : start + self.context_length + 1].astype(np.int64)
         tensor = torch.from_numpy(chunk)
         return tensor[:-1], tensor[1:]
-
-
-def make_loader(
-    dataset: TokenWindows, batch_size: int, shuffle: bool, seed: int, drop_last: bool = True
-) -> DataLoader[tuple[torch.Tensor, torch.Tensor]]:
-    """A loader whose order depends only on `seed`, so a run can be repeated exactly."""
-    generator = torch.Generator().manual_seed(seed)
-    return DataLoader(
-        dataset, batch_size=batch_size, shuffle=shuffle, generator=generator, drop_last=drop_last
-    )
