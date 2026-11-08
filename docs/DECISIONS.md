@@ -2042,3 +2042,42 @@ Neither alone reaches the 0.05 line at both seeds, so rule 4 does not apply to e
 4. The `wiki_ary` cost belongs to the package, not to one component: whether it is worth the gain on the trained languages is the project's decision, as the English share was (D-024, D-025). Dropping either component would give up some of the gain with it: at seed 1337 rotary embeddings carry about 93% of the package's Arabic gain.
 
 **Not decided, and not tested here.** The seed-2024 run of the package without RMSNorm (the test D-034 requires before the reference changes); whether `wiki_ary` should weigh against the package at all, given that it is one of three unseen sources and noisy; the RMSNorm-alone cell at seed 2024 (not needed for any decision above).
+
+## D-036 (2026-11-08): RMSNorm is dropped from the reference: the package without it matches the package at both seeds; `reference-17m` is rotary embeddings + SwiGLU + LayerNorm
+
+Code: none changed. Added: `configs/ablation-rope-swiglu-seed2024.yaml` (committed with its criterion before the run), `configs/reference-17m.yaml` (the new reference), and a test that every shipped config loads and
+that the reference is rotary + SwiGLU + LayerNorm with 16,913,280 parameters. Evidence kept in git: `reports/eval/final-ablation-rope-swiglu-seed2024/` (full evaluation) and `reports/eval/final-d036-no-rmsnorm/evals.json`
+(the evaluation events of the four runs). Script: `scripts/d036_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+
+**What was run.** The package without RMSNorm (rotary embeddings, SwiGLU, LayerNorm) at seed 2024, against `modern-17m-seed2024` (all three); the script checks that each pair of configs differs in the norm only.
+The run was not interrupted, 0 skipped steps, 163,840,000 tokens; the machine's sleep was inhibited during it. The criterion is D-034's, unchanged: dropping RMSNorm costs nothing only if all five conditions hold.
+
+| criterion (D-034): this run minus the package | required | seed 1337 | holds | seed 2024 | holds |
+|---|---|---:|---|---:|---|
+| Arabic mean | below +0.005 | -0.0011 | yes | +0.0013 | yes |
+| English | below +0.005 | -0.0002 | yes | -0.0007 | yes |
+| `wiki_ary` | below +0.05 | -0.0111 | yes | -0.0051 | yes |
+| speed | not more than 10% below | -5.7% | yes | -5.3% | yes |
+| memory | not more than 10% above | +5.1% | yes | +5.1% | yes |
+
+Per source, the difference to the package (bits/char):
+
+| difference to the package, per source | fw2_arb | fw2_ars | fw2_ary | fw2_arz | wiki_ar |
+|---|---:|---:|---:|---:|---:|
+| seed 1337 | -0.002 | -0.002 | -0.001 | -0.002 | +0.002 |
+| seed 2024 | +0.000 | +0.002 | +0.002 | +0.001 | +0.002 |
+
+**All five conditions hold at both seeds.** The package without RMSNorm is, within noise, the package: the Arabic mean differs by -0.0011 and +0.0013 (the noise between seeds at this length is 0.0033, D-029), English by -0.0002 and -0.0007,
+`wiki_ary` by -0.011 and -0.005, the other unseen dialects by at most 0.003. It runs -6% and -5% in tokens per second and +5% and +5% in peak memory
+(inside the 10% band; LayerNorm is a little slower and heavier here, but not by the margin the criterion allowed for). Neither difference in quality is distinguishable from zero here; the criterion asked for evidence of no cost and this is that evidence at the precision of two seeds.
+
+**Decisions.**
+
+1. RMSNorm is dropped from the reference architecture, as D-034 and the config header fixed in advance: the criterion held at both seeds.
+2. **`configs/reference-17m.yaml`** is the reference for later experiments: rotary position embeddings, SwiGLU feed-forward, LayerNorm, 16,913,280 parameters. It is the recipe of `ablation-rope-swiglu` (and of the seed-2024 run), so those runs are its results: seed 1337 Arabic mean 1.9505, seed 2024 1.9515.
+   `local-17m` remains the baseline of record for earlier numbers and `modern-17m` the record of D-028 and D-029; neither file changed.
+3. The code keeps all the options (D-027): RMSNorm is dropped from the reference, not from the code.
+4. The summary of the architecture work, D-028 to D-036: rotary embeddings carry the quality gain (about 0.06 bits/char on the Arabic mean, similar on English); SwiGLU adds a small gain that stays unresolved at the 0.01 threshold, and most of the speed and memory saving; RMSNorm adds nothing measurable; the cost is
+   about +0.03 (rotary) and +0.04 to +0.07 (SwiGLU) bits/char on `wiki_ary`, a source neither was trained on, which together make the package's loss there. The reference keeps both for the gain and the efficiency, and the `wiki_ary` cost remains a project decision (D-024, D-025, D-035).
+
+**Not decided, and not tested here.** Whether the `wiki_ary` cost should change the choice (for example a learned-position variant with SwiGLU, which would give up the rotary gain); effects at other sizes or longer training; grouped-query attention (not built).
