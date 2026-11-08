@@ -1,0 +1,46 @@
+# The package without RMSNorm, second seed (D-035): rotary embeddings and SwiGLU on, LayerNorm kept. Identical to
+# `ablation-rope-swiglu` in every setting and the token budget except `train.seed`, 1337 -> 2024; compared with
+# `modern-17m-seed2024` (all three, already run), which differs from this run in the norm only.
+#
+# Fixed before the run: the criterion of D-034, unchanged. Let D be (this run) minus `modern-17m-seed2024`, bits per
+# character at step 5,000. Dropping RMSNorm counts as costing nothing only if ALL of:
+#   - Arabic mean: D < +0.005   - English: D < +0.005   - `wiki_ary` (full evaluation): D < +0.05
+#   - speed not more than 10% below `modern-17m-seed2024`'s median tokens/s; memory not more than 10% above.
+# `modern-17m-seed2024`: Arabic mean 1.9502, English 1.4922; `wiki_ary` 3.002 (full evaluation).
+# If all hold here AND they held at seed 1337 (D-035), RMSNorm is dropped from the reference: a NEW file
+# `configs/reference-17m.yaml` (rotary embeddings + SwiGLU + LayerNorm, seed 1337) becomes the reference for later
+# experiments, and `modern-17m.yaml` stays unchanged as the record of D-028 and D-029. If any fails, or the Arabic or
+# English difference falls between +0.005 and +0.015 (unresolved), RMSNorm stays in the reference and nothing more is
+# run for it without a new decision.
+name: ablation-rope-swiglu-seed2024
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  position: rope
+  ffn: swiglu
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 2024
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
