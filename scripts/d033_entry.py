@@ -1,6 +1,6 @@
 # ruff: noqa: E501
 """Builds the D-033 entry of docs/DECISIONS.md: SwiGLU alone at a second seed, judged by the criterion
-written in `configs/ablation-swiglu-only-seed2024.yaml` before the run. Tables and numbers come from the run
+written in `configs/experiments/ablation-swiglu-only-seed2024.yaml` before the run. Tables and numbers come from the run
 files and the full evaluations; prose is by hand and comparison sentences are guarded by asserts.
 
 Also writes the evaluation events of the four runs to reports/eval/final-d033-swiglu-seeds/evals.json.
@@ -158,7 +158,7 @@ for sp in ("val", "test"):
 
 text = f"""## D-033 (2026-11-07): SwiGLU alone at a second seed: the Arabic effect is still unresolved, `wiki_ary` is not worse at both seeds, and the keep decision does not depend on the first
 
-Code: none changed. Added: `configs/ablation-swiglu-only-seed2024.yaml`, committed before the run with its criterion in the header. Evidence kept in git:
+Code: none changed. Added: `configs/experiments/ablation-swiglu-only-seed2024.yaml`, committed before the run with its criterion in the header. Evidence kept in git:
 `reports/eval/final-ablation-swiglu-only-seed2024/` (full evaluation) and `reports/eval/final-d033-swiglu-seeds/evals.json` (the evaluation events of the four runs compared).
 Script: `scripts/d033_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
@@ -192,7 +192,7 @@ On the other two unseen dialects SwiGLU alone does nothing (`acm` {d("s1337", "b
 **Decisions.**
 
 1. SwiGLU's Arabic effect stays **unresolved** ({mean_effect:+.4f}, two seeds); no further run is made for it (as registered).
-2. By the registered rules SwiGLU is **kept** under either resolution of that effect (rules 1 and 2), pending the project's confirmation that the header's "stays open" does not hold the keep back: it improves the trained languages slightly at both seeds, and it is {statistics.mean(r["speed"] for r in res.values()):+.0%} faster and {statistics.mean(r["mem"] for r in res.values()):+.0%} in peak memory. `configs/modern-17m.yaml` keeps it.
+2. By the registered rules SwiGLU is **kept** under either resolution of that effect (rules 1 and 2), pending the project's confirmation that the header's "stays open" does not hold the keep back: it improves the trained languages slightly at both seeds, and it is {statistics.mean(r["speed"] for r in res.values()):+.0%} faster and {statistics.mean(r["mem"] for r in res.values()):+.0%} in peak memory. `configs/experiments/modern-17m.yaml` keeps it.
 3. The `wiki_ary` loss is not attributed to a single component: SwiGLU contributes part of it, and the rotary embeddings' contribution rests on one seed.
 4. Rotary embeddings stay kept (D-032, rule 1); RMSNorm stays a candidate to drop, not dropped.
 

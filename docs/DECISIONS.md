@@ -915,7 +915,7 @@ fine-tuning are not part of it. Modules: `config.py` (typed YAML, unknown keys r
 
 ## D-021 (2026-11-03): pilot run of the 17.1M model, and the ars train/validation gap
 
-`configs/pilot-17m.yaml`: 1,500 steps of 32,768 tokens planned (49M tokens), natural source mix,
+`configs/experiments/pilot-17m.yaml`: 1,500 steps of 32,768 tokens planned (49M tokens), natural source mix,
 the untuned hyperparameters of `local-17m.yaml`. It was stopped on request at step 1,056 (SIGTERM,
 which saved `last.pt` at that step; `best.pt` is step 1,000). The schedule did not finish, so
 these are mid-schedule numbers.
@@ -1262,8 +1262,8 @@ and cuts English into more pieces (1.78 tokens per word against 1.32 for GPT-2, 
 
 ## D-024 (2026-11-05): the English share, 39% to 20% of the tokens: Arabic gains 0.044 bits/char at 5,000 steps, English loses 0.074
 
-Code: none changed. Added: `configs/ablation-arabic-only.yaml`, `configs/ablation-english-20.yaml` (800 steps) and
-`configs/ablation-english-20-long.yaml` (5,000 steps), each with the question and the rule of D-023 in its header, written
+Code: none changed. Added: `configs/experiments/ablation-arabic-only.yaml`, `configs/experiments/ablation-english-20.yaml` (800 steps) and
+`configs/experiments/ablation-english-20-long.yaml` (5,000 steps), each with the question and the rule of D-023 in its header, written
 before the run. Evidence kept in git: `reports/eval/final-ablation-english-20-long/` (full evaluation of the 5,000-step
 checkpoint) and `reports/eval/final-d024-mix-ablation/evals.json` (the evaluation events of the six runs below, copied from
 their `metrics.jsonl`). Script: `scripts/d024_entry.py` computed the tables and numbers of this entry from those runs and the
@@ -1504,7 +1504,7 @@ the 5,000-step run's own throughput will say more.
 context; at 6 heads it was not judged worth building before there is a cache to save), a key/value cache
 (next), and any change to the tokenizer.
 
-**The experiment.** `configs/modern-17m.yaml` is the baseline run with all three switches on. The
+**The experiment.** `configs/experiments/modern-17m.yaml` is the baseline run with all three switches on. The
 criterion is in its header, written before the run: the Arabic mean bits/char at step 5,000 must fall by at least 0.03
 below the baseline's 2.0153 and English (1.5634) must not get worse by 0.03 or more (D-023, D-025). The
 result is recorded in the next entry. Caveats fixed in advance: the model has 1.15% fewer parameters; one seed;
@@ -1513,7 +1513,7 @@ and neither separates the parts.
 
 ## D-028 (2026-11-06): RMSNorm + rotary embeddings + SwiGLU against the GPT-2 baseline: Arabic -0.064 bits/char, English -0.073, at the same length
 
-Code: none changed (D-027 built the options). Added: `configs/modern-17m.yaml`. Evidence kept in git:
+Code: none changed (D-027 built the options). Added: `configs/experiments/modern-17m.yaml`. Evidence kept in git:
 `reports/eval/final-modern-17m/` (full evaluation of the 5,000-step checkpoint) and
 `reports/eval/final-d028-modern-arch/evals.json` (the evaluation events of both runs). Script:
 `scripts/d028_entry.py` computed the tables and numbers of this entry (prose by hand; sentences that depend on a
@@ -1601,7 +1601,7 @@ if anything works against it. The advantage narrows with training. Generalizatio
 
 1. The modern architecture meets the criterion in this run (one seed). It is recorded as a result, not as established superiority: no claim that it is
    better is made until the same comparison has been repeated with a second seed, with every setting and the token budget unchanged.
-2. `configs/local-17m.yaml` stays the baseline of record, so earlier numbers keep their meaning; `configs/modern-17m.yaml` is the new reference
+2. `configs/local-17m.yaml` stays the baseline of record, so earlier numbers keep their meaning; `configs/experiments/modern-17m.yaml` is the new reference
    for later experiments that build on this architecture. Which of the two a later change is compared against is stated in that change's config.
 3. Nothing is removed: the GPT-2 parts stay as the default of the code (D-027).
 
@@ -1617,7 +1617,7 @@ if anything works against it. The advantage narrows with training. Generalizatio
 
 ## D-029 (2026-11-06): the modern architecture, repeated with a second seed: the result holds on both, and the Moroccan Wikipedia is worse on both
 
-Code: none changed. Added: `configs/local-17m-seed2024.yaml` and `configs/modern-17m-seed2024.yaml`. Evidence kept in git:
+Code: none changed. Added: `configs/experiments/local-17m-seed2024.yaml` and `configs/experiments/modern-17m-seed2024.yaml`. Evidence kept in git:
 `reports/eval/final-local-17m-seed2024/`, `reports/eval/final-modern-17m-seed2024/` (full evaluations) and
 `reports/eval/final-d029-seed-replicate/evals.json` (the evaluation events of the four runs). Script: `scripts/d029_entry.py`
 computed the tables and numbers (prose by hand; comparisons guarded by asserts). Not in git: the runs (`runs/`, ignored).
@@ -1708,7 +1708,7 @@ source is hurt was not investigated.
 
 **Decisions.**
 
-1. The claim above is recorded. `configs/modern-17m.yaml` is the reference architecture for later experiments, as D-028 said it would be if this held; `local-17m` stays the baseline of record for earlier numbers.
+1. The claim above is recorded. `configs/experiments/modern-17m.yaml` is the reference architecture for later experiments, as D-028 said it would be if this held; `local-17m` stays the baseline of record for earlier numbers.
 2. The GPT-2 parts stay available as the code default (D-027).
 3. `wiki_ary` is added to what is reported next to every later architecture comparison, because it is the one source on which this change lost, and a
    later change that fixes it would be visible.
@@ -1782,8 +1782,8 @@ Wikipedia (`wiki_ary`, +0.095 and +0.087). They did not say which switch does wh
 
 **Design.** Three switches (norm, position, ffn) with two values each give eight cells; two are done (all GPT-2 = `local-17m`, all modern = `modern-17m`, two seeds each).
 
-- *Stage 1* (always): the baseline with one switch on, three runs: `configs/ablation-rmsnorm-only.yaml`, `configs/ablation-rope-only.yaml`,
-  `configs/ablation-swiglu-only.yaml`. Each differs from `local-17m` in its name and one line (checked by diff), seed 1337, 5,000 steps, same token budget.
+- *Stage 1* (always): the baseline with one switch on, three runs: `configs/experiments/ablation-rmsnorm-only.yaml`, `configs/experiments/ablation-rope-only.yaml`,
+  `configs/experiments/ablation-swiglu-only.yaml`. Each differs from `local-17m` in its name and one line (checked by diff), seed 1337, 5,000 steps, same token budget.
   About 80 minutes each at the baseline's speed, about four hours in all.
 - *Stage 2* (only if the additivity test below fails): the modern package with one switch off, three runs. Not written yet; its configs will be written, with these same rules, if it is triggered.
 - Stage 1 covers the three cells with one switch on, stage 2 the three with two on (the package minus one); with the two finished cells, both stages together are all eight. Stage 1 alone gives each switch's effect on top of GPT-2, not on top of the others.
@@ -1825,7 +1825,7 @@ Code: none changed. Evidence kept in git: the full evaluations `reports/eval/fin
 the tables, the classifications and the decisions of this entry by the rules of D-031 (prose by hand; comparison sentences guarded by asserts).
 Not in git: the runs (`runs/`, ignored). The plan, the thresholds and the rules were committed before the first of these runs (D-031).
 
-**What was run.** The three configs of stage 1 (`configs/ablation-*-only.yaml`), each the baseline `local-17m` with one switch on; the script checks that
+**What was run.** The three configs of stage 1 (`configs/experiments/ablation-*-only.yaml`), each the baseline `local-17m` with one switch on; the script checks that
 the stored configurations differ from the baseline's in that switch only. All runs: seed 1337, 5,000 steps, 163,840,000 tokens, none interrupted, 0 skipped steps.
 Effects are against the baseline, bits per character at step 5,000 (in-training validation), the thresholds of D-031: Arabic mean and English, helps at -0.01 or lower, hurts at +0.01 or higher,
 sizes from 0.005 to 0.015 unresolved, below 0.005 neutral; speed and memory count at 10%.
@@ -1889,7 +1889,7 @@ does not carry over to unseen text, and on `wiki_ary` it reverses. The unseen so
 - SwiGLU: **open: unresolved on Arabic and `wiki_ary` worse by 0.05 or more; if the Arabic effect resolves to helps, rule 4 (a trade-off, left to the project), if to neutral, rule 5 (candidate to drop); the rules do not decide it until a second seed resolves the Arabic effect**. It is +44% faster and -21% in memory, which would count for it only under rule 2 (neutral Arabic effect, no `wiki_ary` loss); rule 5 comes first when `wiki_ary` is worse.
 - RMSNorm: **candidate to drop (rule 2: neutral, no speed or memory gain)**. By the rule it is a candidate to drop: simpler code with no gain in quality, speed or memory at this size.
 
-Nothing is removed from the code (D-027), and `configs/modern-17m.yaml` is not changed by this entry: dropping RMSNorm from the reference would need a run of the package without it (rotary embeddings and SwiGLU), which is a cell of stage 2 and has not been run.
+Nothing is removed from the code (D-027), and `configs/experiments/modern-17m.yaml` is not changed by this entry: dropping RMSNorm from the reference would need a run of the package without it (rotary embeddings and SwiGLU), which is a cell of stage 2 and has not been run.
 
 **What this does not show.** One seed per cell. The attribution is on top of GPT-2: a component's effect on top of the others comes only from stage 2, which the additivity test says is not needed for the Arabic mean (and the `wiki_ary` sums agree), but which was not run.
 The SwiGLU Arabic effect is unresolved, not zero, and the `wiki_ary` numbers sit on the noisy unseen sources. Rotary embeddings remove the position table, so their cell is 1.15% smaller; this works against them. Speeds are medians over whole runs on a GPU whose throughput
@@ -1902,7 +1902,7 @@ varies from run to run (D-030); the SwiGLU speed difference is far outside that 
 3. Rotary embeddings are kept (rule 1). RMSNorm is a candidate to drop, not dropped. **SwiGLU is open**: by the pre-registered rules its fate depends on how its Arabic effect resolves, so the second seed that D-031 reserves for unresolved effects is now needed for it; the run and how it will be judged are written below, before it is run.
 4. Stage 2 is not run (the effects are additive by the rule of D-031).
 
-**The follow-up, registered here before it is run.** `configs/ablation-swiglu-only-seed2024.yaml`: the baseline with SwiGLU on, seed 2024, compared with the baseline of the same seed (`local-17m-seed2024`, already run). Judged only by the rules of D-031, with these two additions fixed now:
+**The follow-up, registered here before it is run.** `configs/experiments/ablation-swiglu-only-seed2024.yaml`: the baseline with SwiGLU on, seed 2024, compared with the baseline of the same seed (`local-17m-seed2024`, already run). Judged only by the rules of D-031, with these two additions fixed now:
 the Arabic effect is classified on the mean of the two seeds' effects (-0.0087 at seed 1337 and the new one), with the same bands; `wiki_ary` counts as worse only if it is 0.05 or more at both seeds (if only at one, it is "no difference"). Then rules 1 to 5 are applied as written;
 if the Arabic mean still falls in the unresolved band, SwiGLU stays open and nothing more is run for it without a new decision. No other threshold changes.
 
@@ -1914,7 +1914,7 @@ if the Arabic mean still falls in the unresolved band, SwiGLU stays open and not
 
 ## D-033 (2026-11-07): SwiGLU alone at a second seed: the Arabic effect is still unresolved, `wiki_ary` is not worse at both seeds, and the keep decision does not depend on the first
 
-Code: none changed. Added: `configs/ablation-swiglu-only-seed2024.yaml`, committed before the run with its criterion in the header. Evidence kept in git:
+Code: none changed. Added: `configs/experiments/ablation-swiglu-only-seed2024.yaml`, committed before the run with its criterion in the header. Evidence kept in git:
 `reports/eval/final-ablation-swiglu-only-seed2024/` (full evaluation) and `reports/eval/final-d033-swiglu-seeds/evals.json` (the evaluation events of the four runs compared).
 Script: `scripts/d033_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
@@ -1958,7 +1958,7 @@ On the other two unseen dialects SwiGLU alone does nothing (`acm` +0.002 and +0.
 **Decisions.**
 
 1. SwiGLU's Arabic effect stays **unresolved** (-0.0115, two seeds); no further run is made for it (as registered).
-2. By the registered rules SwiGLU is **kept** under either resolution of that effect (rules 1 and 2), pending the project's confirmation that the header's "stays open" does not hold the keep back: it improves the trained languages slightly at both seeds, and it is +44% faster and -19% in peak memory. `configs/modern-17m.yaml` keeps it.
+2. By the registered rules SwiGLU is **kept** under either resolution of that effect (rules 1 and 2), pending the project's confirmation that the header's "stays open" does not hold the keep back: it improves the trained languages slightly at both seeds, and it is +44% faster and -19% in peak memory. `configs/experiments/modern-17m.yaml` keeps it.
 3. The `wiki_ary` loss is not attributed to a single component: SwiGLU contributes part of it, and the rotary embeddings' contribution rests on one seed.
 4. Rotary embeddings stay kept (D-032, rule 1); RMSNorm stays a candidate to drop, not dropped.
 
@@ -1968,12 +1968,12 @@ On the other two unseen dialects SwiGLU alone does nothing (`acm` +0.002 and +0.
 
 Plan only; written, with the configs, before either run. Two questions left by D-032 and D-033.
 
-**A. How much of the `wiki_ary` loss do rotary embeddings carry?** `configs/ablation-rope-only-seed2024.yaml`: the baseline with rotary embeddings alone, seed 2024, against `local-17m-seed2024`.
+**A. How much of the `wiki_ary` loss do rotary embeddings carry?** `configs/experiments/ablation-rope-only-seed2024.yaml`: the baseline with rotary embeddings alone, seed 2024, against `local-17m-seed2024`.
 So far (bits/char against the baseline of the same seed): rotary alone +0.029 at seed 1337 (no second seed yet); SwiGLU alone +0.071 and +0.040; the package +0.095 and +0.087. D-033 weakened the attribution to SwiGLU and left the rest unattributed.
 Criterion: the Arabic effect is classified on the mean of the two seeds with the D-031 bands; `wiki_ary` counts as worse only at 0.05 or more at **both** seeds; rules 1 to 5 of D-031 as written; the share of the package's `wiki_ary` loss is reported per seed and is not a criterion.
 What the result can and cannot show: with rotary alone at two seeds and SwiGLU alone at two seeds, the shares of the package's loss can be compared at both seeds; it cannot show interactions (stage 2 was not run), nor RMSNorm's share at seed 2024.
 
-**B. Does dropping RMSNorm cost anything?** `configs/ablation-rope-swiglu.yaml`: rotary embeddings and SwiGLU on, LayerNorm kept; it differs from `modern-17m` in that one line (checked by diff); seed 1337.
+**B. Does dropping RMSNorm cost anything?** `configs/experiments/ablation-rope-swiglu.yaml`: rotary embeddings and SwiGLU on, LayerNorm kept; it differs from `modern-17m` in that one line (checked by diff); seed 1337.
 Let D be this run minus `modern-17m` (all three), bits/char at step 5,000. Dropping counts as costing nothing only if **all** hold: Arabic-mean D below +0.005; English D below +0.005; `wiki_ary` D below +0.05 (full evaluation);
 speed not more than 10% below `modern-17m`'s median tokens/s and memory not more than 10% above. A gain is fine; +0.005 or more is not "nothing". The 0.005 is the neutral bound of D-031.
 - All hold: RMSNorm is a *candidate to drop at one seed*. The reference config is changed only after the same test also holds at seed 2024 (a second run, written then, with this same criterion).
@@ -1986,7 +1986,7 @@ Why the asymmetry: RMSNorm alone gave -0.0048 on the Arabic mean (at the neutral
 
 ## D-035 (2026-11-08): the two follow-ups: dropping RMSNorm costs nothing at seed 1337; the `wiki_ary` loss is the sum of rotary embeddings and SwiGLU, neither alone reaching the line
 
-Code: none changed. Added: `configs/ablation-rope-swiglu.yaml` and `configs/ablation-rope-only-seed2024.yaml`, committed with their criteria before the runs (D-034). Evidence kept in git: the full evaluations
+Code: none changed. Added: `configs/experiments/ablation-rope-swiglu.yaml` and `configs/experiments/ablation-rope-only-seed2024.yaml`, committed with their criteria before the runs (D-034). Evidence kept in git: the full evaluations
 `reports/eval/final-ablation-rope-swiglu/` and `reports/eval/final-ablation-rope-only-seed2024/`, and `reports/eval/final-d035-followups/evals.json` (the evaluation events of the eight runs compared).
 Script: `scripts/d035_entry.py` computed the tables and the application of the criteria (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
@@ -2045,7 +2045,7 @@ Neither alone reaches the 0.05 line at both seeds, so rule 4 does not apply to e
 
 ## D-036 (2026-11-08): RMSNorm is dropped from the reference: the package without it matches the package at both seeds; `reference-17m` is rotary embeddings + SwiGLU + LayerNorm
 
-Code: none changed. Added: `configs/ablation-rope-swiglu-seed2024.yaml` (committed with its criterion before the run), `configs/reference-17m.yaml` (the new reference), and a test that every shipped config loads and
+Code: none changed. Added: `configs/experiments/ablation-rope-swiglu-seed2024.yaml` (committed with its criterion before the run), `configs/reference-17m.yaml` (the new reference), and a test that every shipped config loads and
 that the reference is rotary + SwiGLU + LayerNorm with 16,913,280 parameters. Evidence kept in git: `reports/eval/final-ablation-rope-swiglu-seed2024/` (full evaluation) and `reports/eval/final-d036-no-rmsnorm/evals.json`
 (the evaluation events of the four runs). Script: `scripts/d036_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 
@@ -2081,3 +2081,14 @@ Per source, the difference to the package (bits/char):
    about +0.03 (rotary) and +0.04 to +0.07 (SwiGLU) bits/char on `wiki_ary`, a source neither was trained on, which together make the package's loss there. The reference keeps both for the gain and the efficiency, and the `wiki_ary` cost remains a project decision (D-024, D-025, D-035).
 
 **Not decided, and not tested here.** Whether the `wiki_ary` cost should change the choice (for example a learned-position variant with SwiGLU, which would give up the rotary gain); effects at other sizes or longer training; grouped-query attention (not built).
+
+## D-037 (2026-11-08): repository cleanup, done in separate steps without changing any evidence
+
+The project had collected files that were needed once and now make it harder to read (assessment of 2026-11-08). The cleanup
+is done one group at a time, each tested and committed on its own; nothing that a number in this log depends on is deleted.
+
+1. **Configs.** `configs/` now holds only the configs in use: `smoke`, `local-17m` (the baseline of record) and `reference-17m`
+   (D-036). The fourteen configs of finished experiments (pilot, mix ablation, modern package, seeds, architecture ablation) moved,
+   unchanged, to `configs/experiments/`. Every path to them in this log and in the scripts was updated to the new place; the
+   runs' logs store each config's contents, not its path, so no result is affected. A test checks that exactly these three
+   are at the top, and that every config in both places loads and carries its file's name as its run name.

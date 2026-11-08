@@ -125,7 +125,7 @@ slow = min(e["tokens_per_s"] for e in log["modern"] if e["event"] == "train")
 
 text = f"""## D-028 (2026-11-06): RMSNorm + rotary embeddings + SwiGLU against the GPT-2 baseline: Arabic {d_mean:+.3f} bits/char, English {d_src[EN]:+.3f}, at the same length
 
-Code: none changed (D-027 built the options). Added: `configs/modern-17m.yaml`. Evidence kept in git:
+Code: none changed (D-027 built the options). Added: `configs/experiments/modern-17m.yaml`. Evidence kept in git:
 `reports/eval/final-modern-17m/` (full evaluation of the 5,000-step checkpoint) and
 `reports/eval/final-d028-modern-arch/evals.json` (the evaluation events of both runs). Script:
 `scripts/d028_entry.py` computed the tables and numbers of this entry (prose by hand; sentences that depend on a
@@ -177,7 +177,7 @@ if anything works against it. The advantage narrows with training. Generalizatio
 
 1. The modern architecture meets the criterion in this run (one seed). It is recorded as a result, not as established superiority: no claim that it is
    better is made until the same comparison has been repeated with a second seed, with every setting and the token budget unchanged.
-2. `configs/local-17m.yaml` stays the baseline of record, so earlier numbers keep their meaning; `configs/modern-17m.yaml` is the new reference
+2. `configs/local-17m.yaml` stays the baseline of record, so earlier numbers keep their meaning; `configs/experiments/modern-17m.yaml` is the new reference
    for later experiments that build on this architecture. Which of the two a later change is compared against is stated in that change's config.
 3. Nothing is removed: the GPT-2 parts stay as the default of the code (D-027).
 

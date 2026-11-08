@@ -56,9 +56,11 @@ def test_a_yaml_config_loads_and_overrides_apply(tmp_path: Path, make_cfg):
 
 
 def test_the_shipped_configs_are_valid():
-    paths = sorted(Path("configs").glob("*.yaml"))
-    assert {"smoke", "local-17m", "reference-17m"} <= {p.stem for p in paths}
-    for path in paths:
+    in_use = sorted(Path("configs").glob("*.yaml"))
+    assert {p.stem for p in in_use} == {"smoke", "local-17m", "reference-17m"}
+    experiments = sorted(Path("configs/experiments").glob("*.yaml"))
+    assert experiments, "the configs of finished experiments live in configs/experiments/"
+    for path in in_use + experiments:
         cfg = load_config(path)
         assert cfg.name == path.stem, f"{path.name}: the run name differs from the file name"
         assert cfg.model.to_gpt().vocab_size == 16384

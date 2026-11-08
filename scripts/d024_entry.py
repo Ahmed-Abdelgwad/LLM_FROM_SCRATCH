@@ -264,8 +264,8 @@ assert all(d < 0 for d in test_d) and all(d < 0 for d in unseen_d)
 # ------------------------------------------------------------------ the entry
 text = f"""## D-024 (2026-11-05): the English share, 39% to 20% of the tokens: Arabic gains {-d5_mean:.3f} bits/char at 5,000 steps, English loses {d5_en:.3f}
 
-Code: none changed. Added: `configs/ablation-arabic-only.yaml`, `configs/ablation-english-20.yaml` (800 steps) and
-`configs/ablation-english-20-long.yaml` (5,000 steps), each with the question and the rule of D-023 in its header, written
+Code: none changed. Added: `configs/experiments/ablation-arabic-only.yaml`, `configs/experiments/ablation-english-20.yaml` (800 steps) and
+`configs/experiments/ablation-english-20-long.yaml` (5,000 steps), each with the question and the rule of D-023 in its header, written
 before the run. Evidence kept in git: `reports/eval/final-ablation-english-20-long/` (full evaluation of the 5,000-step
 checkpoint) and `reports/eval/final-d024-mix-ablation/evals.json` (the evaluation events of the six runs below, copied from
 their `metrics.jsonl`). Script: `scripts/d024_entry.py` computed the tables and numbers of this entry from those runs and the

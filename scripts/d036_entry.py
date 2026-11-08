@@ -1,6 +1,6 @@
 # ruff: noqa: E501
 """Builds the D-036 entry of docs/DECISIONS.md: the package without RMSNorm at the second seed, judged by the
-criterion of D-034 (repeated in `configs/ablation-rope-swiglu-seed2024.yaml` before the run), and the reference
+criterion of D-034 (repeated in `configs/experiments/ablation-rope-swiglu-seed2024.yaml` before the run), and the reference
 architecture that follows. Tables and numbers come from the run files and the full evaluations; prose is by hand and
 comparison sentences are guarded by asserts.
 
@@ -122,7 +122,7 @@ speeds = [mean_ar(at(f"no{s}")) for s in ("1337", "2024")]
 
 text = f"""## D-036 (2026-11-08): RMSNorm is dropped from the reference: the package without it matches the package at both seeds; `reference-17m` is rotary embeddings + SwiGLU + LayerNorm
 
-Code: none changed. Added: `configs/ablation-rope-swiglu-seed2024.yaml` (committed with its criterion before the run), `configs/reference-17m.yaml` (the new reference), and a test that every shipped config loads and
+Code: none changed. Added: `configs/experiments/ablation-rope-swiglu-seed2024.yaml` (committed with its criterion before the run), `configs/reference-17m.yaml` (the new reference), and a test that every shipped config loads and
 that the reference is rotary + SwiGLU + LayerNorm with 16,913,280 parameters. Evidence kept in git: `reports/eval/final-ablation-rope-swiglu-seed2024/` (full evaluation) and `reports/eval/final-d036-no-rmsnorm/evals.json`
 (the evaluation events of the four runs). Script: `scripts/d036_entry.py` computed the tables and the application of the criterion (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 

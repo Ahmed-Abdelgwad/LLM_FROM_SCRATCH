@@ -194,7 +194,7 @@ assert abs(rms) < 0.01 and abs(pair_wiki - eff["1337"]["pkg_wiki"]) < 0.02
 
 text = f"""## D-035 (2026-11-08): the two follow-ups: dropping RMSNorm costs nothing at seed 1337; the `wiki_ary` loss is the sum of rotary embeddings and SwiGLU, neither alone reaching the line
 
-Code: none changed. Added: `configs/ablation-rope-swiglu.yaml` and `configs/ablation-rope-only-seed2024.yaml`, committed with their criteria before the runs (D-034). Evidence kept in git: the full evaluations
+Code: none changed. Added: `configs/experiments/ablation-rope-swiglu.yaml` and `configs/experiments/ablation-rope-only-seed2024.yaml`, committed with their criteria before the runs (D-034). Evidence kept in git: the full evaluations
 `reports/eval/final-ablation-rope-swiglu/` and `reports/eval/final-ablation-rope-only-seed2024/`, and `reports/eval/final-d035-followups/evals.json` (the evaluation events of the eight runs compared).
 Script: `scripts/d035_entry.py` computed the tables and the application of the criteria (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
 

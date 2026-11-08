@@ -192,7 +192,7 @@ assert all(d < 0 for d in acm_apc)
 
 text = f"""## D-029 (2026-11-06): the modern architecture, repeated with a second seed: the result holds on both, and the Moroccan Wikipedia is worse on both
 
-Code: none changed. Added: `configs/local-17m-seed2024.yaml` and `configs/modern-17m-seed2024.yaml`. Evidence kept in git:
+Code: none changed. Added: `configs/experiments/local-17m-seed2024.yaml` and `configs/experiments/modern-17m-seed2024.yaml`. Evidence kept in git:
 `reports/eval/final-local-17m-seed2024/`, `reports/eval/final-modern-17m-seed2024/` (full evaluations) and
 `reports/eval/final-d029-seed-replicate/evals.json` (the evaluation events of the four runs). Script: `scripts/d029_entry.py`
 computed the tables and numbers (prose by hand; comparisons guarded by asserts). Not in git: the runs (`runs/`, ignored).
@@ -243,7 +243,7 @@ source is hurt was not investigated.
 
 **Decisions.**
 
-1. The claim above is recorded. `configs/modern-17m.yaml` is the reference architecture for later experiments, as D-028 said it would be if this held; `local-17m` stays the baseline of record for earlier numbers.
+1. The claim above is recorded. `configs/experiments/modern-17m.yaml` is the reference architecture for later experiments, as D-028 said it would be if this held; `local-17m` stays the baseline of record for earlier numbers.
 2. The GPT-2 parts stay available as the code default (D-027).
 3. `wiki_ary` is added to what is reported next to every later architecture comparison, because it is the one source on which this change lost, and a
    later change that fixes it would be visible.

@@ -83,7 +83,7 @@ hashes; `data verify` and `data verify-tokens` re-check them.
 | `src/scratchllm/model/` | Attention, layers, GPT, generation |
 | `src/scratchllm/training/` | Config, schedule, batches, trainer, checkpoints, log, evaluation |
 | `src/scratchllm/finetune/` | Empty: LoRA/SFT is not built |
-| `configs/` | One YAML per run: `smoke`, `pilot-17m`, `local-17m` (the baseline), `reference-17m` (rotary + SwiGLU + LayerNorm, D-036), `modern-17m`, and the `ablation-*` runs |
+| `configs/` | The configs in use: `smoke`, `local-17m` (the baseline of record), `reference-17m` (rotary + SwiGLU + LayerNorm, D-036). `configs/experiments/` keeps the config of every finished experiment (pilot, ablations, seeds), unchanged |
 | `scripts/` | Diagnostics on a checkpoint and on the token files, and the scripts that build the tables of a decision entry (D-023, D-024); each states how to run it |
 | `tests/` | Unit tests that define each component's contract |
 | `docs/` | Problem statement, decision log, data plan |

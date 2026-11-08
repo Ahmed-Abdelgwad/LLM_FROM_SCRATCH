@@ -229,7 +229,7 @@ Code: none changed. Evidence kept in git: the full evaluations `reports/eval/fin
 the tables, the classifications and the decisions of this entry by the rules of D-031 (prose by hand; comparison sentences guarded by asserts).
 Not in git: the runs (`runs/`, ignored). The plan, the thresholds and the rules were committed before the first of these runs (D-031).
 
-**What was run.** The three configs of stage 1 (`configs/ablation-*-only.yaml`), each the baseline `local-17m` with one switch on; the script checks that
+**What was run.** The three configs of stage 1 (`configs/experiments/ablation-*-only.yaml`), each the baseline `local-17m` with one switch on; the script checks that
 the stored configurations differ from the baseline's in that switch only. All runs: seed 1337, 5,000 steps, 163,840,000 tokens, none interrupted, 0 skipped steps.
 Effects are against the baseline, bits per character at step 5,000 (in-training validation), the thresholds of D-031: Arabic mean and English, helps at -{NEUTRAL} or lower, hurts at +{NEUTRAL} or higher,
 sizes from {UNRESOLVED_LO} to {UNRESOLVED_HI} unresolved, below {UNRESOLVED_LO} neutral; speed and memory count at {SYSTEM:.0%}.
@@ -271,7 +271,7 @@ does not carry over to unseen text, and on `wiki_ary` it reverses. The unseen so
 - SwiGLU: **{decision["swiglu"]}**. It is {eff["swiglu"]["speed"]:+.0%} faster and {eff["swiglu"]["mem"]:+.0%} in memory, which would count for it only under rule 2 (neutral Arabic effect, no `wiki_ary` loss); rule 5 comes first when `wiki_ary` is worse.
 - RMSNorm: **{decision["rmsnorm"]}**. By the rule it is a candidate to drop: simpler code with no gain in quality, speed or memory at this size.
 
-Nothing is removed from the code (D-027), and `configs/modern-17m.yaml` is not changed by this entry: dropping RMSNorm from the reference would need a run of the package without it (rotary embeddings and SwiGLU), which is a cell of stage 2 and has not been run.
+Nothing is removed from the code (D-027), and `configs/experiments/modern-17m.yaml` is not changed by this entry: dropping RMSNorm from the reference would need a run of the package without it (rotary embeddings and SwiGLU), which is a cell of stage 2 and has not been run.
 
 **What this does not show.** One seed per cell. The attribution is on top of GPT-2: a component's effect on top of the others comes only from stage 2, which the additivity test says is not needed for the Arabic mean (and the `wiki_ary` sums agree), but which was not run.
 The SwiGLU Arabic effect is unresolved, not zero, and the `wiki_ary` numbers sit on the noisy unseen sources. Rotary embeddings remove the position table, so their cell is 1.15% smaller; this works against them. Speeds are medians over whole runs on a GPU whose throughput
@@ -284,7 +284,7 @@ varies from run to run (D-030); the SwiGLU speed difference is far outside that 
 3. Rotary embeddings are kept (rule 1). RMSNorm is a candidate to drop, not dropped. **SwiGLU is open**: by the pre-registered rules its fate depends on how its Arabic effect resolves, so the second seed that D-031 reserves for unresolved effects is now needed for it; the run and how it will be judged are written below, before it is run.
 4. Stage 2 is not run (the effects are additive by the rule of D-031).
 
-**The follow-up, registered here before it is run.** `configs/ablation-swiglu-only-seed2024.yaml`: the baseline with SwiGLU on, seed 2024, compared with the baseline of the same seed (`local-17m-seed2024`, already run). Judged only by the rules of D-031, with these two additions fixed now:
+**The follow-up, registered here before it is run.** `configs/experiments/ablation-swiglu-only-seed2024.yaml`: the baseline with SwiGLU on, seed 2024, compared with the baseline of the same seed (`local-17m-seed2024`, already run). Judged only by the rules of D-031, with these two additions fixed now:
 the Arabic effect is classified on the mean of the two seeds' effects ({eff["swiglu"]["ar"]:+.4f} at seed 1337 and the new one), with the same bands; `wiki_ary` counts as worse only if it is {WIKI} or more at both seeds (if only at one, it is "no difference"). Then rules 1 to 5 are applied as written;
 if the Arabic mean still falls in the unresolved band, SwiGLU stays open and nothing more is run for it without a new decision. No other threshold changes.
 
