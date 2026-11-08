@@ -1983,3 +1983,62 @@ Why the asymmetry: RMSNorm alone gave -0.0048 on the Arabic mean (at the neutral
 **Order and cost.** B first (about an hour at the package's speed), then A (about an hour and a half at rotary-alone speed), each followed by its full evaluation (about five minutes). The existing baseline and package results are not touched.
 
 **Not started.** The two runs start after the commit of this entry and the two configs.
+
+## D-035 (2026-11-08): the two follow-ups: dropping RMSNorm costs nothing at seed 1337; the `wiki_ary` loss is the sum of rotary embeddings and SwiGLU, neither alone reaching the line
+
+Code: none changed. Added: `configs/ablation-rope-swiglu.yaml` and `configs/ablation-rope-only-seed2024.yaml`, committed with their criteria before the runs (D-034). Evidence kept in git: the full evaluations
+`reports/eval/final-ablation-rope-swiglu/` and `reports/eval/final-ablation-rope-only-seed2024/`, and `reports/eval/final-d035-followups/evals.json` (the evaluation events of the eight runs compared).
+Script: `scripts/d035_entry.py` computed the tables and the application of the criteria (prose by hand; comparison sentences guarded by asserts). Not in git: the runs.
+
+**An interruption to disclose.** `ablation-rope-only-seed2024` was stopped once. The machine suspended at 19:34 on 2026-11-07, right after step 4,560 (systemd-logind: "The system will suspend now"); the process survived but its GPU context did not, and it made no progress
+for about six and a half hours. It was killed, and resumed from `last.pt` at step 4,500 (`resume` event in its log), with sleep inhibited for the rest. The losses logged for steps 4,510 to 4,550 after the resume equal those logged before the suspend to four decimals,
+so the resume reproduced the run on this GPU. It is the second run of this series that was resumed once (the baseline at seed 1337 was too, D-026); the criteria do not forbid it and are not changed. `ablation-rope-swiglu` was not interrupted.
+
+**B. Does dropping RMSNorm cost anything?** `ablation-rope-swiglu` (rotary embeddings and SwiGLU, LayerNorm kept), seed 1337, against `modern-17m` (all three). The script checks the two configs differ in the norm only.
+Arabic mean 1.9505 against 1.9515; English 1.4898 against 1.4900. Against the baseline the pair is -0.0648 on the Arabic mean (the package: -0.0637).
+Per source, the difference to the package is between -0.002 and +0.002.
+
+| criterion (D-034) | this run minus `modern-17m` | required | holds |
+|---|---:|---|---|
+| Arabic mean | -0.0011 | below +0.005 | yes |
+| English | -0.0002 | below +0.005 | yes |
+| `wiki_ary` | -0.0111 | below +0.05 | yes |
+| speed | -0.0572 | not more than 10% below | yes |
+| memory | +0.0509 | not more than 10% above | yes |
+
+**Every criterion of D-034 holds: RMSNorm is a candidate to drop at one seed.** Per D-034, the reference config is not changed yet: the same test must also hold at seed 2024 (a run of the package without RMSNorm at seed 2024, against `modern-17m-seed2024`), which has not been run.
+
+**A. Rotary embeddings alone, second seed** (against the baseline of the same seed):
+
+| seed | Arabic effect | English effect | `wiki_ary` effect | package `wiki_ary` | rope share of package | speed | memory |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 1337 | -0.0590 | -0.0621 | +0.029 | +0.095 | 30% | -6% | -1% |
+| 2024 | -0.0599 | -0.0600 | +0.035 | +0.087 | 40% | -5% | +5% |
+| mean | -0.0594 | -0.0611 | +0.032 | +0.091 | | | |
+
+- *Arabic:* the effects are -0.0590 and -0.0599; the mean -0.0594 is well beyond the 0.015 edge of the unresolved band: **helps**, at both seeds, for all five sources. English -0.0621 and -0.0600.
+- *`wiki_ary`:* +0.029 and +0.035: positive at both seeds, below 0.05 at both. **By the criterion it is "no difference" for rotary embeddings alone.** Rule 1 applies: keep. Speed -6% and -5%, memory -1% and +5%: no difference.
+- *Share of the package's loss:* 30% at seed 1337, 40% at seed 2024.
+
+**What the `wiki_ary` loss is made of** (full evaluation; line at 0.05, seed-to-seed noise on unseen sources up to 0.03):
+
+| `wiki_ary`, change vs the baseline of the same seed | seed 1337 | seed 2024 |
+|---|---:|---:|
+| rotary embeddings alone | +0.029 | +0.035 |
+| SwiGLU alone | +0.071 | +0.040 |
+| RMSNorm alone | -0.001 | not run |
+| sum of rotary and SwiGLU | +0.099 | +0.075 |
+| the whole package | +0.095 | +0.087 |
+| rotary + SwiGLU without RMSNorm (D-034 B) | +0.083 | not run |
+
+At both seeds the two singles add up to about the package's loss (within 0.02), RMSNorm alone does nothing, and the pair without RMSNorm has the whole package's loss. So **the loss on the Moroccan Wikipedia is the sum of two moderate parts: rotary embeddings, about +0.029 and +0.035, and SwiGLU, about +0.071 and +0.040**.
+Neither alone reaches the 0.05 line at both seeds, so rule 4 does not apply to either; the package as a whole is beyond it at both seeds (D-029). This replaces both D-029's suspicion (rotary embeddings) and D-032's attribution (SwiGLU): each contributes, none is the sole cause.
+
+**Decisions.**
+
+1. Rotary embeddings are kept (rule 1): a gain of about 0.059 bits/char on the Arabic mean at two seeds, with a `wiki_ary` cost of about +0.032, under the line.
+2. SwiGLU stays as decided in D-033 (kept, pending the project's confirmation).
+3. RMSNorm: a candidate to drop at one seed; **not dropped**. Dropping it would simplify the reference with no measured cost (quality, `wiki_ary`, speed within 6%, memory within 5%) but needs the seed-2024 confirmation D-034 requires.
+4. The `wiki_ary` cost belongs to the package, not to one component: whether it is worth the gain on the trained languages is the project's decision, as the English share was (D-024, D-025). Dropping either component would give up some of the gain with it: at seed 1337 rotary embeddings carry about 93% of the package's Arabic gain.
+
+**Not decided, and not tested here.** The seed-2024 run of the package without RMSNorm (the test D-034 requires before the reference changes); whether `wiki_ary` should weigh against the package at all, given that it is one of three unseen sources and noisy; the RMSNorm-alone cell at seed 2024 (not needed for any decision above).
