@@ -1,0 +1,40 @@
+# The reference architecture for later experiments (D-036): rotary position embeddings and a SwiGLU feed-forward,
+# with LayerNorm (RMSNorm was tested and dropped: no cost to quality, `wiki_ary`, speed or memory at two seeds, D-035 and D-036).
+# 16,913,280 parameters; the baseline of record for earlier numbers stays `local-17m`, and `modern-17m` (all three switches)
+# stays as the record of D-028 and D-029.
+#
+# This file is the same recipe as `ablation-rope-swiglu` (seed 1337) and `ablation-rope-swiglu-seed2024` (seed 2024); the
+# results of those two runs are this configuration's results (see D-035 and D-036). To run a
+# new experiment against it, copy this file, change what the experiment changes, and say so in the header.
+name: reference-17m
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  position: rope
+  ffn: swiglu
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10

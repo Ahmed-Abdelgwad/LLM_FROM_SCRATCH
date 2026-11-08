@@ -56,9 +56,18 @@ def test_a_yaml_config_loads_and_overrides_apply(tmp_path: Path, make_cfg):
 
 
 def test_the_shipped_configs_are_valid():
-    for name in ("smoke", "local-17m"):
-        cfg = load_config(Path("configs") / f"{name}.yaml")
+    paths = sorted(Path("configs").glob("*.yaml"))
+    assert {"smoke", "local-17m", "reference-17m"} <= {p.stem for p in paths}
+    for path in paths:
+        cfg = load_config(path)
+        assert cfg.name == path.stem, f"{path.name}: the run name differs from the file name"
         assert cfg.model.to_gpt().vocab_size == 16384
+
+
+def test_the_reference_architecture_is_rotary_swiglu_and_layernorm():
+    cfg = load_config(Path("configs/reference-17m.yaml"))
+    assert (cfg.model.norm, cfg.model.position, cfg.model.ffn) == ("layernorm", "rope", "swiglu")
+    assert GPT(cfg.model.to_gpt()).num_parameters() == 16_913_280
 
 
 def test_unknown_keys_and_bad_values_are_refused(make_cfg):
