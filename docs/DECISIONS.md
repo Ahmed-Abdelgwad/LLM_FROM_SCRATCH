@@ -2104,3 +2104,9 @@ is done one group at a time, each tested and committed on its own; nothing that 
    (D-017), but training has drawn its batches from `TrainSampler` since D-020, and evaluation reads windows directly; no command,
    script or module called it, only its own test. `TokenWindows` and `window_count` stay: the sampler and both evaluations use them.
    Tests: 587 (one fewer), all passing.
+4. **Reports: mapped, not moved.** This log (27 lines, 24 distinct folders), the README and the archived scripts cite folders of `reports/` by
+   path, and the scripts write into them. Merging the `evals.json` files or renaming folders would break those references and the
+   regeneration check of step 2, and would gain nothing: the repeated content is a few kilobytes (1.3 MB for all 50 tracked files).
+   Instead `reports/README.md` says what each kind of folder holds, which script writes it and which entry uses it. No file in
+   `reports/` changed. The ignored working folders (`reports/eda/2026...`, `reports/eda/leakage`, `reports/eval/local-17m-step5000`)
+   are outside git and stay as they are.

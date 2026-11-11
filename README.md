@@ -87,7 +87,7 @@ hashes; `data verify` and `data verify-tokens` re-check them.
 | `scripts/` | Diagnostics that apply to any checkpoint (environment, checkpoint, token files, one-batch overfit, key/value cache). `scripts/archive/` keeps the script that computed each decision entry's tables (D-023 to D-036); each states how it was run |
 | `tests/` | Unit tests that define each component's contract |
 | `docs/` | Problem statement, decision log, data plan |
-| `reports/` | Tracked reports only (`final-*`); working runs are ignored. `reports/diagnostics/final-d023/` holds the outputs of the diagnostic scripts |
+| `reports/` | Tracked reports only (`final-*`); working runs are ignored. `reports/README.md` maps each folder to the script that wrote it and the decision that cites it |
 | `artifacts/tokenizer/` | The trained tokenizers and their provenance |
 
 ## License
