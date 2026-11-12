@@ -252,6 +252,29 @@ def verify_token_files(descriptions: list[Path]) -> None:
         typer.echo(f"OK {path.name}: {total:,} tokens")
 
 
+@data_app.command("sft-prepare")
+def sft_prepare(
+    raw_dir: Annotated[Path, typer.Option(help="Where the pinned files are kept.")] = Path(
+        "data/raw/sft"
+    ),
+    out_dir: Annotated[Path, typer.Option(help="Where the splits are written.")] = Path(
+        "data/processed/sft"
+    ),
+    fetch: Annotated[
+        bool, typer.Option("--download/--no-download", help="Fetch the pinned files first.")
+    ] = False,
+) -> None:
+    """Build the fine-tuning splits from Aya and CIDAR (D-038): filter, de-leak, split."""
+    from scratchllm.finetune.data import download, prepare
+
+    if fetch:
+        download(raw_dir)
+    manifest = prepare(raw_dir, out_dir)
+    for split, counts in manifest["stages"]["6_split"].items():
+        typer.echo(f"{split:14s} {sum(counts.values()):6,d}  {counts}")
+    typer.echo(f"written to {out_dir}")
+
+
 @tokenizer_app.command("train")
 def tokenizer_train(
     out: Annotated[Path, typer.Option(help="Where the tokenizer file is written.")],
