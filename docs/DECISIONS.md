@@ -2110,3 +2110,97 @@ is done one group at a time, each tested and committed on its own; nothing that 
    Instead `reports/README.md` says what each kind of folder holds, which script writes it and which entry uses it. No file in
    `reports/` changed. The ignored working folders (`reports/eda/2026...`, `reports/eda/leakage`, `reports/eval/local-17m-step5000`)
    are outside git and stay as they are.
+5. **`finetune/` is built, not removed** (decided 2026-11-12). Item 4 of the plan in `docs/PROBLEM.md` (LoRA/SFT) is carried out:
+   D-038 (data), D-039 (plan, registered before training) and D-040 (results). The package is no longer empty.
+6. **`runs/` backup: not done.** It needs a backup location, which only the project can choose; nothing in `runs/` was deleted.
+
+## D-038 (2026-11-12): the fine-tuning data: Aya (Standard Arabic, Egyptian, English) and CIDAR in place of Aya's Moroccan subset
+
+**Why not all of Aya.** The Aya Dataset (Singh et al. 2024, human-written, Apache 2.0) has 8,090 Moroccan pairs, 58% of its Arabic.
+Measured on all of them: median response 19 characters, 51% under 20 characters, 2,938 repeated prompts; a sampled row answers
+"what is Spain's currency?" with an unrelated line. Its Standard Arabic (4,995) and Egyptian (529) pairs are kept, and English (3,944).
+
+**Replacement, chosen among seven candidates** (measured on 2026-11-11 with this project's tokenizer and chat format; "fit" = share
+that fits the 512-token context; overlap = against Aya's Standard and Egyptian pairs):
+
+| Dataset | Pairs | Median response | Fit | Prompt overlap | Provenance | Verdict |
+|---|---|---|---|---|---|---|
+| CIDAR (`arbml/CIDAR`, Alyafeai et al. 2024) | 10,000 | 247 characters | 99.3% | 1 exact, 0 near | Alpaca subset translated with ChatGPT, plus 891 native grammar questions; every pair reviewed by people | **chosen** |
+| alpaca-gpt4-arabic (AceGPT) | 49,969 | 382 | 96.7% | 16, 1 | GPT-4 answers to translated Alpaca prompts; 822 of CIDAR's prompts are in it | runner-up |
+| Evol-Instruct-Arabic-GPT4 | 69,997 | 1,018 | 62.9% | 4, 1 | GPT-4, much code | too long |
+| Jais-3 SFT (sample of 554) | 2.8M | 911 | 48.6% | 0 | CC BY 4.0, model-written, code and STEM | too long |
+| SmolKalam (sample of 600) | 1.79M | 1,400 | 51.0% | 0 | Apache 2.0, machine translation | too long |
+| Arabic-OpenHermes-2.5 (sample of 600) | 981,618 | 318 | 89.3% | 0 | machine translation; many rows begin with a translated system prompt | rejected |
+
+Bactrian-X (non-commercial license), OpenAssistant (76 Arabic messages) and the Arabic part of the Aya Collection (templated or
+machine-translated) were not measured.
+
+**License.** CIDAR's card says Apache 2.0, but its source is Stanford Alpaca (CC BY-NC 4.0, answers by an OpenAI model) translated
+with ChatGPT, and 891 pairs come from an Al Jazeera site. Using it in this non-commercial project is consistent with those terms; a
+commercial release of the data or of models trained on it would need that chain checked again. Recorded in `docs/data/SOURCES.md`.
+
+**Aya's own test split overlaps its training split.** Of the 250 Standard Arabic test prompts, 86 occur verbatim in Aya's training
+pairs, 87 after this project's normalization (D-013), and 96 under the looser key used here (diacritics, punctuation, case and the
+alef/yeh/teh-marbuta variants ignored: "غزوه احد" and "غزوة أحد" are the same question). Only 3 prompt-and-response pairs are identical
+(14 under the loose key): mostly the same question with a rewritten answer (67 of the 87 are re-annotations). All 96 are removed from
+training (143 Standard Arabic rows, since re-annotations share prompts), and 90 English rows for the English test prompts.
+
+**Rules** (`finetune/data.py`, applied in this order; pinned revisions `f9ea045` for Aya and `bc2f9d7` for CIDAR, sha256 of every file
+in `data/processed/sft/manifest.json`): non-empty pairs; the response at least half in its language's script (drops 360 CIDAR answers
+in code or SQL, 42 Standard Arabic, 46 English and 2 Egyptian); the leakage rule above; exact duplicates once; split by the prompt key's sha256
+(5% test, 5% validation), so a prompt never crosses splits. The official Aya test (250 Standard Arabic, 244 English after the script
+rule) is in the test split.
+
+| Split | Pairs | Aya Standard | CIDAR | Aya Egyptian | Aya English |
+|---|---|---|---|---|---|
+| train | 16,744 | 4,244 | 8,671 | 475 | 3,354 |
+| validation | 943 | 267 | 454 | 22 | 200 |
+| test | 1,428 | 495 | 482 | 26 | 425 |
+
+Pairs longer than the 512-token context are dropped when encoded: 665 of the training pairs (344 Standard, 299 English, 22 Egyptian).
+
+**Limits.** Moroccan is no longer taught by fine-tuning, and Egyptian is 3% of it (26 test pairs: reported, not judged). Arabic
+outnumbers English four to one in pairs; training samples the two languages equally (D-039). Most Standard Arabic answers are
+translated, not written in Arabic.
+
+## D-039 (2026-11-12): fine-tuning plan: full fine-tuning against LoRA, registered before any training run
+
+Written after the code, the data and a 30-step smoke run (LoRA, lr 1e-3, to check memory and speed: 1.5 GB peak, 0.2 s per step;
+its validation score was seen, 1.65 bits/char at step 30) and before any other run. The base model was asked two questions in the chat
+format (it answered with markup fragments, no end-of-text); no test-split number of any model has been looked at.
+
+**What is compared.** Full fine-tuning (16.9M trainable parameters) and LoRA (Hu et al. 2021: rank 8 on the query and value maps,
+alpha 8, 73,728 trainable parameters, 0.44%), both from the reference model (rotary + SwiGLU + LayerNorm, step 5,000, D-036).
+Configs `configs/sft/sft-full.yaml` and `configs/sft/sft-lora.yaml`, identical except method and learning rate (a test checks it).
+Loss on the response only (Shi et al. 2024, eq. 2). 32 pairs per step, Arabic and English sampled equally (D-025); 1,000 steps are
+about 1.2 passes over the Arabic pairs and 5.2 over the English ones. Warmup 50 steps, cosine to a tenth, AdamW, weight decay 0.01.
+
+- *Stage A, learning rate* (seed 1337, 400 steps, validation only): full 3e-5, 1e-4, 3e-4; LoRA 3e-4, 1e-3, 3e-3. For each method
+  the rate with the lowest best validation score is used in stage B. Ties within 0.005: the lower rate.
+- *Stage B, main runs* (1,000 steps): each method at its rate, on the base model of seed 1337 (`runs/ablation-rope-swiglu`) and of
+  seed 2024 (`runs/ablation-rope-swiglu-seed2024`), the training seed equal to the base's. `best.pt` is kept by the validation score
+  (mean of the Arabic and English response bits/char, D-025); `merged.pt` is made from it.
+- *Evaluation:* `scratchllm sft-eval` on the test split for the two base models and the four fine-tuned ones (greedy, 150 prompts per
+  variety, 256 new tokens), and `scratchllm eval` (full pretraining validation) for the four, against the base models' existing reports
+  (`reports/eval/final-ablation-rope-swiglu`, `-seed2024`).
+
+**Criteria for each fine-tuned model** (Standard Arabic and English; Egyptian reported only). A method passes a criterion if both of
+its runs do.
+
+1. *Answers:* test response bits/char at least **0.10 lower** than its base model's.
+2. *Stops:* at least **80%** of greedy replies end with end-of-text within 256 tokens.
+3. *Language:* at least **90%** of replies are at least half in the prompt's script.
+4. *Forgetting:* on the full pretraining validation, the Arabic mean (the five trained Arabic sources) and English rise by less than
+   **0.03** bits/char (the threshold of D-023 and D-025), and `wiki_ary` by less than **0.05** (D-031).
+
+**LoRA against full fine-tuning** (the bands of D-031): on the mean over the two seeds of the test response bits/char (Arabic mean of
+Standard and English) and of each forgetting number, a difference under 0.005 is "the same", 0.005 to 0.015 "unresolved", above 0.015
+"differs", and only if both seeds point the same way. Trainable parameters, step time and peak memory are reported (10% counts, D-031).
+
+**What would follow.** If criterion 4 fails, it is reported as the cost of fine-tuning; mixing pretraining text into fine-tuning
+(InstructGPT's "PPO-ptx" idea, applied to SFT) is the remedy to try, in a new entry. If 1 to 3 fail for both methods, the model is
+too small or the data too little for the format, and that is the result.
+
+**What this cannot show.** Whether answers are correct: the four criteria measure format, language and likelihood, not truth. A human
+rubric on a fixed prompt set is planned in `docs/PROBLEM.md`; the reports give the samples it needs, but the scoring is the project's
+to do and is not part of this entry. One learning-rate sweep, on seed 1337 only; no second training seed per base.

@@ -1,0 +1,33 @@
+# Full fine-tuning of the reference model on the chat data (D-039). Registered before any run.
+# Base: the reference architecture (rotary + SwiGLU + LayerNorm) at seed 1337, step 5,000 (D-035, D-036).
+# The learning rate here is the sweep's middle value; the sweep (D-039, stage A) runs lr = 3e-5, 1e-4, 3e-4
+# with --set, for max_steps 400, and the main runs (stage B) use the best one, given with --set and recorded
+# in D-040. The second seed changes name, base_checkpoint and train.seed with --set (D-039).
+name: sft-full
+runs_dir: runs
+base_checkpoint: runs/ablation-rope-swiglu/best.pt
+tokenizer: artifacts/tokenizer/bpe-16k.json
+
+data:
+  data_dir: data/processed/sft
+  language_weights: {ar: 1.0, en: 1.0}
+
+method:
+  kind: full
+
+optim:
+  lr: 0.0001
+  min_lr: 0.00001
+  warmup_steps: 50
+  weight_decay: 0.01
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 1000
+  micro_batch_size: 8
+  grad_accum_steps: 4
+  eval_interval: 50
+  checkpoint_interval: 50
+  log_interval: 10
+  forgetting_windows: 16

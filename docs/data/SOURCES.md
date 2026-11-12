@@ -50,6 +50,15 @@ are noisy, and `arb_Arab` itself contains dialectal text. Do not treat the label
   is two layers deep. Arabic has 74.0M docs and 69.4B tokens. It overlaps in origin with
   FineWeb-2, so adding it mostly adds license complexity. Revisit only if we need more volume.
 
+## Fine-tuning (instruction) data (D-038)
+
+Pinned and hashed by `scratchllm data sft-prepare`; files under `data/raw/sft/`, splits under `data/processed/sft/`.
+
+| Source | Revision | Used | License | Notes |
+|---|---|---|---|---|
+| Aya Dataset (`CohereLabs/aya_dataset`) | `f9ea04583f02a8f86404ff6c58bf75fe637df8a2` | Standard Arabic, Egyptian, English; train and test files | Apache 2.0 | Human-written. The Moroccan subset is not used (D-038). |
+| CIDAR (`arbml/CIDAR`) | `bc2f9d7a9de34b534b126c32b8cce98e098138df` | all 10,000 pairs | Apache 2.0 on the card | Translated from Stanford Alpaca (CC BY-NC 4.0, answers by an OpenAI model) with ChatGPT, plus 891 pairs from an Al Jazeera site: fine for this non-commercial project; check again before any commercial use. |
+
 ## Held-out evaluation data
 
 Carve out validation and test sets from each source **before any cleaning or deduplication**,

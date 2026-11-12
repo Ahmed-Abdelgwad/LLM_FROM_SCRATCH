@@ -246,3 +246,16 @@ def test_the_evaluation_reports_every_variety_and_improves_after_training(setup)
         < before["teacher_forced"]["english"]["bits_per_char"]
     )
     assert loops("a b c a b c a b c") and not loops("a b c d e f")
+
+
+def test_the_shipped_sft_configs_load_and_differ_only_in_name_method_and_learning_rate():
+    paths = sorted(Path("configs/sft").glob("*.yaml"))
+    assert [p.stem for p in paths] == ["sft-full", "sft-lora"]
+    full, lora = (load_sft_config(p).as_dict() for p in paths)
+    assert full["name"] == "sft-full" and lora["name"] == "sft-lora"
+    assert full["method"]["kind"] == "full" and lora["method"]["kind"] == "lora"
+    for section in ("data", "train", "base_checkpoint", "tokenizer"):
+        assert full[section] == lora[section]
+    assert {k: v for k, v in full["optim"].items() if k not in ("lr", "min_lr")} == {
+        k: v for k, v in lora["optim"].items() if k not in ("lr", "min_lr")
+    }
