@@ -422,6 +422,90 @@ def generate_command(
             typer.echo(sample.prompt + sample.completion)
 
 
+@app.command("sft")
+def sft_command(
+    config: Path,
+    set_: Annotated[
+        list[str] | None, typer.Option("--set", help="Override: section.key=value (repeatable).")
+    ] = None,
+    resume: Annotated[bool, typer.Option(help="Continue from the run's last.pt.")] = False,
+) -> None:
+    """Fine-tune a pretrained checkpoint on the chat data, fully or with LoRA (D-039)."""
+    from scratchllm.finetune.config import load_sft_config
+    from scratchllm.finetune.trainer import finetune
+
+    cfg = load_sft_config(config, set_)
+    result = finetune(cfg, resume="auto" if resume else None, progress=typer.echo)
+    typer.echo(f"done: step {result.final_step}, best score {result.best_score}; {result.merged}")
+
+
+@app.command("sft-eval")
+def sft_eval_command(
+    checkpoint: Path,
+    run_id: Annotated[str, typer.Option(help="Report folder; final-<name> is tracked.")],
+    tokenizer: Annotated[Path, typer.Option(help="The tokenizer file.")] = Path(
+        "artifacts/tokenizer/bpe-16k.json"
+    ),
+    data_dir: Annotated[Path, typer.Option(help="The fine-tuning splits.")] = Path(
+        "data/processed/sft"
+    ),
+    per_variety: Annotated[int, typer.Option(help="Prompts answered per variety.")] = 150,
+    max_new_tokens: Annotated[int, typer.Option(help="Longest reply.")] = 256,
+    out_dir: Annotated[Path, typer.Option(help="Where reports go.")] = Path("reports/sft"),
+    device: Annotated[str, typer.Option(help="auto, cpu or cuda.")] = "auto",
+) -> None:
+    """Score a model (fine-tuned, or a base model in the same chat format) on the test split."""
+    from scratchllm.finetune.evaluate import evaluate_sft, write_report
+    from scratchllm.tokenizer.tokenizer import Tokenizer
+    from scratchllm.training.checkpoint import load_model
+    from scratchllm.training.trainer import autocast_factory, resolve_device
+
+    dev = resolve_device(device)
+    autocast, _ = autocast_factory(dev, "auto")
+    model = load_model(checkpoint, dev)
+    report = evaluate_sft(
+        model, Tokenizer.load(tokenizer), data_dir, dev, autocast,
+        generate_per_variety=per_variety, max_new_tokens=max_new_tokens, progress=typer.echo,
+    )  # fmt: skip
+    report["checkpoint"] = str(checkpoint)
+    write_report(report, out_dir / run_id)
+    typer.echo(f"report written to {out_dir / run_id}")
+
+
+@app.command("chat")
+def chat_command(
+    checkpoint: Path,
+    tokenizer: Annotated[Path, typer.Option(help="The tokenizer file.")] = Path(
+        "artifacts/tokenizer/bpe-16k.json"
+    ),
+    prompt: Annotated[list[str] | None, typer.Option("--prompt", help="Repeatable.")] = None,
+    max_new_tokens: Annotated[int, typer.Option(help="Longest reply.")] = 200,
+    temperature: Annotated[float, typer.Option(help="0 = greedy.")] = 0.0,
+    top_k: Annotated[int | None, typer.Option(help="Sample among the k best tokens.")] = None,
+    seed: Annotated[int, typer.Option(help="Seed for sampling.")] = 1,
+    device: Annotated[str, typer.Option(help="auto, cpu or cuda.")] = "auto",
+) -> None:
+    """Ask a fine-tuned model (a merged.pt) questions in the chat format it was trained on."""
+    import torch
+
+    from scratchllm.finetune.chat import generate_reply
+    from scratchllm.tokenizer.tokenizer import Tokenizer
+    from scratchllm.training.checkpoint import load_model
+    from scratchllm.training.trainer import resolve_device
+
+    dev = resolve_device(device)
+    model = load_model(checkpoint, dev)
+    tok = Tokenizer.load(tokenizer)
+    for text in prompt or []:
+        with torch.no_grad():
+            reply = generate_reply(
+                model, tok, text, max_new_tokens, temperature=temperature, top_k=top_k,
+                seed=seed, device=dev,
+            )  # fmt: skip
+        end = "" if reply.stopped_by_eos else "  [no end-of-text: cut]"
+        typer.echo(f"\n>>> {text}\n{reply.text}{end}")
+
+
 @app.command("eval")
 def eval_command(
     checkpoint: Path,
