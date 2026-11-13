@@ -1,0 +1,220 @@
+{
+  "checkpoint": "runs/sft-full-replay5-seed2024/merged.pt",
+  "dropped_too_long": {
+    "english": 20,
+    "msa": 37
+  },
+  "generation": {
+    "egyptian": {
+      "empty_rate": 0.0,
+      "language_rate": 0.9615384615384616,
+      "looping_rate": 0.38461538461538464,
+      "mean_new_tokens": 115.11538461538461,
+      "replies": 26,
+      "stopped_rate": 0.5769230769230769
+    },
+    "english": {
+      "empty_rate": 0.0,
+      "language_rate": 1.0,
+      "looping_rate": 0.6666666666666666,
+      "mean_new_tokens": 129.80666666666667,
+      "replies": 150,
+      "stopped_rate": 0.6733333333333333
+    },
+    "msa": {
+      "empty_rate": 0.0,
+      "language_rate": 0.9866666666666667,
+      "looping_rate": 0.52,
+      "mean_new_tokens": 131.74666666666667,
+      "replies": 150,
+      "stopped_rate": 0.5466666666666666
+    }
+  },
+  "generation_settings": {
+    "decoding": "greedy",
+    "max_new_tokens": 256,
+    "per_variety": 150,
+    "seed": 0
+  },
+  "pairs": 1428,
+  "samples": {
+    "egyptian": [
+      {
+        "id": "aya-train-107714",
+        "prompt": "ايه العلاقة بين الجملتين دول، توافق - تناقض - مفيش علاقة:\n\nالجملة الأولى: رياض بيلبس بسرعة عشان ينزل جرى و يلحق الأتوبيس.\nالجملة التانية: رياض متأخر عن ميعاد ما.",
+        "reference": "خلينا نشوف كده مع بعض:\n\n- لو رياض مكنش وراه ميعاد متأخر عليه مكنش هينزل جرى عشان يلحق الأتوبيس.\n- الهرولة عامة سمة المتأخر.\n\nعشان كده ممكن نقول ان الجملة التانية علاقتها علاقة توافق بالجملة الأولى.",
+        "reply": "بالتأكيد.",
+        "stopped": true
+      },
+      {
+        "id": "aya-train-114329",
+        "prompt": "ممكن تقولي أيه الفرق بين بروس ويليس و بروس واين.",
+        "reference": "بروس ويليس ممثل أمريكى مشهور من مواليد 19 مارس 1955 في مدينة ايدار-اوبرشتاين. حصل على جايزة الإيمي مرتين كأفضل ممثل رئيسي في مسلسل درامي سنة 1987 عن دوره في مسلسل ضوء القمر، وسنة 2000 جايزة ضيف الشرف البارز عن دورة في مسلسل الأصدقاء،و كمان حصل على جايزة الغولدن غلوب سنة 1987 كأفضل ممثل تلفزيوني في مسلسل كوميدي أو موسيقي عن دوره في مسلسل ضوء القمر.\n\nبوس واين هو شخصية خيالية بتمثل ملياردير و واحد من أكبر أقطاب الصناعة فى مدينة جوثام. بروس واين فى حياته الليلية بيقوم بدور باتمان أو الرجل الوطواط  عشان يحارب الجريمة ويحقق مع مجرمين عشان يحاول يمنع كوارث كتير فى مدينة جوثام. كان أول ظهور للشخصية في شهر مايو سنة 1939، ظهر في العدد رقم 27 من مجلة القصص المصورة ديتكتيف كومكس أو قصص المحققين.",
+        "reply": "بالتأكيد، واين هيستون.",
+        "stopped": true
+      },
+      {
+        "id": "aya-train-115065",
+        "prompt": "اقرأ الكام جملة دول و بعدين جاوبلي على السؤال الي جاي:\n\nشوية أرانب كانوا بيعبروا الطريق السريع. مصطفى كان سايق براحته و أخر حاجة كان ممكن يتوقعها هى أرنب على الطريق. يا دوبك قدر يفرمل على أخر أرنب فيهم. الأرنب وقف و بص له و بعدين كمل جرى مع باقى الجماعة. مصطفى كمل طريقه و ما زال مستغرب ايه جابهم فى طريقه النهاردة.\n\nالسؤال: جملة \"بص له\" دي بتعود على مين؟ و ايه نوع العربية اللى كان مصطفى راكبها؟",
+        "reference": "أنا يسعدنى أجاوبك على الأسئلة دى.\n\n- بالنسبة لأو حته فالسؤال، فجملة \"بص له\" بتتكلم علي بصة الأرنب لمصطفى، علشان كده \"له\" هنا بتتكلم على مصطفى.\n- نيجى دلوقتى للحتة التانية من السؤال، للأسف مقدرش أقولك نوع العربية اللى مصطفى كان راكبها لأن الحوار ده متقالتش فى الكام الجملة الي فاتوا.",
+        "reply": "بص له و هو اللى كان بيحكيلى عن السؤال.",
+        "stopped": true
+      },
+      {
+        "id": "aya-train-135276",
+        "prompt": "اتلانتيك ليه؟ وبالنظر للسؤال السابق، اكتب سياق يحتوي على الإجابة. ممكن يكون من 1 - 20 جملة. السياق:",
+        "reference": "خلال منتصف العصر الايوسيني، بيعتقد إن حوض الصرف الصحي في الأمازون تم تقسيمه على طول وسط القارة بواسطة قوس بوروس. المياه في الجانب الشرقي تتدفق باتجاه المحيط الأطلسي، في حين تتدفق المياه في الغرب باتجاه المحيط الهادئ عبر حوض الأمازون. ومع ذلك ، مع ارتفاع جبال الأنديز ، تم إنشاء حوض كبير محاط بحيرة ؛ المعروف الآن باسم حوض سوليمونز. في خلال 5  10 مليون سنة الأخيرة، حطم المياه المتراكمة دي خلال قوس بوروس، و انضم للتدفق الشرقي باتجاه المحيط الأطلسي.",
+        "reply": "الاسم:\n1. **الاسم:\n1. **الاسم:\n2. **الاسم:\n3. **الاسم:\n4. **الاسم:\n4. **الاسم:\n5. **الاسم:\n6. **الاسم:\n6. **الاسم:\n7. **الاسم:\n8. **الاسم:\n8. **الاسم:\n8. **الاسم:\n9. **الاسم:\n9. **الاسم:\n10 **الاسم:\n10 **الاسم:\n10 **الاسم:\n\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم:\n1. **الاسم",
+        "stopped": false
+      },
+      {
+        "id": "aya-train-141502",
+        "prompt": "ممكن تقولي أيه الفرق بين بروس ويليس و بروس واين.",
+        "reference": "بروس ويليس ممثل أمريكى مشهور من مواليد 19 مارس 1955 فى ايدار-اوبرشتاين. حصل على جايزة الإيمي مرتين كأفضل ممثل رئيسي في مسلسل درامي سنة 1987 عن دوره في مسلسل ضوء القمر، وسنة 2000 جايزة ضيف الشرف البارز عن دوره في مسلسل الأصدقاء، كمان حصل على جايزة الغولدن غلوب سنة 1987 كأفضل ممثل تلفزيوني في مسلسل كوميدي أو موسيقي عن دوره في مسلسل ضوء القمر.\n\nبوس واين هو شخصية خيالية بتمثل ملياردير و واحد من أكبر أقطاب الصناعة فى مدينة جوثام. بروس واين فى حياته الليلية بيقوم بدور باتمان أو الرجل الوطواط  عشان يحارب الجريمة ويحقق مع مجرمين عشان يحاول يمنع كوارث كتير فى مدينة جوثام. كان أول ظهور للشخصية في شهر مايو سنة 1939، ظهر في العدد رقم 27 من مجلة القصص المصورة ديتكتيف كومكس أو قصص المحققين.",
+        "reply": "بالتأكيد، واين هيستون.",
+        "stopped": true
+      },
+      {
+        "id": "aya-train-163976",
+        "prompt": "اديني مثال على معلومة في الفئة دي: ألعاب الفيديو",
+        "reference": "فى حوالى 8 خصوم بيحاربوا ميجامان فى كل لعبة.",
+        "reply": "دي: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب الفيديو\n\nالإنترنت: لعبة ألعاب",
+        "stopped": false
+      }
+    ],
+    "english": [
+      {
+        "id": "aya-test-1003",
+        "prompt": "Predict the dependency parsing of the following statement:\n\"I love apples\"\n",
+        "reference": "In this dependency parse tree, \"love\" is the root of the sentence, indicating that it is the main verb. \"I\" is the subject of the sentence, and \"apples\" is the direct object of the verb \"love.\" ",
+        "reply": "I love apples, my broth, and myth,\nI love my broth, I love my broth, I love my broth,\nI love my broth, I love my broth, I love my broth, I love my broth, I love mysterious,\nI love mysterious, mysterious, and mysterious, I love mysterious, I love mysterious,\nI love mysterious, and I love mysterious, I love mysterious, I love mysterious,\nI love mysterious, and I love mysterious, I love mysterious, I love mysterious,\nI love mysterious, and I love mysterious, I love mysterious, I love mysterious,\nI love mysterious, and I love mysterious, I love mysterious, I love mysterious,\nI love mysterious, I love mysterious, I love mysterious, I love mysterious,\nI love mysterious, I love mysterious, I love mysterious, I love mysterious, I love mysterious, I love mysterious",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1032",
+        "prompt": "Question: What will happen if all the deers are killed in the given food chain?\n\nGrass — Deer — Lion\n\n\na. The population of Lion increases\nb. The population of grass decreases\nc. The population of Lion decreases and grass increases\nd. The population of Lion remains unchanged\n\nAnswer:",
+        "reference": "Answer: (c)\n\nIf all the deer are killed in the given food chain, there won’t be any food available for the lions. Hence, the lions will starve to death and their population will decrease. On the other hand, there won’t be any consumers of grass hence, its population would increase.",
+        "reply": "Answer: (d)\n\nThe lion decreases and grass increases.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1081",
+        "prompt": "Explain the types of projects in COCOMO 81.",
+        "reference": "COCOMO 81 distinguishes among Organic (small teams), Semi-Detached (mixed experience), and Embedded (tight constraints) projects.",
+        "reply": "Currently, COCOMO 81 is a fundamental concept in COCOMO 81. It is a fundamental concept in COCOMO 81.\n\nCurrently, COCOMO 81 is a fundamental concept in COCOMO 81. It is a fundamental concept in COCOMO 81. It is a fundamental concept in COCOMO 81.\n\nCurrently, COCOMO 81 is a fundamental concept in COCOMO 81. It is a fundamental concept in COCOMO 81.\n\nCurrently, COCOMO 81 is a fundamental concept in COCOMO 81. It is a fundamental concept in COCOMO 81.\n\nCurrently, COCOMO 81 is a fundamental concept in COCOMO 81. It is a fundamental concept in COCOMO 81.\n\nCurrently, COCOMO 81 is a fun",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1106",
+        "prompt": "How does DevOps contribute to the software development process?\n\n",
+        "reference": "DevOps combines development and operations, promoting collaboration and automation to achieve faster development cycles, continuous integration, and continuous deployment.",
+        "reply": "DevOps involves deploying the software development process to ensure the software development process is crucial for the software development process.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1112",
+        "prompt": "How is Buddhism practiced in Sri Lanka, and what are some important Buddhist sites?",
+        "reference": "Buddhism plays a central role in Sri Lankan culture and daily life. Theravada Buddhism is the predominant practice, influencing rituals, customs, and festivals. The Temple of the Tooth Relic in Kandy is a revered site, housing the sacred tooth relic of Buddha. Anuradhapura, an ancient capital, features the Sri Maha Bodhi, a sacred fig tree believed to be a descendant of the Bodhi tree under which Buddha attained enlightenment. The ancient rock cave temples of Dambulla showcase intricate murals and statues. Adam's Peak, a pilgrimage site, draws devotees with the belief that Buddha left his footprint atop the mountain.",
+        "reply": "Buddhism is the world's largest Buddhist sites. Buddhism is a country located in the north of Sri Lanka, with a population of over 1,200 meters (1,000 meters) in the north of Sri Lanka. Buddhism is a country located in the north of Sri Lanka, with a population of over 1,200 meters (1,000 meters) in the north of Sri Lanka. Buddhism is a country located in the north of Sri Lanka, with a population of over 1,200 meters (1,000 meters) in the north of Sri Lanka. Buddhism is a country located in the north of Sri Lanka, with a population of over 1,200 meters (1,000 meters) in the north of Sri Lanka.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1135",
+        "prompt": "The \"Technical Skills\" secition is is not included in the top of the resume.\n\nis there any grammatical error?",
+        "reference": "Yes, there is a minor grammatical error in your sentence. It should be:\n\n\"The 'Technical Skills' section is not included at the top of the resume.\"\n\nIn this corrected sentence, I removed the double \"is\" for better clarity and grammatical correctness.",
+        "reply": "Yes, there is a grammatical error in Technology. It is a grammatically correct, and it is not possible to make a grammatically correct.",
+        "stopped": true
+      }
+    ],
+    "msa": [
+      {
+        "id": "aya-test-1",
+        "prompt": "قم بإنشاء قصيدة عتاب من بحر الطويل.",
+        "reference": "وَلَمّا بَدا لي أَنَّ ما كُنتُ أَرتَجي\nمِنَ الأَمرِ وَلّى بَعدَما قُلتُ أَقبَلا\nتَلَوَّمتُ بَينَ اللَومِ وَالعُذرِ ساعَةً\nكَذي الوِردِ يُرمى قَبلَ أَن يَتَبَدَّلا\nفَلَمّا رَأَيتُ الحِلمَ قَد طارَ طَيرَةً\nوَلَم أَرَ إِلّا أَن أَلومَ وَأَعذُلا\nرَجَعتُ أُوَلّي عاثِرَ الجَدِّ لَومَها\nفَلا قامَ بَينَ العاثِرينَ وَلا عَلا\nأُلَعِّنُهُ مُستَثنِياً مِن عِنانِهِ\nكَرَدِّكَ في الغِمدِ الكَهامَ المُفَلَّلا\nوَأَعفَيتُ مِن لَومي اِمرَأً ما وَجَدتُهُ\nمُليماً وَلا باباً عَنِ الجودِ مُقفَلا\nلِجَدّي إِذاً بِاللَومِ أَولى مِنَ الحَيا\nوَمَن ذا يَلومُ العارِضَ المُتَهَلِّلا",
+        "reply": "أَزَلَقي بِهِ وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَزَلَقي وَمِنَما\nأَ",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1008",
+        "prompt": "أريد إنشاء قصيدة حزينة من بحر المنسرح. هل يمكنك مساعدتي؟",
+        "reference": "خُذها سُطوراً إِلَيكَ قَد بُعِثَت\nتَروم للنَفس ما يُعللها\nفي طَي بيضا ظَلَت مِن وَلَهٍ\nفيكَ بِأَيدي اللحاظ أَصقلها\nأَكتُبها وَالدُموع تَنقطها\nبِعبرة لا أَزال أُهملها\nلَو كانَ ظَني إِذا بصرت بِها\nنِيابة عَن فَمي تقبلها\nلَرحت شَوقاً إِلَيكَ مُنَدرِجاً\nفي طَيِها وَالنَسيم يَحملها",
+        "reply": "أَنتَََ لَنا لَنا لَنا\nأَنتَ لَنا لَنا لَنا\nأَنتَ لَنا لَنا لَنا\nأَنتَ لَنا لَنا لَنا\nأَنتَ لَنا لَنا لَنا\nأَنتَ لَنا لَنا لَنا\nأَنتَ لَنا لَنا لَنا\nأَنتَ لَنا لَنا لَنا\nأَنتَ لَنا لَنا\nأَنتَ لَنا لَنا\nأَنتَ لَنا لَنا\nأَنتَ لَنا لَنا\nأَنتَ لَنا لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا\nأَنتَ لَنا",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1082",
+        "prompt": "ما أثر ذلك على الأغذية والإنتاج الغذائي في البلد المتضرر؟",
+        "reference": "إن أثر النشاط الإشعاعي على الأغذية والإنتاج الغذائي في بلد متضرر من طارئة إشعاعية أو نووية سيتوقف على أنواع النويدات المشعة ومقدار الإشعاع المترسب أو المنتشر في مكان إنتاج الأغذية أو حصادها. وعلى الرغم من أن وجود اليود المشع في الأغذية يشكل مصدر قلق فوري عقب حدوث طارئة نووية، إلا أنه لن يمثل أي مشكلة للاستهلاك على المدى الطويل لأن العمر النصفي لذلك اليود قصير نسبيا ولأنه سيتحلل بشكل طبيعي خلال فترة زمنية قصيرة. وعلى النقيض من ذلك، يمكن أن يستديم السيزيوم المشع في البيئة لسنوات عديدة وأن يظل يمثل مشكلة طويلة الأجل لإنتاج الأغذية وتجارتها، وخطراً على صحة الإنسان.",
+        "reply": "الزراعة والزراعة والزراعة والزراعة والزراعة.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1084",
+        "prompt": "ما هي الألياف البصرية؟",
+        "reference": "تعرف الألياف البصرية او الضوئية بأنها التقّنية المرّتبطة بنقل البيانات باستخدام نبضات ضوئيّة تنتقل جنبًا إلى جنب مع ألياف طويلة مصنوعة عادةً من البلاستيك أو الزجاج، وقد تمّ تصميمها بِحيّث تُسهِل انتشار الضوء مع الألياف الضوئيّة اعتمادا على مُتطلّبات الطّاقة ومسافة الإرسال، وتُفضّل الأسلاك المعدنيّة للإرسال في اتصالات الألياف الضوئيّة حيث تنتقل الإشارات بأضرار أقل ولا تتأثر بالتّداخل الكهرومغناطيسي. ",
+        "reply": "​الأنف: فعل مضارع مرفوع بالضمة.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1098",
+        "prompt": "كمل الفقرة:\n\nعلى أن الخليفة عثمان بن عفان (ت 35هـ/656م) لم يكن أقل حذرًا من عمر في ركوب البحر؛ فحين أرسل إليه واليه على الشام معاوية بن أبي سفيان (ت 60هـ/681م) يستأذنه في غزو قبرص سنة 27هـ/649م ويهوّن عليه أمرها -كما",
+        "reference": "فعل مع الخليفة عمر الذي رفض طلبه- أجابه عثمان بشروط قائلا: \"فإن ركبتَ البحرَ ومعكَ امرأتك فاركبه مأذونًا لك، وإلا فلا..؛ خيّرهم (= جنوده) فمن اختار الغزو طائعًا فاحمله وأعنْه\"؛ كما يروي البلاذري (ت 279هـ/892م) في ‘فتوح البلدان‘.",
+        "reply": "\nاليه على أن الخليفة عمر بن عفان، وقد كان هناك من كان آخره في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان من أشهر المعارك في القرن الثاني عشر، وقد كان",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1120",
+        "prompt": "اكمل الجملة التالية:\n\nوهو ما قد يُسبب حالة من الشعور بالذنب، لا تخلو من تداعيات جسدية ونفسية لدى الأشخاص",
+        "reference": "المشغولين لدرجة لا تُمكّنهم من ممارسة الرياضة بشكل منتظم، وبالكاد يستطيعون ممارستها في عطلة نهاية الأسبوع فقط.",
+        "reply": "الإجابة الصحيحة هي:\n\n1. **الذنب**: يُسبب التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق أو التهاب الحلق",
+        "stopped": false
+      }
+    ]
+  },
+  "split": "test",
+  "teacher_forced": {
+    "egyptian": {
+      "bits_per_char": 1.8385647996233536,
+      "loss": 4.299719146392888,
+      "pairs": 26
+    },
+    "english": {
+      "bits_per_char": 1.1802409906963984,
+      "loss": 2.7365326904597205,
+      "pairs": 405
+    },
+    "msa": {
+      "bits_per_char": 1.6894199517478936,
+      "loss": 3.7787233033578893,
+      "pairs": 940
+    }
+  },
+  "teacher_forced_groups": {
+    "msa_aya": {
+      "msa": {
+        "bits_per_char": 1.9114608126003323,
+        "loss": 3.930705349607878,
+        "pairs": 461
+      }
+    },
+    "msa_cidar": {
+      "msa": {
+        "bits_per_char": 1.5626426537040934,
+        "loss": 3.6794106127673096,
+        "pairs": 479
+      }
+    },
+    "official_aya_test": {
+      "english": {
+        "bits_per_char": 1.154835665972652,
+        "loss": 2.71553582879218,
+        "pairs": 238
+      },
+      "msa": {
+        "bits_per_char": 1.9452772205841964,
+        "loss": 3.9607467475826432,
+        "pairs": 233
+      }
+    }
+  }
+}
