@@ -61,7 +61,7 @@ comparisons must use bits-per-character (or bits-per-byte) instead.
 | Tokenizer round trip | Tested, and 0 failures on 2,700 real documents (D-015). |
 | Throughput and peak VRAM | Measured on the RTX 3050 (D-019, D-020). |
 | Qualitative samples | Six prompts in Modern Standard, Egyptian and English (D-022, D-023): fluent surface; after 5,000 steps a first sentence can make sense, but there is no coherence over several sentences and greedy decoding loops. |
-| SFT rubric | Not scored. Automatic measures (response bits per character, stop rate, language, looping) and samples on a held-out test split are in `reports/sft/final-sft-*` (D-040); the human rubric is still to do. |
+| SFT rubric | Built, not scored. A blind sheet of 30 test-split prompts answered by the base, fully fine-tuned and LoRA models (InstructGPT's 1-to-7 overall score and two labels) is in `reports/sft/final-rubric-v1` (D-041); the scoring is a person's to do. Automatic measures (response bits per character, stop rate, language, looping) and samples are in `reports/sft/final-sft-*` (D-040). |
 | Reproducibility | A resumed run is bit-identical to an uninterrupted one on CPU (tested) and in the one GPU trial made (D-020). A clean-checkout reproduction of a full run has not been done. |
 
 ## Rules for credible claims

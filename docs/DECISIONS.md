@@ -2165,6 +2165,10 @@ translated, not written in Arabic.
 
 ## D-039 (2026-11-12): fine-tuning plan: full fine-tuning against LoRA, registered before any training run
 
+*Reviewed in D-041:* the thresholds 0.10, 80% and 90% below were set by the assistant writing this plan, with no source and
+without the project's explicit approval; 0.03 and 0.05 are the "no difference" lines of earlier pretraining comparisons. The
+criteria are left as registered and the D-040 verdict under them stands; later entries do not use absolute lines (D-041, D-042).
+
 Written after the code, the data and a 30-step smoke run (LoRA, lr 1e-3, to check memory and speed: 1.5 GB peak, 0.2 s per step;
 its validation score was seen, 1.65 bits/char at step 30) and before any other run. The base model was asked two questions in the chat
 format (it answered with markup fragments, no end-of-text); no test-split number of any model has been looked at.
@@ -2206,6 +2210,9 @@ rubric on a fixed prompt set is planned in `docs/PROBLEM.md`; the reports give t
 to do and is not part of this entry. One learning-rate sweep, on seed 1337 only; no second training seed per base.
 
 ## D-040 (2026-11-13): fine-tuning results: full fine-tuning answers better, LoRA forgets less; neither passes every criterion of D-039
+
+*Reviewed in D-041:* two statements below are struck out or qualified (marked "D-041"), and "LoRA learns less" holds for
+the LoRA configuration tested (rank 8, alpha = rank, query and value maps only), not for LoRA in general.
 
 The plan of D-039, run as registered. Tables built by `scripts/archive/d040_entry.py` from the run logs and the reports; evidence
 kept in git: `reports/sft/final-sft-{base,full,lora}-seed{1337,2024}/` (test split) and `reports/eval/final-sft-{full,lora}-seed{1337,2024}/`
@@ -2290,12 +2297,15 @@ LoRA's step time is 0.88 of full fine-tuning's and its peak memory 0.81 (mean of
   0.25 on `wiki_ary`; LoRA loses 0.03 to 0.05 on each, between a seventh and a fifth as much, but over the 0.03 line of criterion 4
   on the Arabic mean and English. Both fail it.
 - *Cost:* LoRA trains 0.44% of the parameters, takes 0.88 of the step time and 0.81 of the peak memory: a 12% and 19% saving, small
-  next to the paper's because the frozen weights of a 17M model are a small part of the memory to begin with.
+  next to the paper's ~~because the frozen weights of a 17M model are a small part of the memory to begin with~~. [D-041: the
+  reason was not measured. Gradients and AdamW state of 16.9M fp32 weights come to about 194 MiB; the saving seen is 362 MiB.]
 
 **Read with the samples** (`report.md` of each folder). The fine-tuned models answer in the register of the question ("Answer: (c)",
 the right option, for a multiple-choice question; Egyptian for an Egyptian prompt), sometimes on topic, but what they
 say is mostly wrong ("COCOMO 81 is a city") or repeats a phrase until the token limit (looping in 35% to 67% of the replies). At 17M
-parameters and 164M pretraining tokens that is the expected result: fine-tuning changes how the model answers, not what it knows.
+parameters and 164M pretraining tokens that is the expected result~~: fine-tuning changes how the model answers, not what it knows~~.
+[D-041: unsupported. It restates LIMA's Superficial Alignment Hypothesis, which nothing here tests, and the forgetting
+numbers above show that fine-tuning also changes what the model predicts on its pretraining text.]
 
 **Not run, and why it matters.**
 
@@ -2312,3 +2322,153 @@ the lid switch.
 **Decision.** No method passes all four criteria. Which to use is a trade-off, left to the project as `wiki_ary` was in D-031:
 full fine-tuning gives the better chat model, LoRA keeps the base model's language modelling nearly intact. The remedy D-039 named for
 criterion 4, mixing pretraining text into fine-tuning batches, is the next experiment; it is not started.
+
+## D-041 (2026-11-13): review of D-038 to D-040 against their sources; corrections; the human rubric
+
+Written after the results of D-040, when the project asked for the fine-tuning entries to be checked against the papers and
+Raschka's book and corrected. Nothing here changes a criterion of D-039 or the verdict of D-040: the criteria were registered
+before the runs, and changing them now would mean choosing the test after seeing the answer. What is corrected is what the
+entries claim, and what later entries will use.
+
+**Consistent with the sources** (checked against the papers' text):
+
+- LoRA, `finetune/lora.py`: h = W0x + (alpha/r)BAx with B = 0 at the start (Hu et al. 2021, section 4.1); merged after training
+  (their "no additional inference latency"); query and value maps (their Table 5).
+- The loss, `finetune/chat.py`: padding is never a target and the end-of-text is (Raschka, chapter 7, section 7.3,
+  `custom_collate_fn`); the prompt is not scored (Shi et al. 2024, equation 2; the book leaves this as an exercise).
+- The schedule: cosine decay to a tenth of the peak, as InstructGPT's SFT (Ouyang et al. 2022, appendix C.3).
+- Forgetting measured as the loss on the pretraining distribution, the quantity of InstructGPT's "alignment tax"; Kalajdzievski
+  2024 (section 3.1) measures it as cross-entropy to the base model's predictions instead, a variant not computed here.
+
+**Corrections.**
+
+1. *Who set the thresholds of D-039.* 0.10 bits/char (criterion 1), 80% (criterion 2) and 90% (criterion 3) were chosen by the
+   assistant that wrote the plan. No paper or earlier entry gives them, and the project did not approve them explicitly. 0.03 and
+   0.05 (criterion 4) are the lines under which two pretraining runs counted as the same (D-023, D-025, D-031): as a bar for
+   fine-tuning they ask for no measurable forgetting, while Kalajdzievski (2024, section 4.1) finds forgetting "unavoidable" with
+   conventional fine-tuning at a given fine-tuning loss. Checked now:
+   - criterion 2 can be met: 95.9% of the Standard Arabic and 90.6% of the English reference answers of the test split end
+     within 256 tokens, so a model that answered like the references would pass it;
+   - criterion 3 says little for English: the base model of seed 1337 already writes 92% of its English replies in English;
+   - criterion 1 has no measured noise floor: no base model had a second training seed.
+   The verdict of D-040 stands as registered. Later entries do not judge by absolute lines; D-042 compares each run with a
+   control run, using the D-031 bands that the project did set and the noise measured between two runs.
+2. *"Fine-tuning changes how the model answers, not what it knows" (D-040)* is unsupported. It restates the Superficial
+   Alignment Hypothesis of LIMA (Zhou et al. 2023, section 2: "A model's knowledge and capabilities are learnt almost entirely
+   during pretraining"), which nothing here tests; D-040's own forgetting numbers show fine-tuning changing what the model
+   predicts on pretraining text. Struck out in D-040.
+3. *Why LoRA saves little memory (D-040)* was not measured. Gradients and AdamW's two moment tensors for 16,913,280 fp32 weights
+   come to 3 x 64.5 = 194 MiB; the saving seen is 1,877 - 1,515 = 362 MiB at seed 1337. The rest is not explained, and memory was
+   not profiled. Biderman et al. 2024 (section 4.7, appendix I) also find LoRA's savings small and its steps often slower in
+   standard implementations. Marked in D-040.
+4. *"LoRA learns less" (D-040)* holds for the configuration tested: rank 8, alpha = rank, query and value maps only, with the
+   chosen rate at the top of the grid. Biderman et al. 2024 find targeting the MLP or all modules better than attention alone
+   (their Figure 7) and recommend all modules, alpha = 2r and a learning-rate sweep (section 4.7). Not run.
+5. *Choices with no source,* recorded so they are not read as taken from one:
+   - pairs too long are dropped (Raschka's collate function truncates them);
+   - the chat markers are plain text, not the Alpaca template of Raschka section 7.2;
+   - English is passed over 5.2 times and Arabic 1.2 (from equal language weights, D-025); InstructGPT finds SFT "overfit[s]
+     on validation loss after 1 epoch" yet keeps training (section 3.5);
+   - the best checkpoint is chosen by validation loss, whereas InstructGPT chooses its SFT model "based on the RM score on the
+     validation set" (section 3.5); this project has no reward model;
+   - each base model's seed is also its training seed, so seed-to-seed differences mix the two.
+6. *Raschka's book* (chapter 7, instruction fine-tuning; appendix E, LoRA, applied there to classification) says nothing about
+   forgetting or replay. The work on forgetting rests on the papers alone.
+
+**The human rubric** (`docs/PROBLEM.md`), built here and not yet scored:
+
+- *Rubric:* the per-output part of InstructGPT's human evaluation (section 3.6, Table 3, Figure 12a), cut to what applies to
+  a 17M model. Each reply gets a 1-to-7 Likert score of overall quality and two labels: "fails to follow the correct instruction
+  / task" (InstructGPT's wording), and "incorrect". InstructGPT's "hallucination" label is for closed-domain tasks; here most
+  prompts are open questions, so "incorrect" covers any false statement and is left empty when a reply asserts nothing.
+- *Prompts:* 30 test-split prompts (12 Standard Arabic, 12 English, 6 Egyptian), drawn with seed 0. `docs/PROBLEM.md` asked
+  for a hand-written set; prompts written now would be the assistant's, not the project's. Test prompts were never trained on
+  nor used to choose a checkpoint (D-038, D-039).
+- *Models:* the three of seed 1337: base (`runs/ablation-rope-swiglu/best.pt`, given the chat template), full fine-tuning and
+  LoRA (`runs/sft-{full,lora}-seed1337/merged.pt`). Greedy replies of at most 256 tokens, as `sft-eval`.
+- *Blinding:* the replies to each prompt are shown as A, B and C in an order shuffled per prompt. The key is in `key.json`,
+  which the scorer must not open until the scores are final. The base model's replies are markup fragments and easy to
+  recognize, so the blinding holds only between the two fine-tuned models.
+- *Files:* `reports/sft/final-rubric-v1/`: `sheet.html` (scored in a browser, scores downloaded as `scores.csv`), `scores.csv`
+  (the same, for a spreadsheet), `key.json`. Made by `scratchllm sft-rubric-sheet --model base-1337=... --model full-1337=...
+  --model lora-1337=... --run-id final-rubric-v1`; regenerating it gives the same files. Code `finetune/rubric.py`, tests
+  `tests/test_rubric.py`.
+- *Analysis, fixed before any score:* `scratchllm sft-rubric-score reports/sft/final-rubric-v1` reports for each model and
+  variety the mean Likert score and the two label rates, with 95% bootstrap intervals over prompts, and the paired difference
+  of every two models on the same prompts. Full fine-tuning and LoRA differ on the Likert score only if the interval of their
+  paired difference excludes zero; otherwise 30 prompts cannot tell them apart. No direction is predicted.
+- *Limits:* one scorer, 30 prompts, and the reference answer shown as a help, although it is often a translation and not
+  the only right answer. An LLM judge, as in Raschka section 7.8, would be a separate measure, reported as such.
+
+## D-042 (2026-11-13): replay plan: pretraining text in fine-tuning batches at a fixed budget, registered before any run
+
+Written after the code (`finetune/replay.py`, `train.replay_fraction`, tests in `tests/test_replay.py` and
+`tests/test_sft_trainer.py`) and one smoke run on the GPU, of 20 steps with 20% replay from the seed-1337 base model, written
+outside `runs/`. Its peak memory was 1,843 MiB, a step took 0.25 s, and replay was 26% to 27% of the scored tokens. Its
+validation score at step 20, 1.622, was printed and seen. No run of this plan has been made.
+
+**Question.** Full fine-tuning raised the pretraining loss by 0.20 bits/char on the Arabic mean and by 0.26 to 0.27 on English
+(D-040). If part of every fine-tuning batch is pretraining text instead of chat pairs, with the steps and tokens unchanged,
+how much of that forgetting is avoided, and what does it cost the answers?
+
+**Sources.**
+
+- Ibrahim et al. 2024 (arXiv:2403.08763), section 4.2, "compute-equivalent replay": x% of each training batch comes from the old
+  data, and the new data is reduced so compute stays equal. That is the design here. They test 0.5% to 50%, and find "as little
+  as 1%" mitigates forgetting to a large extent in continued pretraining.
+- InstructGPT (Ouyang et al. 2022), appendix C.3: the SFT models that start RLHF "mix in 10% pretraining data during
+  fine-tuning"; appendix E.8 compares 0%, 10% and 50%. The pretraining term with coefficient gamma in their equation 2 belongs
+  to the RL stage and is not used here.
+- Scialom et al. 2022 (arXiv:2205.12393): rehearsal of 1% of earlier data keeps nearly all earlier performance over eight
+  tasks learned in sequence.
+- Kalajdzievski 2024 (arXiv:2401.05605): forgetting is "well predicted by a linear function of fine-tuning loss". So a run that
+  learns less also forgets less, for that reason alone; replay is judged on learning and forgetting together.
+
+None of these concerns a 17M model or Arabic-English pretraining. The rates below lie inside their range.
+
+**Held fixed.** The base models and data of D-040, `configs/sft/sft-full.yaml` at the rate chosen in D-040 (1e-4), 1,000
+steps, 32 rows per step. In every row that is not replayed, the same chat pair as in the run without replay: the pair sampler
+is unchanged. The input tokens per step are the same too, because a replay row has exactly the length of the chat example it
+replaces. Checkpoint selection (validation score, D-039) and evaluation are unchanged.
+
+**Varied.** `train.replay_fraction` = 0, 0.05, 0.10, 0.20: exactly 0, 1,600, 3,200 and 6,400 of the 32,000 rows, spread
+evenly over the steps. A replay row is a window of a training source's train split, drawn with the base model's pretraining
+weights (each source's train tokens), with every token scored. Replay's share of the scored tokens is therefore larger than its
+share of rows, because a chat row scores only its answer. That share is logged and reported. Chat pairs seen fall to 95%, 90%
+and 80%. `wiki_ary` is never replayed (it has no train split), so it measures forgetting on text that replay does not touch.
+
+**Runs.** Both base models, seed 1337 and seed 2024, with the training seed equal to the base's as in D-039: 8 runs, named
+`sft-full-replay{0,5,10,20}-seed{1337,2024}`:
+
+    scratchllm sft configs/sft/sft-full.yaml --set name=sft-full-replay10-seed1337 --set train.replay_fraction=0.1
+    (seed 2024: also --set base_checkpoint=runs/ablation-rope-swiglu-seed2024/best.pt --set train.seed=2024)
+
+The 0% runs repeat D-040's full runs with the new code. If their logs and weights equal D-040's, the old code path is unchanged
+and the GPU deterministic. If they do not, the difference is noise between two identical runs and is reported as such, and the
+0% rerun is the control. Each run is then scored by `scratchllm sft-eval` (test split) and `scratchllm eval` (full pretraining
+validation of `merged.pt`) as in D-040.
+
+**Comparisons**, registered. Each replay rate is compared with the 0% run of the same seed, by the bands of D-031 on the mean of
+the two seeds, both seeds pointing the same way:
+
+- *cost to the answers:* test response bits/char, the mean of Standard Arabic and English (the D-039 comparison number);
+- *forgetting avoided:* the change from the base model on the Arabic mean, English and `wiki_ary`.
+
+Expected before any run: forgetting falls as the rate rises, on the Arabic mean and English, less on `wiki_ary`; the cost to
+the answers rises with the rate.
+
+*Choice of rate:* among the rates whose cost to the answers is "the same" or "unresolved" (under 0.015 bits/char), the one that
+avoids the most forgetting on the Arabic mean. If every rate's cost "differs", no rate is chosen and the table of costs and
+savings is the result. If the 0% rerun differs from D-040's run by more than 0.005 on any compared number, the bands are read
+against that noise and the entry says so. The criteria of D-039 are reported for every run but decide nothing (D-041). Also
+reported: the forgetting probe every 50 steps, as curves, and, after Kalajdzievski, the change in forgetting per unit change
+in response loss for each rate. These are descriptive.
+
+**Not in this plan:**
+
+- replay with LoRA, whose forgetting is already a fifth of full fine-tuning's;
+- weighting the replay loss (InstructGPT's gamma);
+- Kalajdzievski's cross-entropy to the base model's predictions;
+- a rubric sheet for the replay models, which could follow as a second sheet.
+
+Estimated cost: about two hours of the GPU.
