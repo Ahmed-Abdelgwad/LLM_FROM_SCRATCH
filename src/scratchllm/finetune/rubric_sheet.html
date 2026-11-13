@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubric Scoring Sheet</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1d1d1b; --muted:#6b6a65; --card:#fff; --line:#dedbd2; --accent:#2f5d8a; }
+@media (prefers-color-scheme: dark) { :root { --bg:#161615; --fg:#ecebe6; --muted:#a3a19a;
+  --card:#1f1f1d; --line:#3a3936; --accent:#8db4dc; } }
+body { background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, "Noto Naskh Arabic", sans-serif;
+  margin:0 auto; max-width:900px; padding:16px; }
+h1 { font-size:1.3rem; } .muted { color:var(--muted); font-size:.9rem; }
+.prompt { border:1px solid var(--line); background:var(--card); border-radius:8px; padding:12px 16px; margin:20px 0; }
+.text { white-space:pre-wrap; overflow-wrap:anywhere; unicode-bidi:plaintext; }
+.reply { border-top:1px solid var(--line); padding:10px 0; }
+.reply .text { max-height:16em; overflow:auto; }
+.controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:6px; font-size:.95rem; }
+select, button { font:inherit; } button { background:var(--accent); color:var(--bg); border:0; border-radius:6px; padding:8px 14px; cursor:pointer; }
+.bar { position:sticky; top:0; background:var(--bg); padding:8px 0; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+details summary { cursor:pointer; color:var(--muted); }
+</style></head><body>
+<h1>Rubric scoring sheet</h1>
+<p class="muted">For each reply: <b>overall</b> quality 1 (useless) to 7 (as good as a careful human answer);
+<b>fails instruction</b>: it does not do what the prompt asks; <b>incorrect</b>: it states something false or made up
+(leave "n/a" if it says nothing that could be true or false). Judge each reply on its own; the reference answer is a help,
+not the only right answer. Replies marked [cut] reached the length limit. Do not open key.json until you are done.
+Your scores are kept in this browser as you go; press Download to save scores.csv next to this file.</p>
+<div class="bar"><button id="dl">Download scores.csv</button><span id="count" class="muted"></span></div>
+<div id="items"></div>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const items = JSON.parse(document.getElementById('data').textContent);
+const FIELDS = "__FIELDS__".split(',');
+const store = (() => { try { return JSON.parse(localStorage.getItem('rubric-__SHEET__') || '{}'); } catch { return {}; } })();
+const save = () => { try { localStorage.setItem('rubric-__SHEET__', JSON.stringify(store)); } catch {} };
+const el = (tag, attrs = {}, text) => { const e = document.createElement(tag); Object.assign(e, attrs); if (text !== undefined) e.textContent = text; return e; };
+function select(id, opts) { const s = el('select'); for (const [v, t] of opts) s.append(el('option', {value: v}, t));
+  s.value = (store[id] ?? ''); s.onchange = () => { store[id] = s.value; save(); count(); }; return s; }
+function count() { let done = 0, all = 0; for (const it of items) for (const a in it.replies) { all++;
+  if (store[`${it.n}.${a}.overall`] && store[`${it.n}.${a}.fails`] !== undefined && store[`${it.n}.${a}.fails`] !== '') done++; }
+  document.getElementById('count').textContent = `${done} of ${all} replies scored`; }
+const root = document.getElementById('items');
+for (const it of items) {
+  const box = el('section', {className: 'prompt'});
+  box.append(el('div', {className: 'muted'}, `Prompt ${it.n} (${it.variety})`));
+  box.append(el('div', {className: 'text', dir: 'auto'}, it.prompt));
+  const ref = el('details'); ref.append(el('summary', {}, 'Reference answer'));
+  ref.append(el('div', {className: 'text', dir: 'auto'}, it.reference)); box.append(ref);
+  for (const a of Object.keys(it.replies).sort()) {
+    const r = el('div', {className: 'reply'});
+    r.append(el('b', {}, `Reply ${a}`));
+    r.append(el('div', {className: 'text', dir: 'auto'}, (it.replies[a] || '(empty)') + (it.cut[a] ? ' [cut]' : '')));
+    const c = el('div', {className: 'controls'});
+    c.append('Overall ', select(`${it.n}.${a}.overall`, [['', '-'], ...[1,2,3,4,5,6,7].map(v => [v, v])]));
+    c.append('Fails instruction ', select(`${it.n}.${a}.fails`, [['', '-'], ['0', 'no'], ['1', 'yes']]));
+    c.append('Incorrect ', select(`${it.n}.${a}.incorrect`, [['', 'n/a'], ['0', 'no'], ['1', 'yes']]));
+    const note = el('input', {type: 'text', placeholder: 'notes', value: store[`${it.n}.${a}.notes`] || ''});
+    note.oninput = () => { store[`${it.n}.${a}.notes`] = note.value; save(); }; c.append(note);
+    r.append(c); box.append(r);
+  }
+  root.append(box);
+}
+count();
+document.getElementById('dl').onclick = () => {
+  const q = v => '"' + String(v ?? '').replaceAll('"', '""') + '"';
+  const lines = [FIELDS.join(',')];
+  for (const it of items) for (const a of Object.keys(it.replies).sort())
+    lines.push([it.n, a, store[`${it.n}.${a}.overall`], store[`${it.n}.${a}.fails`], store[`${it.n}.${a}.incorrect`],
+      store[`${it.n}.${a}.notes`]].map(q).join(','));
+  const blob = new Blob([lines.join('\n') + '\n'], {type: 'text/csv'});
+  const link = el('a', {href: URL.createObjectURL(blob), download: 'scores.csv'}); link.click();
+};
+</script></body></html>

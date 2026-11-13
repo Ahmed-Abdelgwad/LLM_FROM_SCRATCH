@@ -1,0 +1,294 @@
+{
+  "models": [
+    "base-1337",
+    "full-1337",
+    "lora-1337"
+  ],
+  "prompts": {
+    "1": {
+      "pair_id": "aya-train-114329",
+      "variety": "egyptian",
+      "letters": {
+        "A": "base-1337",
+        "B": "full-1337",
+        "C": "lora-1337"
+      }
+    },
+    "2": {
+      "pair_id": "aya-train-171431",
+      "variety": "egyptian",
+      "letters": {
+        "A": "lora-1337",
+        "B": "base-1337",
+        "C": "full-1337"
+      }
+    },
+    "3": {
+      "pair_id": "aya-train-187013",
+      "variety": "egyptian",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "4": {
+      "pair_id": "aya-train-201219",
+      "variety": "egyptian",
+      "letters": {
+        "A": "base-1337",
+        "B": "full-1337",
+        "C": "lora-1337"
+      }
+    },
+    "5": {
+      "pair_id": "aya-train-27275",
+      "variety": "egyptian",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "6": {
+      "pair_id": "aya-train-79500",
+      "variety": "egyptian",
+      "letters": {
+        "A": "full-1337",
+        "B": "base-1337",
+        "C": "lora-1337"
+      }
+    },
+    "7": {
+      "pair_id": "aya-test-1447",
+      "variety": "english",
+      "letters": {
+        "A": "lora-1337",
+        "B": "base-1337",
+        "C": "full-1337"
+      }
+    },
+    "8": {
+      "pair_id": "aya-test-185",
+      "variety": "english",
+      "letters": {
+        "A": "base-1337",
+        "B": "full-1337",
+        "C": "lora-1337"
+      }
+    },
+    "9": {
+      "pair_id": "aya-test-385",
+      "variety": "english",
+      "letters": {
+        "A": "full-1337",
+        "B": "base-1337",
+        "C": "lora-1337"
+      }
+    },
+    "10": {
+      "pair_id": "aya-test-45",
+      "variety": "english",
+      "letters": {
+        "A": "full-1337",
+        "B": "base-1337",
+        "C": "lora-1337"
+      }
+    },
+    "11": {
+      "pair_id": "aya-test-636",
+      "variety": "english",
+      "letters": {
+        "A": "base-1337",
+        "B": "full-1337",
+        "C": "lora-1337"
+      }
+    },
+    "12": {
+      "pair_id": "aya-test-768",
+      "variety": "english",
+      "letters": {
+        "A": "base-1337",
+        "B": "full-1337",
+        "C": "lora-1337"
+      }
+    },
+    "13": {
+      "pair_id": "aya-train-10292",
+      "variety": "english",
+      "letters": {
+        "A": "lora-1337",
+        "B": "full-1337",
+        "C": "base-1337"
+      }
+    },
+    "14": {
+      "pair_id": "aya-train-107296",
+      "variety": "english",
+      "letters": {
+        "A": "full-1337",
+        "B": "base-1337",
+        "C": "lora-1337"
+      }
+    },
+    "15": {
+      "pair_id": "aya-train-119007",
+      "variety": "english",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "16": {
+      "pair_id": "aya-train-167836",
+      "variety": "english",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "17": {
+      "pair_id": "aya-train-7677",
+      "variety": "english",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "18": {
+      "pair_id": "aya-train-96073",
+      "variety": "english",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "19": {
+      "pair_id": "aya-test-1672",
+      "variety": "msa",
+      "letters": {
+        "A": "full-1337",
+        "B": "base-1337",
+        "C": "lora-1337"
+      }
+    },
+    "20": {
+      "pair_id": "aya-test-478",
+      "variety": "msa",
+      "letters": {
+        "A": "full-1337",
+        "B": "lora-1337",
+        "C": "base-1337"
+      }
+    },
+    "21": {
+      "pair_id": "aya-train-118157",
+      "variety": "msa",
+      "letters": {
+        "A": "lora-1337",
+        "B": "base-1337",
+        "C": "full-1337"
+      }
+    },
+    "22": {
+      "pair_id": "aya-train-164410",
+      "variety": "msa",
+      "letters": {
+        "A": "base-1337",
+        "B": "full-1337",
+        "C": "lora-1337"
+      }
+    },
+    "23": {
+      "pair_id": "cidar-267",
+      "variety": "msa",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "24": {
+      "pair_id": "cidar-4047",
+      "variety": "msa",
+      "letters": {
+        "A": "base-1337",
+        "B": "full-1337",
+        "C": "lora-1337"
+      }
+    },
+    "25": {
+      "pair_id": "cidar-431",
+      "variety": "msa",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    },
+    "26": {
+      "pair_id": "cidar-6058",
+      "variety": "msa",
+      "letters": {
+        "A": "full-1337",
+        "B": "lora-1337",
+        "C": "base-1337"
+      }
+    },
+    "27": {
+      "pair_id": "cidar-7819",
+      "variety": "msa",
+      "letters": {
+        "A": "full-1337",
+        "B": "base-1337",
+        "C": "lora-1337"
+      }
+    },
+    "28": {
+      "pair_id": "cidar-8012",
+      "variety": "msa",
+      "letters": {
+        "A": "full-1337",
+        "B": "lora-1337",
+        "C": "base-1337"
+      }
+    },
+    "29": {
+      "pair_id": "cidar-9752",
+      "variety": "msa",
+      "letters": {
+        "A": "lora-1337",
+        "B": "base-1337",
+        "C": "full-1337"
+      }
+    },
+    "30": {
+      "pair_id": "cidar-9840",
+      "variety": "msa",
+      "letters": {
+        "A": "base-1337",
+        "B": "lora-1337",
+        "C": "full-1337"
+      }
+    }
+  },
+  "meta": {
+    "checkpoints": {
+      "base-1337": "runs/ablation-rope-swiglu/best.pt",
+      "full-1337": "runs/sft-full-seed1337/merged.pt",
+      "lora-1337": "runs/sft-lora-seed1337/merged.pt"
+    },
+    "seed": 0,
+    "max_new_tokens": 256,
+    "counts": {
+      "msa": 12,
+      "english": 12,
+      "egyptian": 6
+    },
+    "decoding": "greedy"
+  }
+}

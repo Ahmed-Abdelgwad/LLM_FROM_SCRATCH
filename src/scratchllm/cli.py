@@ -472,6 +472,56 @@ def sft_eval_command(
     typer.echo(f"report written to {out_dir / run_id}")
 
 
+@app.command("sft-rubric-sheet")
+def sft_rubric_sheet_command(
+    model: Annotated[
+        list[str], typer.Option("--model", help="NAME=CHECKPOINT, repeatable (2 to 8 models).")
+    ],
+    run_id: Annotated[str, typer.Option(help="Sheet folder; final-<name> is tracked.")],
+    tokenizer: Annotated[Path, typer.Option(help="The tokenizer file.")] = Path(
+        "artifacts/tokenizer/bpe-16k.json"
+    ),
+    data_dir: Annotated[Path, typer.Option(help="The fine-tuning splits.")] = Path(
+        "data/processed/sft"
+    ),
+    seed: Annotated[int, typer.Option(help="Seed of the prompt sample and reply order.")] = 0,
+    max_new_tokens: Annotated[int, typer.Option(help="Longest reply.")] = 256,
+    out_dir: Annotated[Path, typer.Option(help="Where sheets go.")] = Path("reports/sft"),
+    device: Annotated[str, typer.Option(help="auto, cpu or cuda.")] = "auto",
+) -> None:
+    """Make a blind human-scoring sheet: the same test prompts, several models' replies (D-041)."""
+    from scratchllm.finetune.rubric import DEFAULT_COUNTS, make_sheet, write_sheet
+    from scratchllm.tokenizer.tokenizer import Tokenizer
+    from scratchllm.training.checkpoint import load_model
+    from scratchllm.training.trainer import autocast_factory, resolve_device
+
+    dev = resolve_device(device)
+    autocast, _ = autocast_factory(dev, "auto")
+    paths = dict(m.split("=", 1) for m in model)
+    models = {name: load_model(Path(path), dev) for name, path in paths.items()}
+    items, key = make_sheet(
+        models, Tokenizer.load(tokenizer), data_dir, dev, autocast, seed=seed,
+        max_new_tokens=max_new_tokens, progress=typer.echo,
+    )  # fmt: skip
+    meta = {"checkpoints": paths, "seed": seed, "max_new_tokens": max_new_tokens,
+            "counts": DEFAULT_COUNTS, "decoding": "greedy"}  # fmt: skip
+    write_sheet(items, key, meta, out_dir / run_id)
+    typer.echo(f"sheet written to {out_dir / run_id}: open sheet.html; do not open key.json")
+
+
+@app.command("sft-rubric-score")
+def sft_rubric_score_command(
+    sheet_dir: Path,
+    scores: Annotated[
+        Path | None, typer.Option(help="The filled scores.csv (default: the sheet's).")
+    ] = None,
+) -> None:
+    """Unblind a filled rubric sheet: per-model scores and paired differences (D-041)."""
+    from scratchllm.finetune.rubric import render_summary, score_sheet
+
+    typer.echo(render_summary(score_sheet(sheet_dir, scores)))
+
+
 @app.command("chat")
 def chat_command(
     checkpoint: Path,
