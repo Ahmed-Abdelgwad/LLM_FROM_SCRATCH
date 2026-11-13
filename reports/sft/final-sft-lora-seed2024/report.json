@@ -1,0 +1,220 @@
+{
+  "checkpoint": "runs/sft-lora-seed2024/merged.pt",
+  "dropped_too_long": {
+    "english": 20,
+    "msa": 37
+  },
+  "generation": {
+    "egyptian": {
+      "empty_rate": 0.0,
+      "language_rate": 0.9615384615384616,
+      "looping_rate": 0.34615384615384615,
+      "mean_new_tokens": 124.26923076923077,
+      "replies": 26,
+      "stopped_rate": 0.5384615384615384
+    },
+    "english": {
+      "empty_rate": 0.0,
+      "language_rate": 1.0,
+      "looping_rate": 0.6266666666666667,
+      "mean_new_tokens": 129.82,
+      "replies": 150,
+      "stopped_rate": 0.6466666666666666
+    },
+    "msa": {
+      "empty_rate": 0.0,
+      "language_rate": 0.9933333333333333,
+      "looping_rate": 0.6666666666666666,
+      "mean_new_tokens": 159.28,
+      "replies": 150,
+      "stopped_rate": 0.42
+    }
+  },
+  "generation_settings": {
+    "decoding": "greedy",
+    "max_new_tokens": 256,
+    "per_variety": 150,
+    "seed": 0
+  },
+  "pairs": 1428,
+  "samples": {
+    "egyptian": [
+      {
+        "id": "aya-train-107714",
+        "prompt": "ايه العلاقة بين الجملتين دول، توافق - تناقض - مفيش علاقة:\n\nالجملة الأولى: رياض بيلبس بسرعة عشان ينزل جرى و يلحق الأتوبيس.\nالجملة التانية: رياض متأخر عن ميعاد ما.",
+        "reference": "خلينا نشوف كده مع بعض:\n\n- لو رياض مكنش وراه ميعاد متأخر عليه مكنش هينزل جرى عشان يلحق الأتوبيس.\n- الهرولة عامة سمة المتأخر.\n\nعشان كده ممكن نقول ان الجملة التانية علاقتها علاقة توافق بالجملة الأولى.",
+        "reply": "اللى بيحصل في الجملتين دول.",
+        "stopped": true
+      },
+      {
+        "id": "aya-train-114329",
+        "prompt": "ممكن تقولي أيه الفرق بين بروس ويليس و بروس واين.",
+        "reference": "بروس ويليس ممثل أمريكى مشهور من مواليد 19 مارس 1955 في مدينة ايدار-اوبرشتاين. حصل على جايزة الإيمي مرتين كأفضل ممثل رئيسي في مسلسل درامي سنة 1987 عن دوره في مسلسل ضوء القمر، وسنة 2000 جايزة ضيف الشرف البارز عن دورة في مسلسل الأصدقاء،و كمان حصل على جايزة الغولدن غلوب سنة 1987 كأفضل ممثل تلفزيوني في مسلسل كوميدي أو موسيقي عن دوره في مسلسل ضوء القمر.\n\nبوس واين هو شخصية خيالية بتمثل ملياردير و واحد من أكبر أقطاب الصناعة فى مدينة جوثام. بروس واين فى حياته الليلية بيقوم بدور باتمان أو الرجل الوطواط  عشان يحارب الجريمة ويحقق مع مجرمين عشان يحاول يمنع كوارث كتير فى مدينة جوثام. كان أول ظهور للشخصية في شهر مايو سنة 1939، ظهر في العدد رقم 27 من مجلة القصص المصورة ديتكتيف كومكس أو قصص المحققين.",
+        "reply": "بالتأكيد،\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "stopped": false
+      },
+      {
+        "id": "aya-train-115065",
+        "prompt": "اقرأ الكام جملة دول و بعدين جاوبلي على السؤال الي جاي:\n\nشوية أرانب كانوا بيعبروا الطريق السريع. مصطفى كان سايق براحته و أخر حاجة كان ممكن يتوقعها هى أرنب على الطريق. يا دوبك قدر يفرمل على أخر أرنب فيهم. الأرنب وقف و بص له و بعدين كمل جرى مع باقى الجماعة. مصطفى كمل طريقه و ما زال مستغرب ايه جابهم فى طريقه النهاردة.\n\nالسؤال: جملة \"بص له\" دي بتعود على مين؟ و ايه نوع العربية اللى كان مصطفى راكبها؟",
+        "reference": "أنا يسعدنى أجاوبك على الأسئلة دى.\n\n- بالنسبة لأو حته فالسؤال، فجملة \"بص له\" بتتكلم علي بصة الأرنب لمصطفى، علشان كده \"له\" هنا بتتكلم على مصطفى.\n- نيجى دلوقتى للحتة التانية من السؤال، للأسف مقدرش أقولك نوع العربية اللى مصطفى كان راكبها لأن الحوار ده متقالتش فى الكام الجملة الي فاتوا.",
+        "reply": "\"بص له\" دي بتعود على الطريق.",
+        "stopped": true
+      },
+      {
+        "id": "aya-train-135276",
+        "prompt": "اتلانتيك ليه؟ وبالنظر للسؤال السابق، اكتب سياق يحتوي على الإجابة. ممكن يكون من 1 - 20 جملة. السياق:",
+        "reference": "خلال منتصف العصر الايوسيني، بيعتقد إن حوض الصرف الصحي في الأمازون تم تقسيمه على طول وسط القارة بواسطة قوس بوروس. المياه في الجانب الشرقي تتدفق باتجاه المحيط الأطلسي، في حين تتدفق المياه في الغرب باتجاه المحيط الهادئ عبر حوض الأمازون. ومع ذلك ، مع ارتفاع جبال الأنديز ، تم إنشاء حوض كبير محاط بحيرة ؛ المعروف الآن باسم حوض سوليمونز. في خلال 5  10 مليون سنة الأخيرة، حطم المياه المتراكمة دي خلال قوس بوروس، و انضم للتدفق الشرقي باتجاه المحيط الأطلسي.",
+        "reply": "الذين يشاهدون في الموضوع الآن: 1 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 - 3 -",
+        "stopped": false
+      },
+      {
+        "id": "aya-train-141502",
+        "prompt": "ممكن تقولي أيه الفرق بين بروس ويليس و بروس واين.",
+        "reference": "بروس ويليس ممثل أمريكى مشهور من مواليد 19 مارس 1955 فى ايدار-اوبرشتاين. حصل على جايزة الإيمي مرتين كأفضل ممثل رئيسي في مسلسل درامي سنة 1987 عن دوره في مسلسل ضوء القمر، وسنة 2000 جايزة ضيف الشرف البارز عن دوره في مسلسل الأصدقاء، كمان حصل على جايزة الغولدن غلوب سنة 1987 كأفضل ممثل تلفزيوني في مسلسل كوميدي أو موسيقي عن دوره في مسلسل ضوء القمر.\n\nبوس واين هو شخصية خيالية بتمثل ملياردير و واحد من أكبر أقطاب الصناعة فى مدينة جوثام. بروس واين فى حياته الليلية بيقوم بدور باتمان أو الرجل الوطواط  عشان يحارب الجريمة ويحقق مع مجرمين عشان يحاول يمنع كوارث كتير فى مدينة جوثام. كان أول ظهور للشخصية في شهر مايو سنة 1939، ظهر في العدد رقم 27 من مجلة القصص المصورة ديتكتيف كومكس أو قصص المحققين.",
+        "reply": "بالتأكيد،\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "stopped": false
+      },
+      {
+        "id": "aya-train-163976",
+        "prompt": "اديني مثال على معلومة في الفئة دي: ألعاب الفيديو",
+        "reference": "فى حوالى 8 خصوم بيحاربوا ميجامان فى كل لعبة.",
+        "reply": "أحد أفضل ألعاب الفيديو في الفئة دي: ألعاب الفيديو.",
+        "stopped": true
+      }
+    ],
+    "english": [
+      {
+        "id": "aya-test-1003",
+        "prompt": "Predict the dependency parsing of the following statement:\n\"I love apples\"\n",
+        "reference": "In this dependency parse tree, \"love\" is the root of the sentence, indicating that it is the main verb. \"I\" is the subject of the sentence, and \"apples\" is the direct object of the verb \"love.\" ",
+        "reply": "The fact that the notion of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning of the word \"I love\" and the meaning of the word \"I love\" is the meaning",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1032",
+        "prompt": "Question: What will happen if all the deers are killed in the given food chain?\n\nGrass — Deer — Lion\n\n\na. The population of Lion increases\nb. The population of grass decreases\nc. The population of Lion decreases and grass increases\nd. The population of Lion remains unchanged\n\nAnswer:",
+        "reference": "Answer: (c)\n\nIf all the deer are killed in the given food chain, there won’t be any food available for the lions. Hence, the lions will starve to death and their population will decrease. On the other hand, there won’t be any consumers of grass hence, its population would increase.",
+        "reply": "The population of Lion is the population of Lion.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1081",
+        "prompt": "Explain the types of projects in COCOMO 81.",
+        "reference": "COCOMO 81 distinguishes among Organic (small teams), Semi-Detached (mixed experience), and Embedded (tight constraints) projects.",
+        "reply": "COCOMO 81.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1106",
+        "prompt": "How does DevOps contribute to the software development process?\n\n",
+        "reference": "DevOps combines development and operations, promoting collaboration and automation to achieve faster development cycles, continuous integration, and continuous deployment.",
+        "reply": "The software development process is a process that is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process is used to identify the software development process, and the software development process can be used to identify the software development process, and the software development process can be used to identify the software development process",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1112",
+        "prompt": "How is Buddhism practiced in Sri Lanka, and what are some important Buddhist sites?",
+        "reference": "Buddhism plays a central role in Sri Lankan culture and daily life. Theravada Buddhism is the predominant practice, influencing rituals, customs, and festivals. The Temple of the Tooth Relic in Kandy is a revered site, housing the sacred tooth relic of Buddha. Anuradhapura, an ancient capital, features the Sri Maha Bodhi, a sacred fig tree believed to be a descendant of the Bodhi tree under which Buddha attained enlightenment. The ancient rock cave temples of Dambulla showcase intricate murals and statues. Adam's Peak, a pilgrimage site, draws devotees with the belief that Buddha left his footprint atop the mountain.",
+        "reply": "Buddhist sites are also known as Buddhist sites, which are known as Buddhist sites. The Buddhist sites are known as Buddhist sites, which are known as Buddhist sites, which are known as Buddhist sites. The Buddhist sites are known as Buddhist sites, which are known as Buddhist sites, which are known as Buddhist sites. The Buddhist sites are known as Buddhist sites, which are known as Buddhist sites, which are known as Buddhist sites. The Buddhist sites are known as Buddhist sites, which are known as Buddhist sites, which are known as Buddhist sites. The Buddhist sites are known as Buddhist sites, which are known as Buddhist sites, which are known as Buddhist sites. The Buddhist sites are known as Buddhist sites, which are known as Buddhist sites, which are known as Buddhist sites.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1135",
+        "prompt": "The \"Technical Skills\" secition is is not included in the top of the resume.\n\nis there any grammatical error?",
+        "reference": "Yes, there is a minor grammatical error in your sentence. It should be:\n\n\"The 'Technical Skills' section is not included at the top of the resume.\"\n\nIn this corrected sentence, I removed the double \"is\" for better clarity and grammatical correctness.",
+        "reply": "The \"Technical Skills\" security is the most commonly used in the design of the resume.",
+        "stopped": true
+      }
+    ],
+    "msa": [
+      {
+        "id": "aya-test-1",
+        "prompt": "قم بإنشاء قصيدة عتاب من بحر الطويل.",
+        "reference": "وَلَمّا بَدا لي أَنَّ ما كُنتُ أَرتَجي\nمِنَ الأَمرِ وَلّى بَعدَما قُلتُ أَقبَلا\nتَلَوَّمتُ بَينَ اللَومِ وَالعُذرِ ساعَةً\nكَذي الوِردِ يُرمى قَبلَ أَن يَتَبَدَّلا\nفَلَمّا رَأَيتُ الحِلمَ قَد طارَ طَيرَةً\nوَلَم أَرَ إِلّا أَن أَلومَ وَأَعذُلا\nرَجَعتُ أُوَلّي عاثِرَ الجَدِّ لَومَها\nفَلا قامَ بَينَ العاثِرينَ وَلا عَلا\nأُلَعِّنُهُ مُستَثنِياً مِن عِنانِهِ\nكَرَدِّكَ في الغِمدِ الكَهامَ المُفَلَّلا\nوَأَعفَيتُ مِن لَومي اِمرَأً ما وَجَدتُهُ\nمُليماً وَلا باباً عَنِ الجودِ مُقفَلا\nلِجَدّي إِذاً بِاللَومِ أَولى مِنَ الحَيا\nوَمَن ذا يَلومُ العارِضَ المُتَهَلِّلا",
+        "reply": "أجمل قصائد عتاب من بحر الطويل\nأجمل قصائد عتاب من بحر الطويل\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب من بحرية\nأجمل قصائد عتاب",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1008",
+        "prompt": "أريد إنشاء قصيدة حزينة من بحر المنسرح. هل يمكنك مساعدتي؟",
+        "reference": "خُذها سُطوراً إِلَيكَ قَد بُعِثَت\nتَروم للنَفس ما يُعللها\nفي طَي بيضا ظَلَت مِن وَلَهٍ\nفيكَ بِأَيدي اللحاظ أَصقلها\nأَكتُبها وَالدُموع تَنقطها\nبِعبرة لا أَزال أُهملها\nلَو كانَ ظَني إِذا بصرت بِها\nنِيابة عَن فَمي تقبلها\nلَرحت شَوقاً إِلَيكَ مُنَدرِجاً\nفي طَيِها وَالنَسيم يَحملها",
+        "reply": "أريد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أجد أن أ",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1082",
+        "prompt": "ما أثر ذلك على الأغذية والإنتاج الغذائي في البلد المتضرر؟",
+        "reference": "إن أثر النشاط الإشعاعي على الأغذية والإنتاج الغذائي في بلد متضرر من طارئة إشعاعية أو نووية سيتوقف على أنواع النويدات المشعة ومقدار الإشعاع المترسب أو المنتشر في مكان إنتاج الأغذية أو حصادها. وعلى الرغم من أن وجود اليود المشع في الأغذية يشكل مصدر قلق فوري عقب حدوث طارئة نووية، إلا أنه لن يمثل أي مشكلة للاستهلاك على المدى الطويل لأن العمر النصفي لذلك اليود قصير نسبيا ولأنه سيتحلل بشكل طبيعي خلال فترة زمنية قصيرة. وعلى النقيض من ذلك، يمكن أن يستديم السيزيوم المشع في البيئة لسنوات عديدة وأن يظل يمثل مشكلة طويلة الأجل لإنتاج الأغذية وتجارتها، وخطراً على صحة الإنسان.",
+        "reply": "الأنواع الغذائية والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة والأطعمة",
+        "stopped": false
+      },
+      {
+        "id": "aya-test-1084",
+        "prompt": "ما هي الألياف البصرية؟",
+        "reference": "تعرف الألياف البصرية او الضوئية بأنها التقّنية المرّتبطة بنقل البيانات باستخدام نبضات ضوئيّة تنتقل جنبًا إلى جنب مع ألياف طويلة مصنوعة عادةً من البلاستيك أو الزجاج، وقد تمّ تصميمها بِحيّث تُسهِل انتشار الضوء مع الألياف الضوئيّة اعتمادا على مُتطلّبات الطّاقة ومسافة الإرسال، وتُفضّل الأسلاك المعدنيّة للإرسال في اتصالات الألياف الضوئيّة حيث تنتقل الإشارات بأضرار أقل ولا تتأثر بالتّداخل الكهرومغناطيسي. ",
+        "reply": "الحيوان البصرية هو الألياف البصرية.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1098",
+        "prompt": "كمل الفقرة:\n\nعلى أن الخليفة عثمان بن عفان (ت 35هـ/656م) لم يكن أقل حذرًا من عمر في ركوب البحر؛ فحين أرسل إليه واليه على الشام معاوية بن أبي سفيان (ت 60هـ/681م) يستأذنه في غزو قبرص سنة 27هـ/649م ويهوّن عليه أمرها -كما",
+        "reference": "فعل مع الخليفة عمر الذي رفض طلبه- أجابه عثمان بشروط قائلا: \"فإن ركبتَ البحرَ ومعكَ امرأتك فاركبه مأذونًا لك، وإلا فلا..؛ خيّرهم (= جنوده) فمن اختار الغزو طائعًا فاحمله وأعنْه\"؛ كما يروي البلاذري (ت 279هـ/892م) في ‘فتوح البلدان‘.",
+        "reply": "أكثر من عمر في غزو قبرص سنة 139ه/748م.",
+        "stopped": true
+      },
+      {
+        "id": "aya-test-1120",
+        "prompt": "اكمل الجملة التالية:\n\nوهو ما قد يُسبب حالة من الشعور بالذنب، لا تخلو من تداعيات جسدية ونفسية لدى الأشخاص",
+        "reference": "المشغولين لدرجة لا تُمكّنهم من ممارسة الرياضة بشكل منتظم، وبالكاد يستطيعون ممارستها في عطلة نهاية الأسبوع فقط.",
+        "reply": "الذنب هي حالة من القلق، لا تُسبب في حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في التنفس، أو عدم حدوث أي مشاكل في",
+        "stopped": false
+      }
+    ]
+  },
+  "split": "test",
+  "teacher_forced": {
+    "egyptian": {
+      "bits_per_char": 1.8934784797075932,
+      "loss": 4.428141817002849,
+      "pairs": 26
+    },
+    "english": {
+      "bits_per_char": 1.303335390093828,
+      "loss": 3.021942069238213,
+      "pairs": 405
+    },
+    "msa": {
+      "bits_per_char": 1.787944242897533,
+      "loss": 3.9990924510815082,
+      "pairs": 940
+    }
+  },
+  "teacher_forced_groups": {
+    "msa_aya": {
+      "msa": {
+        "bits_per_char": 2.0172115391609196,
+        "loss": 4.148169889752511,
+        "pairs": 461
+      }
+    },
+    "msa_cidar": {
+      "msa": {
+        "bits_per_char": 1.657003755814479,
+        "loss": 3.9015940017298374,
+        "pairs": 479
+      }
+    },
+    "official_aya_test": {
+      "english": {
+        "bits_per_char": 1.250689215936962,
+        "loss": 2.9409304515204058,
+        "pairs": 238
+      },
+      "msa": {
+        "bits_per_char": 2.0583092256711817,
+        "loss": 4.19088934205901,
+        "pairs": 233
+      }
+    }
+  }
+}

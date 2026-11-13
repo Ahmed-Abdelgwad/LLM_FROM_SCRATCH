@@ -1,0 +1,465 @@
+# Fine-tuning evaluation: runs/sft-lora-seed1337/merged.pt
+
+| Variety | Test pairs | Response bits/char | Stopped | Right language | Empty | Looping | Mean new tokens |
+|---|---|---|---|---|---|---|---|
+| msa | 940 | 1.786 | 53% | 95% | 0% | 56% | 134 |
+| egyptian | 26 | 1.898 | 46% | 96% | 0% | 54% | 144 |
+| english | 405 | 1.304 | 69% | 100% | 0% | 57% | 122 |
+
+## Samples (greedy)
+
+### msa
+- **Prompt:** قم بإنشاء قصيدة عتاب من بحر الطويل.
+  - **Reference:** وَلَمّا بَدا لي أَنَّ ما كُنتُ أَرتَجي
+مِنَ الأَمرِ وَلّى بَعدَما قُلتُ أَقبَلا
+تَلَوَّمتُ بَينَ اللَومِ وَالعُذرِ ساعَةً
+كَذي الوِردِ يُرمى قَبلَ أَن يَتَبَدَّلا
+فَلَمّا رَأَيتُ الحِلمَ قَد طارَ طَير
+  - **Reply:** الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الشروق:
+
+الش [cut]
+- **Prompt:** أريد إنشاء قصيدة حزينة من بحر المنسرح. هل يمكنك مساعدتي؟
+  - **Reference:** خُذها سُطوراً إِلَيكَ قَد بُعِثَت
+تَروم للنَفس ما يُعللها
+في طَي بيضا ظَلَت مِن وَلَهٍ
+فيكَ بِأَيدي اللحاظ أَصقلها
+أَكتُبها وَالدُموع تَنقطها
+بِعبرة لا أَزال أُهملها
+لَو كانَ ظَني إِذا بصرت بِها
+نِياب
+  - **Reply:** أريد أن أذهب إلى هذه القصيدة.
+- **Prompt:** ما أثر ذلك على الأغذية والإنتاج الغذائي في البلد المتضرر؟
+  - **Reference:** إن أثر النشاط الإشعاعي على الأغذية والإنتاج الغذائي في بلد متضرر من طارئة إشعاعية أو نووية سيتوقف على أنواع النويدات المشعة ومقدار الإشعاع المترسب أو المنتشر في مكان إنتاج الأغذية أو حصادها. وعلى الرغ
+  - **Reply:** الزراعة هي:
+
+1.
+2.
+2.
+3.
+3.
+4.
+4.
+5.
+5.
+5.
+6.
+6.
+6.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7 [cut]
+- **Prompt:** ما هي الألياف البصرية؟
+  - **Reference:** تعرف الألياف البصرية او الضوئية بأنها التقّنية المرّتبطة بنقل البيانات باستخدام نبضات ضوئيّة تنتقل جنبًا إلى جنب مع ألياف طويلة مصنوعة عادةً من البلاستيك أو الزجاج، وقد تمّ تصميمها بِحيّث تُسهِل انتشا
+  - **Reply:** الألياف البصرية هي الألياف البصرية.
+- **Prompt:** كمل الفقرة:
+
+على أن الخليفة عثمان بن عفان (ت 35هـ/656م) لم يكن أقل حذرًا من عمر في ركوب البحر؛ فحين أرسل إليه واليه على الشام معاوية بن أبي سفيان (ت 60هـ/681م) يستأذنه في غزو قبرص سنة 27هـ/649م ويهوّن
+  - **Reference:** فعل مع الخليفة عمر الذي رفض طلبه- أجابه عثمان بشروط قائلا: "فإن ركبتَ البحرَ ومعكَ امرأتك فاركبه مأذونًا لك، وإلا فلا..؛ خيّرهم (= جنوده) فمن اختار الغزو طائعًا فاحمله وأعنْه"؛ كما يروي البلاذري (ت 27
+  - **Reply:** النهب:
+
+أثناء صلاة الفجر، قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال:
+
+قال: [cut]
+- **Prompt:** اكمل الجملة التالية:
+
+وهو ما قد يُسبب حالة من الشعور بالذنب، لا تخلو من تداعيات جسدية ونفسية لدى الأشخاص
+  - **Reference:** المشغولين لدرجة لا تُمكّنهم من ممارسة الرياضة بشكل منتظم، وبالكاد يستطيعون ممارستها في عطلة نهاية الأسبوع فقط.
+  - **Reply:** إذا كان هناك أي شيء آخر، يجب أن يكون هناك أي شيء آخر،
+إذا كان هناك أي شيء آخر، يجب أن يكون هناك أي شيء آخر،
+إذا كان هناك أي شيء آخر، يجب أن يكون هناك أي شيء آخر.
+
+### egyptian
+- **Prompt:** ايه العلاقة بين الجملتين دول، توافق - تناقض - مفيش علاقة:
+
+الجملة الأولى: رياض بيلبس بسرعة عشان ينزل جرى و يلحق الأتوبيس.
+الجملة التانية: رياض متأخر عن ميعاد ما.
+  - **Reference:** خلينا نشوف كده مع بعض:
+
+- لو رياض مكنش وراه ميعاد متأخر عليه مكنش هينزل جرى عشان يلحق الأتوبيس.
+- الهرولة عامة سمة المتأخر.
+
+عشان كده ممكن نقول ان الجملة التانية علاقتها علاقة توافق بالجملة الأولى.
+  - **Reply:** اللى بيحصل في نفس الوقت.
+- **Prompt:** ممكن تقولي أيه الفرق بين بروس ويليس و بروس واين.
+  - **Reference:** بروس ويليس ممثل أمريكى مشهور من مواليد 19 مارس 1955 في مدينة ايدار-اوبرشتاين. حصل على جايزة الإيمي مرتين كأفضل ممثل رئيسي في مسلسل درامي سنة 1987 عن دوره في مسلسل ضوء القمر، وسنة 2000 جايزة ضيف الشرف 
+  - **Reply:** الاسم:
+- اسمحوا:
+- اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: ا [cut]
+- **Prompt:** اقرأ الكام جملة دول و بعدين جاوبلي على السؤال الي جاي:
+
+شوية أرانب كانوا بيعبروا الطريق السريع. مصطفى كان سايق براحته و أخر حاجة كان ممكن يتوقعها هى أرنب على الطريق. يا دوبك قدر يفرمل على أخر أرنب فيه
+  - **Reference:** أنا يسعدنى أجاوبك على الأسئلة دى.
+
+- بالنسبة لأو حته فالسؤال، فجملة "بص له" بتتكلم علي بصة الأرنب لمصطفى، علشان كده "له" هنا بتتكلم على مصطفى.
+- نيجى دلوقتى للحتة التانية من السؤال، للأسف مقدرش أقولك 
+  - **Reply:** هو ده اللى كان بيشتغل على الطريق.
+- **Prompt:** اتلانتيك ليه؟ وبالنظر للسؤال السابق، اكتب سياق يحتوي على الإجابة. ممكن يكون من 1 - 20 جملة. السياق:
+  - **Reference:** خلال منتصف العصر الايوسيني، بيعتقد إن حوض الصرف الصحي في الأمازون تم تقسيمه على طول وسط القارة بواسطة قوس بوروس. المياه في الجانب الشرقي تتدفق باتجاه المحيط الأطلسي، في حين تتدفق المياه في الغرب باتجا
+  - **Reply:** الخطوة:
+
+1.
+2.
+2.
+3.
+3.
+4.
+4.
+4.
+5.
+5.
+5.
+6.
+6.
+6.
+6.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7.
+7 [cut]
+- **Prompt:** ممكن تقولي أيه الفرق بين بروس ويليس و بروس واين.
+  - **Reference:** بروس ويليس ممثل أمريكى مشهور من مواليد 19 مارس 1955 فى ايدار-اوبرشتاين. حصل على جايزة الإيمي مرتين كأفضل ممثل رئيسي في مسلسل درامي سنة 1987 عن دوره في مسلسل ضوء القمر، وسنة 2000 جايزة ضيف الشرف البارز
+  - **Reply:** الاسم:
+- اسمحوا:
+- اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: اسمحوا: ا [cut]
+- **Prompt:** اديني مثال على معلومة في الفئة دي: ألعاب الفيديو
+  - **Reference:** فى حوالى 8 خصوم بيحاربوا ميجامان فى كل لعبة.
+  - **Reply:** اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: لعبة الفيديو
+اللعبة دي: ل [cut]
+
+### english
+- **Prompt:** Predict the dependency parsing of the following statement:
+"I love apples"
+
+  - **Reference:** In this dependency parse tree, "love" is the root of the sentence, indicating that it is the main verb. "I" is the subject of the sentence, and "apples" is the direct object of the verb "love." 
+  - **Reply:** The following statement is "I love"
+- **Prompt:** Question: What will happen if all the deers are killed in the given food chain?
+
+Grass — Deer — Lion
+
+
+a. The population of Lion increases
+b. The population of grass decreases
+c. The population of Lio
+  - **Reference:** Answer: (c)
+
+If all the deer are killed in the given food chain, there won’t be any food available for the lions. Hence, the lions will starve to death and their population will decrease. On the other
+  - **Reply:** The population of Lion decreases in the number of Lion decreases in the number of Lion decreases.
+
+The population of Lion decreases in the number of Lion decreases in the number of Lion decreases in the number of Lion decreases in the number of Lion decreases in the number of Lion decreases in the n [cut]
+- **Prompt:** Explain the types of projects in COCOMO 81.
+  - **Reference:** COCOMO 81 distinguishes among Organic (small teams), Semi-Detached (mixed experience), and Embedded (tight constraints) projects.
+  - **Reply:** COCOMO 81 is a key component of the project.
+- **Prompt:** How does DevOps contribute to the software development process?
+
+
+  - **Reference:** DevOps combines development and operations, promoting collaboration and automation to achieve faster development cycles, continuous integration, and continuous deployment.
+  - **Reply:** The software development process is a process that is used to control the software development process. It is used to control the software development process, allowing the software to be used to control the software development process.
+- **Prompt:** How is Buddhism practiced in Sri Lanka, and what are some important Buddhist sites?
+  - **Reference:** Buddhism plays a central role in Sri Lankan culture and daily life. Theravada Buddhism is the predominant practice, influencing rituals, customs, and festivals. The Temple of the Tooth Relic in Kandy 
+  - **Reply:** Sri Lanka is a popular culture that is a popular culture. It is a popular culture that is a popular culture that is a popular culture. It is a popular culture that is a popular culture that is a popular culture that is a popular culture. It is a popular culture that is a popular culture that is a po
+- **Prompt:** The "Technical Skills" secition is is not included in the top of the resume.
+
+is there any grammatical error?
+  - **Reference:** Yes, there is a minor grammatical error in your sentence. It should be:
+
+"The 'Technical Skills' section is not included at the top of the resume."
+
+In this corrected sentence, I removed the double "i
+  - **Reply:** The "Technical Skills" security is a key component of the resume.
+

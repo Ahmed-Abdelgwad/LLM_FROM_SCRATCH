@@ -35,3 +35,7 @@ reports/tokenizer/*
 # Evaluation reports: same rule
 reports/eval/*
 !reports/eval/final-*/
+
+# Fine-tuning reports: same rule
+reports/sft/*
+!reports/sft/final-*/
