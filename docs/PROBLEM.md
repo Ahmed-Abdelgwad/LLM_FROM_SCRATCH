@@ -20,7 +20,7 @@ column says what exists, and the decision log entries hold the evidence.
 | 1 | Arabic-aware normalization + a bilingual BPE tokenizer trained on our own data | **Built** (D-013 to D-016). Normalization is deliberately light: it keeps spelling variants (D-006). Fertility is measured against GPT-2 and Qwen3. |
 | 2 | A modern decoder-only transformer (RMSNorm, RoPE, GQA, SwiGLU, KV cache) written from scratch | **Mostly.** The default is still the GPT-2 architecture of the book (D-018, D-019); RMSNorm, rotary embeddings and SwiGLU are built as config switches (D-027) and, all three together scored lower than it at 5,000 steps on the trained languages in two seeds, not on the unseen Moroccan Wikipedia (D-028, D-029). The reference architecture is rotary embeddings + SwiGLU + LayerNorm, `configs/reference-17m.yaml` (RMSNorm was tested and dropped, D-035, D-036); a KV cache is built for generation (D-030); GQA is **not built**; each further change is an ablation judged by bits per character (D-007, D-023), not a given. |
 | 3 | Resumable pretraining (mixed precision, gradient accumulation, checkpointing) | **Built** (D-020): bfloat16, accumulation, clipping, warmup and cosine schedule, atomic checkpoints, exact resume, JSON-lines log. Only a 1,500-step pilot has been trained (D-021). |
-| 4 | LoRA/SFT to turn the base model into a chat model | **Not built.** `finetune/` is empty. |
+| 4 | LoRA/SFT to turn the base model into a chat model | **Built** (D-038 to D-040): full fine-tuning and LoRA from scratch, on Aya and CIDAR. Replies come in the prompt's language and often stop, but most answers are wrong at this size; full fine-tuning answers better and forgets more of the pretraining, LoRA the reverse. Neither passes all four registered criteria. |
 | 5 | Typed YAML configs, unit tests and CI so every number in this repo can be reproduced | **Configs and tests built** (typed, unknown keys refused; over 500 tests, mutation-checked). **CI exists but has not run on this code:** the workflow triggers on pushes to `main` while the branch is `master`, it installs the CUDA build of torch, and nothing has been pushed yet. |
 
 Also built, as the plan required before any training: the data pipeline (sampling with manifests,
@@ -61,7 +61,7 @@ comparisons must use bits-per-character (or bits-per-byte) instead.
 | Tokenizer round trip | Tested, and 0 failures on 2,700 real documents (D-015). |
 | Throughput and peak VRAM | Measured on the RTX 3050 (D-019, D-020). |
 | Qualitative samples | Six prompts in Modern Standard, Egyptian and English (D-022, D-023): fluent surface; after 5,000 steps a first sentence can make sense, but there is no coherence over several sentences and greedy decoding loops. |
-| SFT rubric | Not applicable yet. |
+| SFT rubric | Not scored. Automatic measures (response bits per character, stop rate, language, looping) and samples on a held-out test split are in `reports/sft/final-sft-*` (D-040); the human rubric is still to do. |
 | Reproducibility | A resumed run is bit-identical to an uninterrupted one on CPU (tested) and in the one GPU trial made (D-020). A clean-checkout reproduction of a full run has not been done. |
 
 ## Rules for credible claims

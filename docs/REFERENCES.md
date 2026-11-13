@@ -1,8 +1,8 @@
 # References
 
 The research papers and books behind this repository, what each one supports, and where in the
-code it is used. Line numbers refer to the code as of 2026-11-11 (commit `9b4ba51` plus the
-uncommitted `finetune/chat.py`).
+code it is used. Line numbers refer to the code as of 2026-11-11 (commit `9b4ba51`); the fine-tuning rows
+were updated on 2026-11-13.
 
 **How this list was checked.** Every technique was located in the code first, then matched to the
 paper that introduced it. Each arXiv identifier was resolved on 2026-11-11 through the Semantic
@@ -17,8 +17,8 @@ and each entry says where it departs.
 1. **Implemented and cited.** The code names the paper in a docstring or comment.
 2. **Implemented, not cited.** The code does what the paper describes, but nothing in the
    repository names it. These are the gaps a reader would expect to see filled.
-3. **Planned or in progress.** Item 4 (LoRA/SFT) and the GQA part of item 2 in
-   [PROBLEM.md](PROBLEM.md).
+3. **Fine-tuning, and planned work.** Item 4 (LoRA/SFT) of [PROBLEM.md](PROBLEM.md), built in D-038 to
+   D-040, and the GQA part of item 2, not built.
 
 ## 1. Implemented and cited
 
@@ -92,15 +92,15 @@ These are used and named in the code, but no one paper introduced them, so none 
 - **Bits per character** for comparing models across tokenizers, [training/batches.py:181](../src/scratchllm/training/batches.py#L181) (D-007, D-023).
 - **Learning-rate warmup** and **temperature sampling**.
 
-## 3. Planned or in progress
+## 3. Fine-tuning, and planned work
 
 | Paper | Link | What it would support | State |
 |---|---|---|---|
-| Hu et al. *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR 2022 | [arXiv:2106.09685](https://arxiv.org/abs/2106.09685) | Fine-tuning through a trainable low-rank change beside frozen weights, B initialized at zero so training starts from the base model | **Not built.** [PROBLEM.md](PROBLEM.md) item 4. `src/scratchllm/finetune/lora.py` does not exist |
-| Ouyang et al. *Training Language Models to Follow Instructions with Human Feedback* (InstructGPT). NeurIPS 2022 | [arXiv:2203.02155](https://arxiv.org/abs/2203.02155) | Supervised fine-tuning on demonstrations, the first of its three stages; its observation that SFT "overfit[s] on validation loss after 1 epoch" (section 3.5). The paper does not say whether the prompt is masked from the loss, so it is not the source of that choice. The reward model and RL stages are not planned | **In progress, uncommitted.** [finetune/chat.py](../src/scratchllm/finetune/chat.py) |
-| Shi et al. *Instruction Tuning With Loss Over Instructions.* NeurIPS 2024 | [arXiv:2405.14394](https://arxiv.org/abs/2405.14394) | The two losses: on the response only (their equation 2, used here) and on prompt and response without the template tokens (equation 4). They find the second helps most with short outputs or few examples | **In progress, uncommitted.** The loss mask in [finetune/chat.py](../src/scratchllm/finetune/chat.py) |
-| Singh et al. *Aya Dataset: An Open-Access Collection for Multilingual Instruction Tuning.* ACL 2024 | [arXiv:2402.06619](https://arxiv.org/abs/2402.06619), [dataset](https://huggingface.co/datasets/CohereLabs/aya_dataset) | SFT data: human-written, Apache 2.0. The Standard Arabic, Egyptian and English subsets are used; the Moroccan subset is not (median response 19 characters) | **In progress** |
-| Alyafeai et al. *CIDAR: Culturally Relevant Instruction Dataset For Arabic.* ACL 2024 | [arXiv:2402.03177](https://arxiv.org/abs/2402.03177), [dataset](https://huggingface.co/datasets/arbml/CIDAR) | SFT data replacing Aya's Moroccan subset: 10,000 Arabic pairs, an Alpaca subset translated with ChatGPT plus 891 native grammar questions, all reviewed by people. Card license Apache 2.0; the Alpaca source is CC BY-NC 4.0 | **In progress** |
+| Hu et al. *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR 2022 | [arXiv:2106.09685](https://arxiv.org/abs/2106.09685) | Fine-tuning through a trainable low-rank change beside frozen weights, B initialized at zero so training starts from the base model | **Built** (D-039, D-040). [finetune/lora.py](../src/scratchllm/finetune/lora.py): A Kaiming-uniform as in Microsoft's `loralib` (the paper says Gaussian); per-slice adapters for the fused qkv map, like `loralib.MergedLinear` |
+| Ouyang et al. *Training Language Models to Follow Instructions with Human Feedback* (InstructGPT). NeurIPS 2022 | [arXiv:2203.02155](https://arxiv.org/abs/2203.02155) | Supervised fine-tuning on demonstrations, the first of its three stages; its observation that SFT "overfit[s] on validation loss after 1 epoch" (section 3.5). The paper does not say whether the prompt is masked from the loss, so it is not the source of that choice. The reward model and RL stages are not planned | **Used** (D-039). [finetune/trainer.py](../src/scratchllm/finetune/trainer.py) |
+| Shi et al. *Instruction Tuning With Loss Over Instructions.* NeurIPS 2024 | [arXiv:2405.14394](https://arxiv.org/abs/2405.14394) | The two losses: on the response only (their equation 2, used here) and on prompt and response without the template tokens (equation 4). They find the second helps most with short outputs or few examples | **Built.** The loss mask in [finetune/chat.py](../src/scratchllm/finetune/chat.py) (equation 2) |
+| Singh et al. *Aya Dataset: An Open-Access Collection for Multilingual Instruction Tuning.* ACL 2024 | [arXiv:2402.06619](https://arxiv.org/abs/2402.06619), [dataset](https://huggingface.co/datasets/CohereLabs/aya_dataset) | SFT data: human-written, Apache 2.0. The Standard Arabic, Egyptian and English subsets are used; the Moroccan subset is not (median response 19 characters) | **Used** (D-038). [finetune/data.py](../src/scratchllm/finetune/data.py) |
+| Alyafeai et al. *CIDAR: Culturally Relevant Instruction Dataset For Arabic.* ACL 2024 | [arXiv:2402.03177](https://arxiv.org/abs/2402.03177), [dataset](https://huggingface.co/datasets/arbml/CIDAR) | SFT data replacing Aya's Moroccan subset: 10,000 Arabic pairs, an Alpaca subset translated with ChatGPT plus 891 native grammar questions, all reviewed by people. Card license Apache 2.0; the Alpaca source is CC BY-NC 4.0 | **Used** (D-038). [finetune/data.py](../src/scratchllm/finetune/data.py) |
 | Ainslie et al. *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints.* EMNLP 2023 | [arXiv:2305.13245](https://arxiv.org/abs/2305.13245) | Grouped-query attention: several query heads share one key/value head, shrinking the KV cache | **Not built.** [PROBLEM.md](PROBLEM.md) item 2 |
 | Shazeer. *Fast Transformer Decoding: One Write-Head is All You Need.* 2019 | [arXiv:1911.02150](https://arxiv.org/abs/1911.02150) | Multi-query attention, the one-group extreme of GQA | **Not built**, background for GQA |
 

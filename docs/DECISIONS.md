@@ -2204,3 +2204,111 @@ too small or the data too little for the format, and that is the result.
 **What this cannot show.** Whether answers are correct: the four criteria measure format, language and likelihood, not truth. A human
 rubric on a fixed prompt set is planned in `docs/PROBLEM.md`; the reports give the samples it needs, but the scoring is the project's
 to do and is not part of this entry. One learning-rate sweep, on seed 1337 only; no second training seed per base.
+
+## D-040 (2026-11-13): fine-tuning results: full fine-tuning answers better, LoRA forgets less; neither passes every criterion of D-039
+
+The plan of D-039, run as registered. Tables built by `scripts/archive/d040_entry.py` from the run logs and the reports; evidence
+kept in git: `reports/sft/final-sft-{base,full,lora}-seed{1337,2024}/` (test split) and `reports/eval/final-sft-{full,lora}-seed{1337,2024}/`
+(full pretraining evaluation of the merged models).
+
+**Stage A, learning rate** (seed 1337, 400 steps; best validation score, bits/char):
+
+| Method | lr 3e-5 | lr 1e-4 | lr 3e-4 |
+|---|---|---|---|
+| full | 3e-5: 1.5474 | 1e-4: 1.5136 **chosen** | 3e-4: 1.5290 |
+| lora | 3e-4: 1.6279 | 1e-3: 1.6176 | 3e-3: 1.6069 **chosen** |
+
+**Stage B, the runs** (1,000 steps; best checkpoint by validation score):
+
+| Run | Trainable parameters | Best step | Best validation score | Median seconds per step | Peak memory (MiB) |
+|---|---|---|---|---|---|
+| full, seed 1337 | 16,913,280 | 950 | 1.5013 | 0.234 | 1877 |
+| full, seed 2024 | 16,913,280 | 900 | 1.4966 | 0.235 | 1884 |
+| lora, seed 1337 | 73,728 | 950 | 1.5981 | 0.207 | 1515 |
+| lora, seed 2024 | 73,728 | 950 | 1.6077 | 0.207 | 1518 |
+
+**Criteria 1 to 3** (test split; replies greedy, 150 prompts per variety; Egyptian, 26 pairs, reported only):
+
+| Model | Variety | Response bits/char | Change from base | Stopped | Right language | Empty | Looping |
+|---|---|---|---|---|---|---|---|
+| base, seed 1337 | msa | 1.868 |  | 0% | 5% | 0% | 97% |
+| base, seed 1337 | egyptian | 1.944 |  | 0% | 12% | 0% | 100% |
+| base, seed 1337 | english | 1.367 |  | 0% | 92% | 0% | 88% |
+| full, seed 1337 | msa | 1.694 | -0.174 | 55% | 99% | 0% | 56% |
+| full, seed 1337 | egyptian | 1.845 | -0.099 | 65% | 100% | 0% | 38% |
+| full, seed 1337 | english | 1.196 | -0.171 | 70% | 100% | 0% | 57% |
+| lora, seed 1337 | msa | 1.786 | -0.082 | 53% | 95% | 0% | 56% |
+| lora, seed 1337 | egyptian | 1.898 | -0.045 | 46% | 96% | 0% | 54% |
+| lora, seed 1337 | english | 1.304 | -0.063 | 69% | 100% | 0% | 57% |
+| base, seed 2024 | msa | 1.872 |  | 1% | 49% | 0% | 93% |
+| base, seed 2024 | egyptian | 1.941 |  | 0% | 46% | 0% | 92% |
+| base, seed 2024 | english | 1.370 |  | 0% | 81% | 0% | 62% |
+| full, seed 2024 | msa | 1.693 | -0.179 | 57% | 99% | 0% | 53% |
+| full, seed 2024 | egyptian | 1.843 | -0.098 | 65% | 100% | 0% | 35% |
+| full, seed 2024 | english | 1.186 | -0.184 | 75% | 100% | 0% | 59% |
+| lora, seed 2024 | msa | 1.788 | -0.084 | 42% | 99% | 0% | 67% |
+| lora, seed 2024 | egyptian | 1.893 | -0.048 | 54% | 96% | 0% | 35% |
+| lora, seed 2024 | english | 1.303 | -0.067 | 65% | 100% | 0% | 63% |
+
+**Criterion 4, forgetting** (full pretraining validation, bits/char; change from the base model):
+
+| Model | Arabic mean | English | `wiki_ary` |
+|---|---|---|---|
+| base, seed 1337 | 1.9516 | 1.4847 | 2.9654 |
+| full, seed 1337 | 2.1545 (+0.2029) | 1.7477 (+0.2630) | 3.1965 (+0.2312) |
+| lora, seed 1337 | 1.9938 (+0.0422) | 1.5297 (+0.0451) | 2.9968 (+0.0315) |
+| base, seed 2024 | 1.9531 | 1.4860 | 2.9966 |
+| full, seed 2024 | 2.1523 (+0.1992) | 1.7541 (+0.2681) | 3.2509 (+0.2542) |
+| lora, seed 2024 | 1.9949 (+0.0418) | 1.5318 (+0.0458) | 3.0274 (+0.0308) |
+
+**Verdict per criterion** (a method passes if both of its runs do):
+
+| Method | 1 Answers | 2 Stops | 3 Language | 4 Forgetting |
+|---|---|---|---|---|
+| full | pass (yes, yes) | fail (no, no) | pass (yes, yes) | fail (no, no) |
+| lora | fail (no, no) | fail (no, no) | pass (yes, yes) | fail (no, no) |
+
+**LoRA against full fine-tuning** (LoRA minus full, per seed; bands of D-031):
+
+| Number | Seed 1337 | Seed 2024 | Mean | Band |
+|---|---|---|---|---|
+| test response bits/char (mean of Standard Arabic and English) | +0.0999 | +0.1063 | +0.1031 | differs |
+| forgetting, Arabic mean | -0.1607 | -0.1574 | -0.1590 | differs |
+| forgetting, English | -0.2180 | -0.2223 | -0.2201 | differs |
+| forgetting, `wiki_ary` | -0.1997 | -0.2235 | -0.2116 | differs |
+
+LoRA's step time is 0.88 of full fine-tuning's and its peak memory 0.81 (mean of the two seeds).
+
+**What the numbers say.**
+
+- *Both methods teach the format, partly.* The base model, given the chat template, answers every prompt with markup fragments
+  (`</>`, `</category>`) and never stops; after fine-tuning, replies are in the prompt's language (95% to 100%, criterion 3 passes for
+  both) and 42% to 75% of them end on their own, short of the 80% of criterion 2 for both methods.
+- *Full fine-tuning learns the answers better:* the reference answers become 0.17 to 0.18 bits/char more likely on Standard Arabic and
+  English (criterion 1 passes), against 0.06 to 0.08 for LoRA (fails the 0.10 line). The gap, 0.10 bits/char, is the same at both seeds.
+- *Full fine-tuning forgets much more:* on the pretraining text it loses 0.20 bits/char on the Arabic mean, 0.26 to 0.27 on English and 0.23 to
+  0.25 on `wiki_ary`; LoRA loses 0.03 to 0.05 on each, between a seventh and a fifth as much, but over the 0.03 line of criterion 4
+  on the Arabic mean and English. Both fail it.
+- *Cost:* LoRA trains 0.44% of the parameters, takes 0.88 of the step time and 0.81 of the peak memory: a 12% and 19% saving, small
+  next to the paper's because the frozen weights of a 17M model are a small part of the memory to begin with.
+
+**Read with the samples** (`report.md` of each folder). The fine-tuned models answer in the register of the question ("Answer: (c)",
+the right option, for a multiple-choice question; Egyptian for an Egyptian prompt), sometimes on topic, but what they
+say is mostly wrong ("COCOMO 81 is a city") or repeats a phrase until the token limit (looping in 35% to 67% of the replies). At 17M
+parameters and 164M pretraining tokens that is the expected result: fine-tuning changes how the model answers, not what it knows.
+
+**Not run, and why it matters.**
+
+- In all four runs the best checkpoint is at step 900 or 950 of 1,000: validation was still improving at the end, so longer
+  fine-tuning would likely lower the response loss and raise the stop rate, and would likely forget more. Not tested.
+- LoRA's chosen rate, 3e-3, is the top of the registered grid; a higher one might do better. The grid was not extended after seeing it.
+- A human rubric on a fixed prompt set (`docs/PROBLEM.md`) is not scored; the reports give the samples it needs.
+
+**Run note.** The machine suspended 85 seconds into the first main run (`sft-full-seed1337`) although sleep was inhibited, and
+resumed six hours later; the process continued where it was, between steps 250 and 260 (loss 2.948, then 2.905, in line with the
+seed-2024 run at the same steps). The step time is measured on a monotonic clock that stops during suspend. Later runs also inhibit
+the lid switch.
+
+**Decision.** No method passes all four criteria. Which to use is a trade-off, left to the project as `wiki_ary` was in D-031:
+full fine-tuning gives the better chat model, LoRA keeps the base model's language modelling nearly intact. The remedy D-039 named for
+criterion 4, mixing pretraining text into fine-tuning batches, is the next experiment; it is not started.

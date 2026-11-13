@@ -14,6 +14,7 @@ and in `scripts/archive/`, so they are never renamed or merged: a name below is 
 | `diagnostics/final-dNNN/` | plain-text output of the diagnostic scripts; the header of each file says what it was run on | `scripts/diagnose_checkpoint.py`, `scripts/diagnose_tokens.py`, `scripts/overfit_one_batch.py`, `scripts/check_kv_cache.py` |
 | `eda/final-*/` | `report.json`, `report.md` (no raw text) | `scratchllm data analyze`, `scratchllm data leakage-report` |
 | `tokenizer/final-*/` | fertility measurements of the tokenizers | `scratchllm tokenizer fertility` |
+| `sft/final-*/` | `report.json`, `report.md`: a model on the fine-tuning test split, response bits per character per variety, greedy replies scored for stopping, language, emptiness and looping, with samples | `scratchllm sft-eval` |
 
 ## Which decision uses which folder
 
@@ -36,6 +37,8 @@ and in `scripts/archive/`, so they are never renamed or merged: a name below is 
 | `eval/final-ablation-swiglu-only`, `eval/final-ablation-swiglu-only-seed2024`, `eval/final-d033-swiglu-seeds` | D-033 | SwiGLU alone, two seeds |
 | `eval/final-ablation-rope-only`, `eval/final-ablation-rope-only-seed2024`, `eval/final-ablation-rope-swiglu`, `eval/final-d035-followups` | D-035 | rotary alone at two seeds, the package without RMSNorm at seed 1337 |
 | `eval/final-ablation-rope-swiglu-seed2024`, `eval/final-d036-no-rmsnorm` | D-036 | the package without RMSNorm at seed 2024; basis of `reference-17m` |
+| `sft/final-sft-base-seed{1337,2024}` | D-040 | the two base models given the chat template |
+| `sft/final-sft-{full,lora}-seed{1337,2024}`, `eval/final-sft-{full,lora}-seed{1337,2024}` | D-040 | the four fine-tuned models: test split, and the full pretraining evaluation (forgetting) |
 
 ## Regenerating
 
