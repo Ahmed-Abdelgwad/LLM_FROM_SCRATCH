@@ -2472,3 +2472,167 @@ in response loss for each rate. These are descriptive.
 - a rubric sheet for the replay models, which could follow as a second sheet.
 
 Estimated cost: about two hours of the GPU.
+
+## D-043 (2026-11-13): replay results: 20% replay removes more than half the forgetting, with no measurable cost to the answers
+
+The eight runs of D-042, as registered: full fine-tuning at 1e-4, 1,000 steps of 32 rows, with 0%, 5%, 10% or 20% of the rows
+replaced by pretraining text of the same length, from the base models of seed 1337 and seed 2024. Each run was scored by
+`scratchllm sft-eval` (test split, `reports/sft/final-sft-full-replay*`) and `scratchllm eval` (full pretraining validation,
+`reports/eval/final-sft-full-replay*`). The tables are built by `scripts/archive/d042_entry.py` from the runs' logs and reports;
+the numbers it compares are in `reports/eval/final-d042-replay/evals.json`.
+
+**The 0% runs against D-040's full runs** (same config, new code):
+
+| Seed | Eval events equal | Weights of `merged.pt` equal | Largest difference of a logged eval number |
+|---|---|---|---|
+| 1337 | no | no | 0.000592 |
+| 2024 | no | no | 0.000649 |
+
+| Number, 0% rerun minus D-040 | Seed 1337 | Seed 2024 |
+|---|---|---|
+| test response bits/char | +0.0022 | -0.0000 |
+| forgetting, Arabic mean | -0.0022 | +0.0000 |
+| forgetting, English | -0.0083 | +0.0000 |
+| forgetting, `wiki_ary` | -0.0017 | -0.0005 |
+
+**The runs** (1,000 steps, 32 rows per step; best checkpoint by validation score):
+
+| Run | Replayed rows | Replay share of scored tokens | Best step | Best validation score | Median s/step | Peak MiB |
+|---|---|---|---|---|---|---|
+| 0%, seed 1337 | 0 | 0.0% | 850 | 1.5013 | 0.237 | 1877 |
+| 5%, seed 1337 | 1,600 | 7.2% | 950 | 1.4922 | 0.239 | 1877 |
+| 10%, seed 1337 | 3,200 | 14.1% | 950 | 1.4909 | 0.236 | 1877 |
+| 20%, seed 1337 | 6,400 | 26.9% | 950 | 1.4876 | 0.237 | 1877 |
+| 0%, seed 2024 | 0 | 0.0% | 900 | 1.4966 | 0.236 | 1884 |
+| 5%, seed 2024 | 1,600 | 7.3% | 900 | 1.4879 | 0.236 | 1884 |
+| 10%, seed 2024 | 3,200 | 14.2% | 950 | 1.4857 | 0.238 | 1884 |
+| 20%, seed 2024 | 6,400 | 27.2% | 1000 | 1.4923 | 0.238 | 1884 |
+
+**Answers and forgetting** (test split; full pretraining validation, change from the base model, bits/char):
+
+| Run | Response, Standard Arabic | Response, English | Mean | Stopped (msa, en) | Right language (msa, en) | Arabic mean | English | `wiki_ary` |
+|---|---|---|---|---|---|---|---|---|
+| 0%, seed 1337 | 1.696 | 1.198 | 1.4471 | 55%, 65% | 99%, 100% | +0.2007 | +0.2548 | +0.2295 |
+| 5%, seed 1337 | 1.690 | 1.186 | 1.4379 | 52%, 69% | 99%, 100% | +0.1378 | +0.1832 | +0.1830 |
+| 10%, seed 1337 | 1.689 | 1.186 | 1.4374 | 51%, 67% | 99%, 100% | +0.1152 | +0.1395 | +0.1629 |
+| 20%, seed 1337 | 1.691 | 1.186 | 1.4385 | 51%, 63% | 100%, 100% | +0.0869 | +0.0915 | +0.1292 |
+| 0%, seed 2024 | 1.693 | 1.186 | 1.4393 | 58%, 75% | 99%, 100% | +0.1992 | +0.2681 | +0.2537 |
+| 5%, seed 2024 | 1.689 | 1.180 | 1.4348 | 55%, 67% | 99%, 100% | +0.1339 | +0.1804 | +0.1786 |
+| 10%, seed 2024 | 1.689 | 1.179 | 1.4344 | 56%, 66% | 99%, 100% | +0.1124 | +0.1445 | +0.1586 |
+| 20%, seed 2024 | 1.691 | 1.178 | 1.4348 | 51%, 69% | 99%, 100% | +0.0848 | +0.0953 | +0.1297 |
+
+**Against the 0% run of the same seed** (replay minus 0%; bands of D-031 on the mean of the two seeds):
+
+| Rate | Number | Seed 1337 | Seed 2024 | Mean | Band |
+|---|---|---|---|---|---|
+| 5% | cost: test response bits/char | -0.0092 | -0.0045 | -0.0068 | unresolved |
+| 5% | forgetting, Arabic mean | -0.0629 | -0.0653 | -0.0641 | differs |
+| 5% | forgetting, English | -0.0716 | -0.0878 | -0.0797 | differs |
+| 5% | forgetting, `wiki_ary` | -0.0464 | -0.0752 | -0.0608 | differs |
+| 10% | cost: test response bits/char | -0.0097 | -0.0049 | -0.0073 | unresolved |
+| 10% | forgetting, Arabic mean | -0.0855 | -0.0868 | -0.0862 | differs |
+| 10% | forgetting, English | -0.1152 | -0.1237 | -0.1194 | differs |
+| 10% | forgetting, `wiki_ary` | -0.0666 | -0.0952 | -0.0809 | differs |
+| 20% | cost: test response bits/char | -0.0085 | -0.0046 | -0.0065 | unresolved |
+| 20% | forgetting, Arabic mean | -0.1137 | -0.1144 | -0.1141 | differs |
+| 20% | forgetting, English | -0.1633 | -0.1728 | -0.1681 | differs |
+| 20% | forgetting, `wiki_ary` | -0.1003 | -0.1241 | -0.1122 | differs |
+
+**Choice rule** (D-042): rates whose cost is the same or unresolved: 5%, 10%, 20%; chosen: **20%**.
+Largest difference between a 0% rerun and its D-040 run on these numbers: 0.0083 bits/char.
+
+**D-039 criteria, reported only** (D-041): 1 answers (both varieties at least 0.10 lower), 2 stops (80%), 3 language (90%), 4 forgetting (0.03, `wiki_ary` 0.05):
+
+| Run | 1 | 2 | 3 | 4 |
+|---|---|---|---|---|
+| 0%, seed 1337 | yes | no | yes | no |
+| 5%, seed 1337 | yes | no | yes | no |
+| 10%, seed 1337 | yes | no | yes | no |
+| 20%, seed 1337 | yes | no | yes | no |
+| 0%, seed 2024 | yes | no | yes | no |
+| 5%, seed 2024 | yes | no | yes | no |
+| 10%, seed 2024 | yes | no | yes | no |
+| 20%, seed 2024 | yes | no | yes | no |
+
+**Forgetting per unit of learning** (after Kalajdzievski 2024; Arabic-mean forgetting divided by the response gain, mean of the seeds):
+
+| Rate | Response gain (bits/char) | Arabic-mean forgetting | Ratio |
+|---|---|---|---|
+| 0% | 0.1759 | +0.2000 | 1.14 |
+| 5% | 0.1827 | +0.1359 | 0.74 |
+| 10% | 0.1832 | +0.1138 | 0.62 |
+| 20% | 0.1824 | +0.0859 | 0.47 |
+
+**Forgetting during training** (16-window probe, Arabic mean, bits/char; mean of the seeds):
+
+| Rate | step 50 | step 250 | step 500 | step 750 | step 1000 |
+|---|---|---|---|---|---|
+| 0% | 1.9587 | 2.0450 | 2.0984 | 2.1216 | 2.1293 |
+| 5% | 1.9553 | 2.0194 | 2.0513 | 2.0622 | 2.0656 |
+| 10% | 1.9539 | 2.0106 | 2.0355 | 2.0421 | 2.0437 |
+| 20% | 1.9503 | 1.9963 | 2.0142 | 2.0159 | 2.0155 |
+
+
+**Noise.** The 0% runs do not repeat D-040 exactly: no eval event and no weight is equal. To see whether the replay commit
+changed the path without replay, the old commit (`26b71f1`) and the new code were each run for 50 steps from the seed-1337
+base, outside `runs/`, and compared at step 10, inside the warmup, where the learning rate does not depend on the run length:
+
+| Run | Loss at step 10 |
+|---|---|
+| D-040, `sft-full-seed1337` | 3.485463 |
+| 0% rerun, `sft-full-replay0-seed1337` | 3.485517 |
+| old commit, 50 steps | 3.485546 |
+| new code, 50 steps, first | 3.485610 |
+| new code, 50 steps, second | 3.485549 |
+
+Two runs of the same code differ as much as old and new code do, so the difference is the GPU's nondeterminism, not the
+change. The largest difference between a 0% rerun and its D-040 run on a compared number, 0.0083 bits/char (English
+forgetting, seed 1337), is above the 0.005 of D-042, so the bands are read against it, as registered. Most of it comes from
+checkpoint selection: in seed 1337 the validation scores of steps 850 and 950 are within 0.0001 of each other in both runs, and
+the rerun picked 850 where D-040 picked 950. Read against this noise:
+
+- every forgetting reduction, at least 0.046 bits/char in each seed, is more than five times the noise and holds;
+- the cost to the answers, -0.0045 to -0.0097, is at most about four times the noise on that number (0.0022), and the band
+  "unresolved" stands. Replay lowered the response loss slightly in both seeds at every rate; that is not claimed as a gain.
+
+**What the runs show.**
+
+1. *Forgetting.* It falls with the rate, steadily, in both seeds, on all three measures. At 20%, the rise in the Arabic mean
+   is 0.086 bits/char instead of 0.200, English 0.093 instead of 0.261, `wiki_ary` 0.129 instead of 0.242. Moroccan Wikipedia
+   is never replayed, so the effect is not just keeping the replayed sources: forgetting falls on text that replay does not
+   touch, although less (about 46% there, against 57% on the Arabic mean and 64% on English).
+2. *Answers.* Response bits/char did not get worse at any rate, although the chat pairs seen fell to 80% and replay took 27%
+   of the scored tokens at 20%. Stop rates and reply language move by a few points in both directions, with no pattern by
+   rate; they were not compared by registration.
+3. *Against Kalajdzievski.* Forgetting did not fall because the runs learned less: the response gain is the same (0.176 to
+   0.183 bits/char), and forgetting per unit of gain falls from 1.14 to 0.47. Replay changes the trade-off, not only where a
+   run sits on it.
+4. *Over training.* The probe curves show forgetting growing through the run without replay, still rising at step 1,000,
+   and flat after step 500 at 20%.
+5. *Expected before the runs* (D-042): forgetting falling with the rate, less on `wiki_ary`: as found. The cost to the
+   answers rising with the rate: not found; no cost was measured at any rate.
+
+**Choice of rate.** By D-042's rule, the rates whose cost is "the same" or "unresolved" are 5%, 10% and 20%. Of those, 20%
+avoids the most forgetting on the Arabic mean, so **20% is chosen**. The script also counts a cost below zero as eligible, a
+reading of "under 0.015 bits/char"; here it changes nothing, since all three rates are "unresolved".
+
+**Limits.**
+
+- 20% is the top of the tested grid, and forgetting was still falling there; a higher rate may do better, and it was not tested.
+  The grid was not extended after seeing the results.
+- The D-039 criteria are still not met: forgetting at 20% (0.085 to 0.087 on the Arabic mean) is far above the 0.03 of
+  criterion 4, and the stop rate below the 80% of criterion 2. Those thresholds were set by the assistant (D-041), and decide
+  nothing here.
+- Replay was measured as change in bits per character only. Whether the replay models answer better or worse in a person's
+  judgement is not known; they are not on the rubric sheet of D-041.
+- Two seeds, one model size, one fine-tuning length.
+
+**Run note.** The machine was on battery and suspended at 06:15:37, although sleep, idle and the lid switch were inhibited;
+the journal gives no reason. `sft-full-replay10-seed1337` had finished training two seconds before (its `end` event is at
+06:15:35), and its test-split evaluation hung after the resume with a dead GPU context. It was killed and the script restarted
+at 16:13; the restart skips training for runs with a `merged.pt` and redoes their evaluations, so every report of these runs
+comes from after the restart. No training was interrupted.
+
+**Decision.** For full fine-tuning, replay at 20% of rows is the chosen setting: it removes more than half the forgetting with
+no measured cost to the answers. `configs/sft/sft-full.yaml` is left as registered in D-039 (no replay); the replay runs are
+named by their rate, and a model for use is `runs/sft-full-replay20-seed{1337,2024}/merged.pt`.

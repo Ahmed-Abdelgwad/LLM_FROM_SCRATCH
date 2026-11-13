@@ -39,6 +39,7 @@ and in `scripts/archive/`, so they are never renamed or merged: a name below is 
 | `eval/final-ablation-rope-swiglu-seed2024`, `eval/final-d036-no-rmsnorm` | D-036 | the package without RMSNorm at seed 2024; basis of `reference-17m` |
 | `sft/final-sft-base-seed{1337,2024}` | D-040 | the two base models given the chat template |
 | `sft/final-sft-{full,lora}-seed{1337,2024}`, `eval/final-sft-{full,lora}-seed{1337,2024}` | D-040 | the four fine-tuned models: test split, and the full pretraining evaluation (forgetting) |
+| `sft/final-sft-full-replay{0,5,10,20}-seed{1337,2024}`, `eval/final-sft-full-replay{0,5,10,20}-seed{1337,2024}`, `eval/final-d042-replay` | D-043 | the replay runs planned in D-042: test split, full pretraining evaluation, and the numbers the entry compares |
 | `sft/final-rubric-v1` | D-041 | the blind human-rubric sheet: `sheet.html`, `scores.csv`, `key.json` (not to be opened before scoring); `summary.*` once scored |
 
 ## Regenerating
