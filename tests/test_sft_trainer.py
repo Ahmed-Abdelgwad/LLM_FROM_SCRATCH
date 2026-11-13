@@ -139,6 +139,22 @@ def test_a_run_learns_the_answers_and_writes_a_merged_ordinary_checkpoint(setup,
         assert start["trainable_parameters"] == start["parameters"]
 
 
+def test_replay_keeps_steps_and_rows_logs_its_share_and_slows_forgetting(setup):
+    make, _, _ = setup
+    plain = finetune(make("plain", max_steps=40))
+    mixed = finetune(make("mixed", max_steps=40, replay_fraction=0.25))
+    trains = [e for e in read_events(mixed.run_dir / "metrics.jsonl") if e["event"] == "train"]
+    assert trains[-1]["step"] == 40
+    assert trains[-1]["replay_rows"] == 40 * 8 // 4  # 8 rows per step, a quarter replayed
+    assert trains[-1]["replay_token_share"] > 0.25  # replay scores every token, chat the answer
+    assert "replay_rows" not in read_events(plain.run_dir / "metrics.jsonl")[1]
+
+    def alpha(run):
+        return evals(run)[-1]["forgetting_bits_per_char"]["alpha"]
+
+    assert alpha(mixed.run_dir) < alpha(plain.run_dir)  # the replayed text is forgotten less
+
+
 def test_the_step_loss_weights_every_response_token_equally(setup):
     """Two micro-batches of different lengths give the same gradient as one batch of all."""
     _, tok, base = setup

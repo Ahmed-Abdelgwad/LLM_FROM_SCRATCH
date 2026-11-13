@@ -50,6 +50,7 @@ from scratchllm.finetune.chat import IGNORE, EncodedExample, encode_example
 from scratchllm.finetune.config import SFTConfig
 from scratchllm.finetune.data import Pair, PairSampler, read_split
 from scratchllm.finetune.lora import add_lora, lora_state, merge_lora, trainable_parameters
+from scratchllm.finetune.replay import ReplaySampler
 from scratchllm.model.gpt import GPT
 from scratchllm.tokenizer.normalize import normalize
 from scratchllm.tokenizer.tokenizer import Tokenizer
@@ -242,6 +243,19 @@ def finetune(
     sources = [load_source(tokens_dir, n) for n in training_source_names(tokens_dir)]
     forget_sets = validation_sets(sources, context) if t.forgetting_windows else {}
     source_meta = {s.name: s for s in sources}
+    replay = None
+    if t.replay_fraction > 0:
+        # the base model's own pretraining mix: its configured weights, or each source's train
+        # tokens when none were configured (`training.trainer.prepare_data`)
+        chosen = base_state["config"]["data"].get("train_sources")
+        replay_sources = [s for s in sources if chosen is None or s.name in chosen]
+        replay_weights = [
+            float(s.train_tokens) if chosen is None else chosen[s.name] for s in replay_sources
+        ]
+        replay = ReplaySampler(
+            replay_sources, replay_weights, t.replay_fraction, t.micro_batch_size,
+            t.grad_accum_steps, t.seed,
+        )  # fmt: skip
 
     optimizer = make_optimizer(model, cfg.optim, device)
     step, best = 0, None
@@ -283,6 +297,8 @@ def finetune(
     params = [p for p in model.parameters() if p.requires_grad]
     max_norm = cfg.optim.grad_clip if cfg.optim.grad_clip > 0 else math.inf
     completed, skips, window, started = step, 0, [], time.perf_counter()
+    # since the start or the resume: replayed rows, and their share of the scored tokens
+    replay_rows = replay_tokens = scored_tokens = 0
     guard = ExitStack()
     stop = guard.enter_context(stop_on_termination())
     try:
@@ -290,8 +306,19 @@ def finetune(
             lr = lr_at(index, cfg.optim.lr, cfg.optim.min_lr, cfg.optim.warmup_steps, t.max_steps)
             for group in optimizer.param_groups:
                 group["lr"] = lr
-            micro = [collate(sampler.batch(index, m), pad_id) for m in range(t.grad_accum_steps)]
+            if replay is None:
+                micro = [
+                    collate(sampler.batch(index, m), pad_id) for m in range(t.grad_accum_steps)
+                ]
+            else:
+                micro = []
+                for m in range(t.grad_accum_steps):
+                    examples, swapped = replay.mix(index, m, sampler.batch(index, m))
+                    replay_rows += len(swapped)
+                    replay_tokens += sum(len(examples[i].targets) for i in swapped)
+                    micro.append(collate(examples, pad_id))
             n_tokens = sum(int((y != IGNORE).sum()) for _, y in micro)
+            scored_tokens += n_tokens
             total = torch.zeros((), device=device)
             for x, y in micro:
                 with autocast():
@@ -320,6 +347,8 @@ def finetune(
                     grad_norm=grad_norm, seconds=elapsed,
                     peak_memory_mib=torch.cuda.max_memory_allocated() / 2**20
                     if device.type == "cuda" else None,
+                    **({"replay_rows": replay_rows, "replay_token_share": replay_tokens
+                        / scored_tokens} if replay is not None else {}),
                 )  # fmt: skip
                 mean = sum(window) / len(window)
                 progress(f"step {completed}/{t.max_steps}  loss {mean:.4f}  lr {lr:.2e}")

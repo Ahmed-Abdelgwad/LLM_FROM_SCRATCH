@@ -56,6 +56,9 @@ class SFTTrain(_Strict):
     log_interval: PositiveInt = 10
     # windows per pretraining source scored at each evaluation, to watch forgetting as it happens
     forgetting_windows: int = Field(16, ge=0)
+    # share of the rows of every step that are pretraining text instead of chat pairs (D-042,
+    # `replay.py`); 0 = none, the runs of D-040
+    replay_fraction: float = Field(0.0, ge=0.0, lt=1.0)
     precision: Literal["auto", "bf16", "fp32"] = "auto"
     device: Literal["auto", "cpu", "cuda"] = "auto"
     max_consecutive_skips: PositiveInt = 10
