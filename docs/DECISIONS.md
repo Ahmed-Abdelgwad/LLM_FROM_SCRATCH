@@ -2684,3 +2684,62 @@ they come from a different schedule and are not compared with anything.
 (Ainslie et al.'s "uptraining"); fine-tuning a GQA model.
 
 Estimated cost: about 65 minutes per run, about two and a quarter hours in all.
+
+## D-045 (2026-11-15): grouped-query attention is not adopted: it fails D-044's criterion, with the two seeds far apart
+
+The two runs of D-044, as registered: the reference with 2 key/value heads (`configs/experiments/ablation-gqa2.yaml`,
+`ablation-gqa2-seed2024.yaml`), 5,000 steps each, against the reference run of the same seed. Neither run was interrupted;
+0 skipped steps, 163,840,000 tokens each; sleep was inhibited, and the machine was on mains power when the runs started. The script
+`scripts/archive/d044_entry.py` checks that each pair of configs differs in `n_kv_heads` only, builds the tables and applies
+the criterion. Evidence in git: `reports/eval/final-ablation-gqa2{,-seed2024}/` (full evaluations) and
+`reports/eval/final-d044-gqa/evals.json` (the evaluation events of the four runs).
+
+| criterion (D-044): GQA minus the reference | required | seed 1337 | seed 2024 | mean | band (D-031) | holds |
+|---|---|---:|---:|---:|---|---|
+| Arabic mean | mean below +0.005 | +0.0333 | +0.0049 | +0.0191 | differs | **no** |
+| English | mean below +0.005 | +0.0164 | +0.0055 | +0.0110 | unresolved | **no** |
+| `wiki_ary` | below +0.05 at both | +0.1622 | -0.0235 | | | **no** |
+| speed (median tokens/s) | not more than 10% below | +4.6% | +4.0% | | | yes |
+| peak memory | not more than 10% above | -3.3% | -3.3% | | | yes |
+
+| bits/char at step 5,000 | Arabic mean, GQA | reference | English, GQA | reference | tokens/s, GQA | reference | peak MiB, GQA | reference |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| seed 1337 | 1.9838 | 1.9505 | 1.5063 | 1.4898 | 47,626 | 45,550 | 1633 | 1689 |
+| seed 2024 | 1.9564 | 1.9515 | 1.4969 | 1.4915 | 47,719 | 45,885 | 1633 | 1689 |
+
+| GQA minus the reference, per source | fw2_arb | fw2_ars | fw2_ary | fw2_arz | wiki_ar | `wiki_ary` | `fw2_acm` | `fw2_apc` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| seed 1337 | +0.034 | +0.034 | +0.024 | +0.044 | +0.030 | +0.162 | +0.050 | +0.050 |
+| seed 2024 | +0.005 | +0.005 | +0.008 | +0.002 | +0.004 | -0.024 | -0.004 | +0.001 |
+
+| | parameters | key/value cache, one 512-token sequence, float32 |
+|---|---:|---:|
+| reference (6 key/value heads) | 16,913,280 | 9.0 MiB |
+| GQA (2 key/value heads) | 15,733,632 | 3.0 MiB |
+
+**Verdict (D-044):** not all conditions hold: the reference stays multi-head.
+
+**Reading.**
+
+1. *The criterion fails* on the Arabic mean (+0.019 on the mean of the seeds, "differs"), English (+0.011, "unresolved") and
+   `wiki_ary` (+0.162 at seed 1337). Speed (+4% to +5% tokens/s) and memory (-3%) are inside the 10% band. By the rule registered
+   in D-044, **the reference stays multi-head**, and no further run is made for GQA without a new decision.
+2. *The two seeds disagree in size.* At seed 2024 GQA is within 0.008 of the reference on every trained source and better on
+   `wiki_ary`; at seed 1337 it is 0.02 to 0.04 worse on every Arabic source and 0.16 worse on `wiki_ary`. Between seeds of the
+   same multi-head architecture the Arabic mean differs by about 0.003 (D-029); here the GQA runs differ from their references by
+   +0.033 and +0.005. Two seeds cannot say which is typical.
+3. *What happened at seed 1337.* No gradient spike and no jump in the loss (largest gradient norm after warmup 0.98). The run
+   fell behind slowly between steps 1,000 and 2,000: its training loss went from 0.02 to 0.11 above the reference's
+   (250-step means), and the Arabic validation gap from +0.017 to +0.062. It then closed part of the gap, to +0.033 at step
+   5,000. At seed 2024 the training loss stayed within 0.015 of the reference throughout. One reading is a slower phase of
+   learning that this seed fell into and the shorter key/value maps made harder to leave; it was not tested and is not claimed.
+4. *Expected before the runs* (D-044): a small cost, most likely unresolved. Seed 2024 matches that; seed 1337 does not, and the
+   mean lands in "differs".
+5. *What GQA buys at this size:* 7% fewer parameters, a cache 3 times smaller (3 MiB instead of 9 MiB for one 512-token sequence)
+   and 4% to 5% faster training. None of these matters on this GPU at this size.
+
+**Decision.** `configs/reference-17m.yaml` stays the reference (multi-head). `model.n_kv_heads` stays in the code, tested, off by
+default (D-027). Item 2 of `docs/PROBLEM.md` is complete as a build: every part it names exists, and each was judged by an ablation.
+
+**Not tested:** a third seed, which would say whether seed 1337 or seed 2024 is typical; 1 or 3 key/value heads; a
+parameter-matched GQA; uptraining from a multi-head checkpoint.
