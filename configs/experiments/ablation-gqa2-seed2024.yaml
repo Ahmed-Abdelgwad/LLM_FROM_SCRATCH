@@ -1,0 +1,36 @@
+# Grouped-query attention, second seed (D-044): identical to `ablation-gqa2` in every setting and the token budget
+# except the name and `train.seed`, 1337 -> 2024; compared with `ablation-rope-swiglu-seed2024` (the reference at seed
+# 2024), which differs from this run in `n_kv_heads` only. The criterion is the one in `ablation-gqa2.yaml` and D-044.
+name: ablation-gqa2-seed2024
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  position: rope
+  ffn: swiglu
+  n_kv_heads: 2
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 2024
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10

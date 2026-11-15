@@ -2636,3 +2636,51 @@ comes from after the restart. No training was interrupted.
 **Decision.** For full fine-tuning, replay at 20% of rows is the chosen setting: it removes more than half the forgetting with
 no measured cost to the answers. `configs/sft/sft-full.yaml` is left as registered in D-039 (no replay); the replay runs are
 named by their rate, and a model for use is `runs/sft-full-replay20-seed{1337,2024}/merged.pt`.
+
+## D-044 (2026-11-15): grouped-query attention, built, with its ablation registered before any run
+
+**Built.** `model.n_kv_heads` (config switch, D-027 style): the 6 query heads share `n_kv_heads` key/value heads, n_heads / n_kv_heads
+consecutive query heads per group (Ainslie et al. 2023; `n_kv_heads = 1` is Shazeer's multi-query attention). The fused `attn.qkv`
+map has d_model + 2 kv_dim outputs; the shared heads are copied to their group only when the scores are computed, and the key/value
+cache (D-030) stores one copy, so it is n_heads / n_kv_heads times smaller. Off by default (`None` = `n_heads`): every existing config
+and checkpoint builds the model it was, which is tested, and `runs/ablation-rope-swiglu/best.pt` loads unchanged. LoRA's "attn.q",
+"attn.k" and "attn.v" slices now follow the attention's real sizes instead of thirds. Tests, `tests/test_gqa.py`:
+
+- GQA equals multi-head attention whose key and value heads are repeated to their group, written-out and fused kernels, with and
+  without rotary embeddings, for 1 and 2 key/value heads;
+- the projection shrinks by the group factor, causality holds, a head count that does not divide is refused (attention and run config);
+- feeding a text in pieces through the cache gives the logits of feeding it whole; the cache holds only the shared heads (4, 2 and 1
+  key/value heads: sizes 4:2:1); generation with and without the cache agrees; a GQA model trains;
+- LoRA slices and parameter count follow the narrower keys and values, and merging keeps the outputs.
+
+At the reference's size (6 heads, 384 wide, 512 tokens) the cache of one sequence is 9 MiB in float32; with 2 key/value heads it is
+3 MiB. That saving does not matter on this GPU; GQA matters for large models with long contexts and many sequences. This entry asks
+only what it costs in quality at this size.
+
+**Question.** Does the reference with 2 key/value heads instead of 6 (`n_kv_heads: 2`) model the text as well as the reference?
+
+**Runs.** `configs/experiments/ablation-gqa2.yaml` (seed 1337) and `ablation-gqa2-seed2024.yaml` (seed 2024): each differs from the
+reference run of its seed (`ablation-rope-swiglu`, `ablation-rope-swiglu-seed2024`) in the name and `n_kv_heads: 2` only (checked by
+diff), 5,000 steps, the same token budget. The model has 15,733,632 parameters, 7.0% fewer: nothing is added back. (Llama 2 widened
+the feed-forward to keep the count; that would be a second change and is not made.) Each run is followed by its full evaluation
+(`scratchllm eval`), as in D-032 to D-036.
+
+**Criterion**, the form of D-034. Let D be (GQA run) minus (reference run of the same seed), bits/char at step 5,000. GQA costs nothing
+measurable only if all hold: Arabic mean, D below +0.005 on the mean of the two seeds; English, the same; `wiki_ary` (full evaluation),
+D below +0.05 at both seeds; median tokens/s not more than 10% below the reference's, peak memory not more than 10% above.
+
+- All hold: GQA is adopted into a new reference config, `configs/reference-17m-gqa.yaml`; `reference-17m.yaml` stays as the record.
+- Any fails: the reference stays multi-head. An Arabic or English D between +0.005 and +0.015, or seeds that disagree in sign, is
+  "unresolved", and the reference stays multi-head too: adopting needs evidence of no cost (D-034). The option stays in the code
+  either way. No further run is made for it without a new decision.
+
+Expected before the runs: a small cost, from the 7% fewer parameters, most likely in the unresolved range.
+
+**Seen before registration.** One smoke run, 200 steps of `ablation-gqa2` with warmup cut to 20, written outside `runs/`: 47,936
+tokens/s against 45,700 for the reference at the same step, peak memory 1,633 MiB against 1,689. Its losses (6.68 at step 200) were seen;
+they come from a different schedule and are not compared with anything.
+
+**Not in this plan:** 1 or 3 key/value heads; a parameter-matched GQA; converting a trained multi-head model by mean-pooling its heads
+(Ainslie et al.'s "uptraining"); fine-tuning a GQA model.
+
+Estimated cost: about 65 minutes per run, about two and a quarter hours in all.

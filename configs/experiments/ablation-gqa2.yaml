@@ -1,0 +1,44 @@
+# Grouped-query attention (D-044): the reference architecture (`reference-17m`: rotary embeddings, SwiGLU, LayerNorm)
+# with 2 key/value heads shared by the 6 query heads, 3 each. Identical to `reference-17m` except the name and
+# `n_kv_heads: 2`; seed 1337, 5,000 steps, same token budget. 15,733,632 parameters (-1,179,648, -7.0%): the key and
+# value maps shrink and nothing is added back. The key/value cache of generation is 3 times smaller.
+#
+# Fixed before the run (D-044). Let D be (this run) minus `ablation-rope-swiglu` (the reference at seed 1337), bits per
+# character at step 5,000, and the same at seed 2024. GQA costs nothing measurable only if ALL of, on the mean of the
+# two seeds:
+#   - Arabic mean: D < +0.005   - English: D < +0.005   - `wiki_ary` (full evaluation): D < +0.05 at both seeds
+#   - speed not more than 10% below the reference's median tokens/s; memory not more than 10% above.
+# Then GQA may go into a new reference config; otherwise the reference stays multi-head. The option stays in the code.
+name: ablation-gqa2
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  position: rope
+  ffn: swiglu
+  n_kv_heads: 2
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 5000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
