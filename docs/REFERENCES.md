@@ -18,7 +18,7 @@ and each entry says where it departs.
 2. **Implemented, not cited.** The code does what the paper describes, but nothing in the
    repository names it. These are the gaps a reader would expect to see filled.
 3. **Fine-tuning, and planned work.** Item 4 (LoRA/SFT) of [PROBLEM.md](PROBLEM.md), built in D-038 to
-   D-040, and the GQA part of item 2, not built.
+   D-040, and the GQA part of item 2, built in D-044.
 
 ## 1. Implemented and cited
 
@@ -106,8 +106,8 @@ These are used and named in the code, but no one paper introduced them, so none 
 | Shi et al. *Instruction Tuning With Loss Over Instructions.* NeurIPS 2024 | [arXiv:2405.14394](https://arxiv.org/abs/2405.14394) | The two losses: on the response only (their equation 2, used here) and on prompt and response without the template tokens (equation 4). They find the second helps most with short outputs or few examples | **Built.** The loss mask in [finetune/chat.py](../src/scratchllm/finetune/chat.py) (equation 2) |
 | Singh et al. *Aya Dataset: An Open-Access Collection for Multilingual Instruction Tuning.* ACL 2024 | [arXiv:2402.06619](https://arxiv.org/abs/2402.06619), [dataset](https://huggingface.co/datasets/CohereLabs/aya_dataset) | SFT data: human-written, Apache 2.0. The Standard Arabic, Egyptian and English subsets are used; the Moroccan subset is not (median response 19 characters) | **Used** (D-038). [finetune/data.py](../src/scratchllm/finetune/data.py) |
 | Alyafeai et al. *CIDAR: Culturally Relevant Instruction Dataset For Arabic.* ACL 2024 | [arXiv:2402.03177](https://arxiv.org/abs/2402.03177), [dataset](https://huggingface.co/datasets/arbml/CIDAR) | SFT data replacing Aya's Moroccan subset: 10,000 Arabic pairs, an Alpaca subset translated with ChatGPT plus 891 native grammar questions, all reviewed by people. Card license Apache 2.0; the Alpaca source is CC BY-NC 4.0 | **Used** (D-038). [finetune/data.py](../src/scratchllm/finetune/data.py) |
-| Ainslie et al. *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints.* EMNLP 2023 | [arXiv:2305.13245](https://arxiv.org/abs/2305.13245) | Grouped-query attention: several query heads share one key/value head, shrinking the KV cache | **Not built.** [PROBLEM.md](PROBLEM.md) item 2 |
-| Shazeer. *Fast Transformer Decoding: One Write-Head is All You Need.* 2019 | [arXiv:1911.02150](https://arxiv.org/abs/1911.02150) | Multi-query attention, the one-group extreme of GQA | **Not built**, background for GQA |
+| Ainslie et al. *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints.* EMNLP 2023 | [arXiv:2305.13245](https://arxiv.org/abs/2305.13245) | Grouped-query attention: several query heads share one key/value head, shrinking the KV cache | **Built and cited** (`model/attention.py`, `model.n_kv_heads`, D-044). Trained from scratch, not "uptrained" from a multi-head checkpoint as in the paper |
+| Shazeer. *Fast Transformer Decoding: One Write-Head is All You Need.* 2019 | [arXiv:1911.02150](https://arxiv.org/abs/1911.02150) | Multi-query attention, the one-group extreme of GQA | **Built** as `n_kv_heads: 1` (D-044), tested, not trained |
 
 ## Code the project learned from
 
