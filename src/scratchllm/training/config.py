@@ -39,6 +39,7 @@ class ModelSection(_Strict):
     position: Literal["learned", "rope"] = "learned"
     ffn: Literal["gelu", "swiglu"] = "gelu"
     rope_theta: float = Field(10000.0, gt=0.0)
+    n_kv_heads: PositiveInt | None = None  # grouped-query attention; None = n_heads
 
     def to_gpt(self) -> GPTConfig:
         return GPTConfig(**self.model_dump())
@@ -111,6 +112,9 @@ class RunConfig(_Strict):
             raise ValueError("warmup_steps cannot exceed max_steps")
         if self.model.d_model % self.model.n_heads != 0:
             raise ValueError("d_model must be divisible by n_heads")
+        kv = self.model.n_kv_heads
+        if kv is not None and self.model.n_heads % kv != 0:
+            raise ValueError("n_heads must be a multiple of n_kv_heads")
         return self
 
     @property

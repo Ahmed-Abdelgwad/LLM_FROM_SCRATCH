@@ -94,7 +94,7 @@ def main() -> None:
             ev = events(f"sft-{m}-seed{s}")
             start = next(e for e in ev if e["event"] == "start")
             evals = [e for e in ev if e["event"] == "eval"]
-            best = min(evals, key=lambda e: e["score"])
+            best_eval = min(evals, key=lambda e: e["score"])
             trains = [e for e in ev if e["event"] == "train"]
             steps = [
                 (b["seconds"] - a["seconds"]) / (b["step"] - a["step"])
@@ -107,7 +107,7 @@ def main() -> None:
                 "trainable": start["trainable_parameters"],
             }
             out.append(
-                f"| {m}, seed {s} | {start['trainable_parameters']:,} | {best['step']} | {best['score']:.4f} | {statistics.median(steps):.3f} | {peak:.0f} |"
+                f"| {m}, seed {s} | {start['trainable_parameters']:,} | {best_eval['step']} | {best_eval['score']:.4f} | {statistics.median(steps):.3f} | {peak:.0f} |"
             )
     out.append("")
 

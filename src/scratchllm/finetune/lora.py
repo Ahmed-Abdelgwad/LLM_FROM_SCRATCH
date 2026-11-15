@@ -21,7 +21,9 @@ Choices, and where each comes from:
   (out = 3 * d_model). The paper adapts W_q and W_v separately (its table 5 finds that pair the
   best use of a fixed budget). So a target can name a slice of a fused layer: "attn.q", "attn.k"
   and "attn.v" give that third of `attn.qkv` its own A and B, like `loralib.MergedLinear` with
-  `enable_lora=[True, False, True]`. The slices leave the other thirds exactly unchanged.
+  `enable_lora=[True, False, True]`. The slices leave the other thirds exactly unchanged. With
+  grouped-query attention the key and value parts are narrower than the query part (`kv_dim`
+  outputs each, not d_model), and the slices follow the attention's own sizes.
 * After training, B A is added into W0 once (`merge_lora`, the paper's "no additional inference
   latency"): the merged model is a plain `GPT` with the base model's parameter names, and the
   ordinary checkpoint, evaluation and generation code reads it.
@@ -104,6 +106,16 @@ class LoRALinear(nn.Module):
         return out + torch.cat(parts, dim=-1)
 
 
+def _qkv_bounds(model: nn.Module, name: str, module: nn.Linear) -> list[tuple[int, int]]:
+    """Output ranges of the queries, keys and values in a fused `attn.qkv` map."""
+    attention = model.get_submodule(name.rpartition(".")[0])
+    q_dim = getattr(attention, "d_model", module.out_features // 3)
+    kv_dim = getattr(attention, "kv_dim", q_dim)
+    if q_dim + 2 * kv_dim != module.out_features:
+        raise ValueError(f"{name}: {module.out_features} outputs, expected {q_dim + 2 * kv_dim}")
+    return [(0, q_dim), (q_dim, q_dim + kv_dim), (q_dim + kv_dim, q_dim + 2 * kv_dim)]
+
+
 def _resolve(model: nn.Module, targets: Sequence[str]) -> dict[str, list[tuple[int, int]] | None]:
     """Module name -> slices to adapt (None = all of it), for every layer the targets name."""
     unknown = [t for t in targets if t not in QKV_SLICES and t not in LINEAR_TARGETS]
@@ -116,10 +128,10 @@ def _resolve(model: nn.Module, targets: Sequence[str]) -> dict[str, list[tuple[i
         if not isinstance(module, nn.Linear):
             continue
         if name.endswith("attn.qkv"):
-            third = module.out_features // 3
             wanted = [QKV_SLICES[t] for t in targets if t in QKV_SLICES]
             if wanted:
-                plan[name] = [(i * third, (i + 1) * third) for i in sorted(set(wanted))]
+                bounds = _qkv_bounds(model, name, module)
+                plan[name] = [bounds[i] for i in sorted(set(wanted))]
         elif name.endswith(tuple(t for t in targets if t in LINEAR_TARGETS)):
             plan[name] = None
     for target in targets:
@@ -182,11 +194,18 @@ def trainable_parameters(model: nn.Module) -> int:
 
 
 def lora_parameter_count(
-    d_model: int, d_ff: int, n_layers: int, rank: int, targets: Sequence[str]
+    d_model: int,
+    d_ff: int,
+    n_layers: int,
+    rank: int,
+    targets: Sequence[str],
+    kv_dim: int | None = None,
 ) -> int:
-    """r * (in + out) per adapted map, summed: the formula the tests check the model against."""
+    """r * (in + out) per adapted map, summed: the formula the tests check the model against.
+    `kv_dim` is the width of the keys and values under grouped-query attention (default d_model)."""
+    kv = d_model if kv_dim is None else kv_dim
     shape = {
-        "attn.q": (d_model, d_model), "attn.k": (d_model, d_model), "attn.v": (d_model, d_model),
+        "attn.q": (d_model, d_model), "attn.k": (d_model, kv), "attn.v": (d_model, kv),
         "attn.out_proj": (d_model, d_model), "ff.up": (d_model, d_ff), "ff.gate": (d_model, d_ff),
         "ff.down": (d_ff, d_model),
     }  # fmt: skip

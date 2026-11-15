@@ -37,6 +37,16 @@ return the weights. With `fast=True`, `forward` uses `F.scaled_dot_product_atten
 the same numbers (the tests compare them) without ever building the T x T tables in memory,
 which on the RTX 3050 is about 4 times faster and uses about 3.5 times less memory per layer.
 
+Grouped-query attention (GQA, Ainslie et al. 2023). With `n_kv_heads` below `n_heads`, the
+query heads are split into `n_kv_heads` groups of n_heads / n_kv_heads consecutive heads, and
+every head of a group uses the same key and value head. The keys and values are then smaller by
+that factor, and so is the key/value cache that generation keeps (D-030): that is what GQA is for.
+`n_kv_heads = 1` is multi-query attention (Shazeer 2019); `n_kv_heads = n_heads`, the default,
+is the multi-head attention above, with the same weights and the same checkpoints as before the
+option existed. The shared heads are copied to their group only at the moment the scores are
+computed; the cache keeps one copy (`tests/test_gqa.py` checks that GQA equals multi-head
+attention whose key and value heads are repeated that way).
+
 Positions. Attention alone does not know the order of the tokens. By default the model adds that
 information to the inputs (a learned position embedding in GPT-2) and nothing happens here. With
 `rope=True` the order is put into the queries and keys instead (rotary embeddings, Su et al. 2021,
@@ -96,17 +106,25 @@ class CausalSelfAttention(nn.Module):
         fast: bool = False,
         rope: bool = False,
         rope_theta: float = 10000.0,
+        n_kv_heads: int | None = None,
     ) -> None:
         super().__init__()
         if d_model % n_heads != 0:
             raise ValueError(f"d_model {d_model} must be divisible by n_heads {n_heads}")
+        n_kv_heads = n_heads if n_kv_heads is None else n_kv_heads
+        if n_kv_heads < 1 or n_heads % n_kv_heads != 0:
+            raise ValueError(f"n_heads {n_heads} must be a multiple of n_kv_heads {n_kv_heads}")
         self.d_model = d_model
         self.n_heads = n_heads
+        self.n_kv_heads = n_kv_heads
+        self.groups = n_heads // n_kv_heads  # query heads per key/value head
         self.head_dim = d_model // n_heads
+        self.kv_dim = n_kv_heads * self.head_dim  # width of the keys, and of the values
         self.context_length = context_length
         self.fast = fast
         self.dropout = dropout
-        self.qkv = nn.Linear(d_model, 3 * d_model, bias=bias)
+        # queries, keys and values in one map: d_model + 2 * kv_dim outputs (3 * d_model, no GQA)
+        self.qkv = nn.Linear(d_model, d_model + 2 * self.kv_dim, bias=bias)
         self.out_proj = nn.Linear(d_model, d_model, bias=bias)
         self.attn_dropout = nn.Dropout(dropout)
         self.resid_dropout = nn.Dropout(dropout)
@@ -135,6 +153,7 @@ class CausalSelfAttention(nn.Module):
             return self.forward_with_weights(x)[0]
         batch, length, width = self._check(x)
         q, k, v = self._qkv(x)
+        k, v = self._expand(k), self._expand(v)
         out = F.scaled_dot_product_attention(
             q, k, v, dropout_p=self.dropout if self.training else 0.0, is_causal=True
         )
@@ -161,7 +180,8 @@ class CausalSelfAttention(nn.Module):
         batch, length, width = self._check(x)
         offset = cache.length
         q, k, v = self._qkv(x, offset)
-        keys, values = cache.update(layer, k, v)  # (batch, heads, offset + T, head_dim)
+        keys, values = cache.update(layer, k, v)  # (batch, kv heads, offset + T, head_dim)
+        keys, values = self._expand(keys), self._expand(values)
         if length == 1:  # the newest token may see everything stored
             out = F.scaled_dot_product_attention(q, keys, values)
         elif offset == 0:
@@ -175,7 +195,12 @@ class CausalSelfAttention(nn.Module):
     def _qkv(
         self, x: torch.Tensor, offset: int = 0
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        q, k, v = (self._heads(t) for t in self.qkv(x).split(self.d_model, dim=2))
+        q, k, v = self.qkv(x).split((self.d_model, self.kv_dim, self.kv_dim), dim=2)
+        q, k, v = (
+            self._heads(q, self.n_heads),
+            self._heads(k, self.n_kv_heads),
+            self._heads(v, self.n_kv_heads),
+        )
         if self.rope:
             length = x.shape[1]
             cos = self.rope_cos[offset : offset + length]
@@ -183,15 +208,22 @@ class CausalSelfAttention(nn.Module):
             q, k = apply_rotary(q, cos, sin), apply_rotary(k, cos, sin)
         return q, k, v
 
-    def _heads(self, t: torch.Tensor) -> torch.Tensor:
-        """(batch, T, d_model) -> (batch, heads, T, head_dim)."""
+    def _heads(self, t: torch.Tensor, heads: int | None = None) -> torch.Tensor:
+        """(batch, T, heads * head_dim) -> (batch, heads, T, head_dim); default heads: n_heads."""
         batch, length, _ = t.shape
-        return t.view(batch, length, self.n_heads, self.head_dim).transpose(1, 2)
+        heads = self.n_heads if heads is None else heads
+        return t.view(batch, length, heads, self.head_dim).transpose(1, 2)
+
+    def _expand(self, t: torch.Tensor) -> torch.Tensor:
+        """(batch, n_kv_heads, T, head_dim) -> (batch, n_heads, T, head_dim): key/value head g is
+        used by query heads g * groups .. (g + 1) * groups - 1. Nothing to do without GQA."""
+        return t if self.groups == 1 else t.repeat_interleave(self.groups, dim=1)
 
     def forward_with_weights(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Also returns the attention weights (batch, heads, T, T), to look at or to test."""
         batch, length, width = self._check(x)
         q, k, v = self._qkv(x)
+        k, v = self._expand(k), self._expand(v)
         scores = q @ k.transpose(-2, -1) / math.sqrt(self.head_dim)  # (batch, H, T, T)
         scores = scores.masked_fill(self.future[:length, :length], float("-inf"))
         weights = torch.softmax(scores, dim=-1)

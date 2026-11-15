@@ -19,7 +19,8 @@ Options (D-027). The description above is the default, GPT-2. Three config switc
 parts with the ones recent models use: `norm="rmsnorm"` (RMS norm instead of layer norm),
 `position="rope"` (rotary embeddings in the attention instead of a learned vector per position;
 the model then has no position table) and `ffn="swiglu"` (a gated feed-forward instead of the
-GELU one, at a width that keeps its parameter count). Each is off by default, so a config or a
+GELU one, at a width that keeps its parameter count). A fourth, `n_kv_heads`, makes the attention
+grouped-query (see `attention.py`). Each is off by default, so a config or a
 checkpoint made before they existed builds the model it always was.
 
 Positions. Attention does not know the order of tokens, so a learned vector per position
@@ -79,6 +80,9 @@ class GPTConfig:
     position: Literal["learned", "rope"] = "learned"
     ffn: Literal["gelu", "swiglu"] = "gelu"
     rope_theta: float = 10000.0
+    # grouped-query attention: key/value heads shared by n_heads / n_kv_heads query heads each;
+    # None = n_heads, multi-head attention as before the option existed
+    n_kv_heads: int | None = None
 
     @property
     def hidden(self) -> int:
@@ -104,6 +108,7 @@ class Block(nn.Module):
         self.attn = CausalSelfAttention(
             cfg.d_model, cfg.n_heads, cfg.context_length, cfg.dropout, cfg.bias,
             cfg.fast_attention, rope=cfg.position == "rope", rope_theta=cfg.rope_theta,
+            n_kv_heads=cfg.n_kv_heads,
         )  # fmt: skip
         self.norm2 = make_norm(cfg)
         ff_class = SwiGLUFeedForward if cfg.ffn == "swiglu" else FeedForward

@@ -11,7 +11,8 @@ The cache has the shape of the model's window: room for `context_length` positio
 filled from the left. It holds the positions 0 .. length-1 of one text; it cannot slide (when the
 text outgrows the window, the model's view shifts and every position's numbers change, so the
 caller starts again without a cache; `generate` does this and the result is the same as without
-any cache at all).
+any cache at all). With grouped-query attention it stores the n_kv_heads shared heads, not one per
+query head, so it is n_heads / n_kv_heads times smaller.
 """
 
 from __future__ import annotations
@@ -30,8 +31,8 @@ class KVCache:
     def update(
         self, layer: int, keys: torch.Tensor, values: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        """Store the new positions' keys and values (batch, heads, new, head_dim) after the ones
-        already there; return all of them, (batch, heads, length + new, head_dim)."""
+        """Store the new positions' keys and values (batch, kv heads, new, head_dim) after the ones
+        already there; return all of them, (batch, kv heads, length + new, head_dim)."""
         new = keys.size(2)
         if self.length + new > self.context_length:
             raise ValueError(
@@ -50,6 +51,12 @@ class KVCache:
         stored_v[:, :, self.length : self.length + new] = values
         end = self.length + new
         return stored_k[:, :, :end], stored_v[:, :, :end]
+
+    def nbytes(self) -> int:
+        """Memory the cache has allocated, in bytes."""
+        return sum(
+            t.numel() * t.element_size() for t in (*self._keys, *self._values) if t is not None
+        )
 
     def advance(self, new: int) -> None:
         self.length += new
