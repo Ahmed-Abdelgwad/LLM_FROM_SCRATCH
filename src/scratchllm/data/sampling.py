@@ -54,6 +54,14 @@ class SampleSpec:
     min_chars: int = 50  # drops empty/trivial rows only; real quality filtering comes after EDA
     rows_per_group: int = 250  # rows taken from each sampled row group (raised for small sources)
     read_workers: int = 4  # best of 1/4/16 measured on fineweb-2 arb_Arab; more did not help
+    # Seed of the train/val/test assignment; None = `seed`, as every sample before D-049 was drawn.
+    # A second draw from the same source sets it to the first draw's seed, so a site lands in the
+    # same split in both and no site crosses the train/evaluation boundary (D-049).
+    split_seed: int | None = None
+
+    @property
+    def effective_split_seed(self) -> int:
+        return self.seed if self.split_seed is None else self.split_seed
 
 
 def text_hash(text: str) -> str:
@@ -170,7 +178,7 @@ def build_docs(
             "id": doc_id,
             "source": source.name,
             "url": url,
-            "split": assign_split(key, spec.seed, spec.val_frac, spec.test_frac),
+            "split": assign_split(key, spec.effective_split_seed, spec.val_frac, spec.test_frac),
             "text_sha256": digest,
             "text": text,
         }

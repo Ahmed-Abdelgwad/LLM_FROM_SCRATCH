@@ -42,6 +42,10 @@ def sample(
     source: Annotated[str, typer.Argument(help="Registered source name (see `data sources`).")],
     n_docs: Annotated[int, typer.Option(help="Documents to draw.")] = 50_000,
     seed: int = 0,
+    split_seed: Annotated[
+        int | None,
+        typer.Option(help="Seed of the split assignment; default: --seed (D-049)."),
+    ] = None,
     val_frac: float = 0.02,
     test_frac: float = 0.02,
     out_dir: Path = Path("data/raw/eda"),
@@ -67,6 +71,7 @@ def sample(
             test_frac=test_frac,
             rows_per_group=rows_per_group,
             read_workers=workers,
+            split_seed=split_seed,
         )
         rev = revision or latest_revision(src.repo)
         typer.echo(f"{src.name}: {src.repo} @ {rev[:10]}, drawing {n_docs} docs (seed {seed})")
@@ -214,6 +219,46 @@ def leaks(
     if purge_to is not None:
         for name, r in purge_train_leaks(manifests, eval_hashes, purge_to).items():
             typer.echo(f"{name}: kept {r['kept']}, removed {r['removed_train_leaks']}")
+
+
+@data_app.command("extend-train")
+def extend_train(
+    draw_dir: Annotated[Path, typer.Argument(help="Folder of the second draw (its manifests).")],
+    out_dir: Annotated[Path, typer.Option(help="Where the new training documents go.")],
+    base_dir: Annotated[Path, typer.Option(help="Folder of the first sample.")] = Path(
+        "data/raw/eda"
+    ),
+) -> None:
+    """Keep a second draw's new training documents only: train sites, not in the first sample,
+    no exact duplicate of any evaluation document (D-049)."""
+    from scratchllm.data.extend import build_extension, evaluation_hashes
+
+    eval_hashes = evaluation_hashes(sorted(base_dir.glob("*.manifest.json")))
+    typer.echo(f"{len(eval_hashes):,} evaluation texts in {base_dir}")
+    draws = sorted(draw_dir.glob("*.manifest.json"))
+    if not draws:
+        raise typer.BadParameter(f"no manifests in {draw_dir}")
+    for draw in draws:
+        receipt = build_extension(base_dir / draw.name, draw, eval_hashes, out_dir)
+        counts = {k: v for k, v in receipt.items() if isinstance(v, int)}
+        typer.echo(f"{receipt['source']}: {counts}")
+
+
+@data_app.command("compose-tokens")
+def compose_tokens_cmd(
+    ext_dir: Annotated[Path, typer.Argument(help="Token files of the extension.")],
+    out_dir: Annotated[Path, typer.Option(help="The composed token folder.")],
+    base_dir: Annotated[Path, typer.Option(help="The token folder to extend.")] = Path(
+        "data/processed/tokens-16k"
+    ),
+) -> None:
+    """Base token files with each extended source's train file lengthened; every other file
+    copied byte for byte (D-049)."""
+    from scratchllm.data.extend import compose_tokens
+
+    for name, meta in compose_tokens(base_dir, ext_dir, out_dir).items():
+        shown = ", ".join(f"{k} {v['tokens']:,}" for k, v in meta["splits"].items())
+        typer.echo(f"{name}: {shown} tokens{' (extended)' if 'extension' in meta else ''}")
 
 
 @data_app.command("tokenize")
