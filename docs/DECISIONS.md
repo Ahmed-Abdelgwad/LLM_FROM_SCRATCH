@@ -2918,3 +2918,100 @@ relative path; the report is identical apart from that path, every number includ
 reproduction on other hardware, or of the data pipeline end to end, is not done.
 
 **Decision.** The reproducibility metric of `docs/PROBLEM.md` is met for the reference run, at the tolerance of D-047.
+
+## D-049 (2026-11-17): scaling plan: four times the training, by repeating the data or by new data, registered before any data is drawn or any run made
+
+**Question.** The reference model (17M parameters, 164M tokens, about 10 tokens per parameter) stops at 1.95 bits/char on the
+Arabic mean and 1.49 on English (D-036). Its training and validation losses are almost equal, so it is not overfitting; it is
+short of training. Does four times the training lower the loss enough to matter, and does that need new text, or is repeating the
+text we have enough?
+
+**Source.** Muennighoff et al., *Scaling Data-Constrained Language Models*, NeurIPS 2023 (arXiv:2305.16264), from models of 10M to
+9B parameters: "with constrained data for a fixed compute budget, training with up to 4 epochs of repeated data yields negligible
+changes to loss compared to having unique data", and "models trained for a single epoch consistently have the best validation loss
+per compute". Read in the paper on 2026-11-17. Their data is English; this model is bilingual and smaller than most of theirs.
+
+**Arms.** Both have four times the reference's compute and differ only in the data they read. Each is `configs/reference-17m.yaml`
+with `max_steps: 20000` (the cosine schedule ends at step 20,000; warmup and learning rates unchanged), seed 1337, one run each.
+
+| Arm | Config | Training text | Tokens seen | Expected passes over the text |
+|---|---|---|---|---|
+| reference (exists) | `reference-17m` | `tokens-16k`, 167M train tokens | 164M | 1.0 |
+| A, epochs | `configs/experiments/scale-epochs4.yaml` | the same `tokens-16k` | 655M | 3.9 |
+| B, new data | `configs/experiments/scale-data4.yaml` | `tokens-16k-4x`, about 670M train tokens | 655M | about 1.0 |
+
+The trainer draws random windows from each source in proportion to its train tokens. So "passes" are expected values: some text is
+read more often than others. The mix between sources stays as it is, up to the sampling noise of the new draw.
+
+**Building the data for arm B**, before any run. Every step is checked, and the evaluation side does not change.
+
+1. *New train documents only.* For each of the six training sources, draw a second sample from the same pinned dataset revision,
+   with a new draw seed (1) and about three times the documents of the first. The sampler uses one seed both to draw and to
+   assign splits by site, and a new seed would move sites between train and evaluation. So the sampler gets a separate
+   `split_seed`. It defaults to the draw seed, so every existing manifest reproduces unchanged; that is tested. The second sample
+   uses `split_seed: 0`, the first sample's. Every new document whose site (or, for Wikipedia, id) the split rule sends to
+   validation or test is dropped, not added. So no site crosses the train/evaluation boundary, and the evaluation sets stay as
+   they are.
+2. *Fresh means fresh:* new documents that exactly duplicate a document of the first sample are dropped.
+3. *Leakage, as D-005 and D-012:* new train documents that exactly duplicate any evaluation document are removed, and the
+   near-duplicate rate against the evaluation sets is measured and reported, not removed.
+4. *Same processing:* the same cleaning rules, normalization and tokenizer (`artifacts/tokenizer/bpe-16k.json`, by hash).
+5. *`data/processed/tokens-16k-4x`:* each source's train file is the old train tokens followed by the new ones. Every
+   validation, test and evaluation-only file is a byte-identical copy of `tokens-16k`'s, checked by SHA-256.
+
+The sampler option, the exclusion steps and the token-directory builder are new code, with tests, committed before the data is
+drawn. Disk: about 4 GB of raw text and 1.3 GB of tokens, against 20 GB free. Download: about 3 GB, roughly 35 minutes at the
+speed measured on 2026-11-17.
+
+**Metrics**, the same as D-023 to D-036, so every number compares with the earlier entries:
+
+- *decision:* bits/char at the final step, in-training validation, on the Arabic mean and on English;
+- *guard rails:* `wiki_ary` and the other unseen dialects from the full evaluation (`scratchllm eval`); and, for arm A, the gap
+  between validation and train-probe bits/char on the Arabic mean, against the reference's gap at step 5,000;
+- *reported, not judged:* the validation curve every 250 steps, tokens/s, peak memory, and greedy samples at the fixed prompts of
+  D-022 and D-023.
+
+**Criteria.** These thresholds were proposed by the assistant and agreed by the project on 2026-11-17, before any data was drawn.
+Let D be (arm) minus (reference), bits/char.
+
+*Preconditions*, or there is no comparison: validation, test and evaluation-only token files identical to `tokens-16k` by hash;
+the same tokenizer; zero exact duplicates of evaluation documents in arm B's new train text; no skipped steps; the configs differ
+from `reference-17m` only in `name`, `max_steps` and, for B, `tokens_dir`.
+
+*1. Does four times the training help?* Each arm is classified on the Arabic mean and on English:
+
+- **worth adopting:** D ≤ -0.05 on both. For scale, 0.05 is about what all the architecture work of D-028 to D-036 gained (0.06);
+- **real but small:** not worth adopting, and D ≤ -0.015 on at least one of the two, with neither worse than the reference;
+- **no gain:** anything else.
+
+An arm that is "worth adopting" is still not adopted if a guard rail trips: `wiki_ary` worse than the reference by 0.05 or more
+(D-031's rule for unseen text), or, for arm A, a validation-minus-train gap more than 0.02 larger than the reference's (repetition
+turning into memorizing; this 0.02 is also the assistant's).
+
+*2. Repeated or new data?* D' = B minus A, on the Arabic mean and on English, by the bands of D-031: |D'| < 0.005 "the same";
+0.005 to 0.015 "unresolved"; more than 0.015 "differs".
+
+- A is "the same" as B, or better: repeating the data is enough, and new data is not needed at this scale.
+- B "differs", lower: the model needs new text, not more passes over the old.
+- "Unresolved": a second seed (2024) of both arms would decide, about 8.5 more GPU-hours. It is run only on the project's go, with
+  this same criterion.
+
+*Decision rule.* If one or both arms are "worth adopting", the cheaper adopted arm becomes a new reference config,
+`configs/reference-17m-20k.yaml`: A, unless B is lower by more than 0.015 on the Arabic mean, in which case B. `reference-17m.yaml`
+stays as the record. Otherwise the reference does not change, and the result is reported as it is.
+
+**Expected before the runs:** both arms "worth adopting" on the Arabic mean, from the pilot-to-baseline gain (2.42 to 2.02 for 3.3
+times the tokens, D-022, D-023), and A and B "the same" or "unresolved", from Muennighoff et al. Expectations decide nothing.
+
+**Not in this plan:**
+
+- a larger model, the other half of scaling: at 20,000 steps the 17M model sees about 39 tokens per parameter, past Chinchilla's
+  20, so a larger model would likely use the same compute better. A separate plan.
+- the human rubric: it was at the floor (D-046). If an arm is adopted, fine-tuning it with D-039's recipe and 20% replay (D-043),
+  and scoring a new sheet, is a separate plan.
+- a second seed, unless criterion 2 is unresolved;
+- rebuilding the tokenizer on the larger data.
+
+**Cost.** About 4 to 4.5 hours of GPU per run, so 8.5 hours for both arms, plus the full evaluations, the download and the
+tokenization. The machine has suspended during two of the last runs despite the inhibitor (D-043, D-048). Each run resumes from
+`last.pt` if it is stopped, and the entry will report any interruption.
