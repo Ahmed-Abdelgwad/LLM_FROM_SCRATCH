@@ -2854,3 +2854,67 @@ work without changing the config or the worktree's clean state:
 - The drive's files belong to root, so git refuses the worktree as "dubious ownership". Every command in the worktree runs with
   `safe.directory` set for that one process (environment variables `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_0`, `GIT_CONFIG_VALUE_0`);
   the global git config is not changed.
+
+## D-048 (2026-11-17): the reference run reproduces from a clean checkout, within D-047's tolerance
+
+The run of D-047, as registered: `configs/reference-17m.yaml` (name and `runs_dir` set on the command line), from a clean
+`git worktree` at commit `9136841`, in a virtual environment built fresh from `uv.lock` (35 minutes of downloads; Python 3.13.12,
+torch 2.14.1+cu130, numpy 2.5.4), reading the same token files through a symlink. Run `runs/repro-reference-17m`, full evaluation
+`reports/eval/final-repro-reference-17m` (see the run note for where it was run). The script `scripts/archive/d047_entry.py` checks the preconditions, applies the
+criterion and builds the tables; the evaluation events of both runs are in `reports/eval/final-d047-repro/evals.json`.
+
+| Precondition (D-047) | holds |
+|---|---|
+| config equal except the name and runs_dir | yes |
+| token files equal by SHA-256 | yes |
+| parameters 16,913,280 | yes |
+| Python 3.13.12, torch 2.14.1+cu130 | yes |
+| worktree clean | yes |
+| no skipped steps, no resume | yes |
+
+Original: commit `6f1ee7e`, 3.13.12, torch 2.14.1+cu130. Rerun: commit `9136841`, 3.13.12, torch 2.14.1+cu130, numpy 2.5.4.
+
+| Criterion (D-047): rerun minus original, bits/char | |D| | limit | result |
+|---|---:|---:|---|
+| 1. Arabic mean at step 5,000 | +0.0008 | 0.005 | holds |
+| 1. English at step 5,000 | -0.0012 | 0.005 | holds |
+| 2. `wiki_ary`, full evaluation | +0.0122 | 0.02 | holds |
+| 2. every other source and split, full evaluation (largest) (fw2_acm, eval) | +0.0021 | 0.01 | holds |
+| 3. Arabic mean at every evaluation (largest) (step 250) | -0.0022 | 0.015 | holds |
+| 3. training loss, 250-step means (largest) (steps 1501 to 1750) | -0.0094 | 0.02 | holds |
+
+| Step | 250 | 750 | 1250 | 1750 | 2250 | 2750 | 3250 | 3750 | 4250 | 4750 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Arabic mean, rerun minus original | -0.0022 | -0.0007 | -0.0012 | +0.0007 | +0.0011 | +0.0015 | +0.0008 | +0.0014 | +0.0012 | +0.0006 |
+
+Reported, not judged: training loss at step 10, original 9.692326259613036, rerun 9.692311000823974 (not equal); largest single logged training-loss difference 0.0152; median tokens/s 45,550 and 45,663; peak memory 1689 and 1689 MiB.
+
+**Verdict (D-047): reproduced within tolerance.**
+
+**Reading.**
+
+1. *Every precondition and every criterion holds,* so by D-047's rule the run is **reproduced within tolerance.** At step 5,000
+   the Arabic mean differs by +0.0008 bits/char and English by -0.0012, against a limit of 0.005. That is inside the 0.0033 that
+   separates two seeds (D-029).
+2. *The curve:* the Arabic mean stays within 0.0022 of the original at all 20 evaluations, and the 250-step training-loss means
+   within 0.0094. The largest single logged training-loss difference is 0.015.
+3. *The closest call is `wiki_ary`:* +0.012 against a limit of 0.02. It is the source the model never trained on, and the one D-031
+   already found the noisiest. Every other source and split of the full evaluation is within 0.0021.
+4. *Not bit-identical,* as D-047 expected: the step-10 losses already differ in the fifth decimal (9.692311 against 9.692326). So
+   the agreement above is reproduction within GPU noise, not exact reproduction.
+5. *Code since the original:* the rerun used code two training-related commits newer than `6f1ee7e` (grouped-query attention, off
+   by default, and the removal of an unused loader). That it reproduces is also evidence that those commits did not change this
+   run's arithmetic beyond noise.
+
+**Run note.** The machine suspended at 07:17:14, between steps 1,230 and 1,240, although sleep, idle and the lid switch were
+inhibited, and on mains power. The journal logs "The system will suspend now!" with no cause; the lid closed 4 seconds after.
+It resumed at 15:41:58. The training process survived, kept its GPU state and continued from where it was; it was not restarted,
+and its log has no resume event. The differences from the original are no larger after the suspend than before it (-0.0022 to
++0.0006 up to step 1,250, -0.0002 to +0.0017 after). The full evaluation was first run from the worktree, which recorded the
+checkpoint by its absolute path. It was rerun from the repository root, with the environment the lock file describes, to record a
+relative path; the report is identical apart from that path, every number included.
+
+**Limits.** Same machine and same GPU as the original; one run; the token files were reused, not rebuilt from the raw data. A
+reproduction on other hardware, or of the data pipeline end to end, is not done.
+
+**Decision.** The reproducibility metric of `docs/PROBLEM.md` is met for the reference run, at the tolerance of D-047.
