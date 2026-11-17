@@ -41,7 +41,7 @@ and in `scripts/archive/`, so they are never renamed or merged: a name below is 
 | `sft/final-sft-{full,lora}-seed{1337,2024}`, `eval/final-sft-{full,lora}-seed{1337,2024}` | D-040 | the four fine-tuned models: test split, and the full pretraining evaluation (forgetting) |
 | `sft/final-sft-full-replay{0,5,10,20}-seed{1337,2024}`, `eval/final-sft-full-replay{0,5,10,20}-seed{1337,2024}`, `eval/final-d042-replay` | D-043 | the replay runs planned in D-042: test split, full pretraining evaluation, and the numbers the entry compares |
 | `eval/final-ablation-gqa2`, `eval/final-ablation-gqa2-seed2024`, `eval/final-d044-gqa` | D-045 | grouped-query attention (2 key/value heads) at two seeds, and the evaluation events compared |
-| `sft/final-rubric-v1` | D-041 | the blind human-rubric sheet: `sheet.html`, `scores.csv`, `key.json` (not to be opened before scoring); `summary.*` once scored |
+| `sft/final-rubric-v1` | D-041, D-046 | the blind human-rubric sheet (`sheet.html`, `key.json`), the scores (`scores.csv`, scoring columns only) and their analysis (`summary.json`, `summary.md`) |
 
 ## Regenerating
 

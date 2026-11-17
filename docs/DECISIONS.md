@@ -2743,3 +2743,52 @@ default (D-027). Item 2 of `docs/PROBLEM.md` is complete as a build: every part 
 
 **Not tested:** a third seed, which would say whether seed 1337 or seed 2024 is typical; 1 or 3 key/value heads; a
 parameter-matched GQA; uptraining from a multi-head checkpoint.
+
+## D-046 (2026-11-17): the human rubric, scored: every reply of every model fails its prompt; full fine-tuning scores above LoRA by the registered rule, on 4 prompts
+
+The sheet of D-041 (`reports/sft/final-rubric-v1`), scored by one person in the browser page. The page's download replaced
+`scores.csv`, which now has only the scoring columns (`prompt_no`, `reply`, `overall`, `fails_instruction`, `incorrect`, `notes`);
+the prompts and reply texts stay in `sheet.html` and in the committed history of the file. `scratchllm sft-rubric-score` checked
+that the 90 scored rows match the key exactly and wrote `summary.json` and `summary.md`. The scorer's notes are in `scores.csv`.
+
+**Scores** (overall 1 to 7; 95% bootstrap intervals over prompts):
+
+| Model | Overall | 95% interval | Fails the instruction | Incorrect, of the replies judged |
+|---|---|---|---|---|
+| base, seed 1337 | 1.00 | 1.00 to 1.00 | 100% (30/30) | 100% (30/30) |
+| full fine-tuning, seed 1337 | 1.17 | 1.03 to 1.30 | 100% (30/30) | 100% (30/30) |
+| LoRA, seed 1337 | 1.03 | 1.00 to 1.10 | 100% (30/30) | 100% (29/29; 1 not judged) |
+
+| Pair | Mean difference | 95% interval | Wins / ties / losses |
+|---|---|---|---|
+| base minus full | -0.17 | -0.30 to -0.03 | 0 / 25 / 5 |
+| base minus LoRA | -0.03 | -0.10 to +0.00 | 0 / 29 / 1 |
+| full minus LoRA | +0.13 | +0.03 to +0.27 | 4 / 26 / 0 |
+
+By variety, full fine-tuning's mean is 1.25 on Standard Arabic, 1.17 on Egyptian and 1.08 on English; LoRA's 1.08, 1.00 and
+1.00; the base model's 1.00 everywhere. The "incorrect" rate is over the replies judged: one LoRA reply (prompt 10, English) was
+left blank because it asserted nothing, so LoRA's rate is 29 of 29, not 29 of 30. `summary.md` writes every rate with its
+denominator (the rendering was changed for this; `summary.json` and the scores are unchanged).
+
+**Reading.**
+
+1. *No model answers.* All 90 replies fail the instruction, and all 89 replies judged for correctness are incorrect. The highest
+   score given is 2 of 7, to 6 replies: full fine-tuning on prompts 5, 8, 23, 25 and 26, LoRA on prompt 23. The scorer's notes
+   describe the same failures as D-040's automatic measures: the base model writes markup, the fine-tuned models repeat the
+   question, loop, or answer something else.
+2. *Full fine-tuning against LoRA,* the comparison registered in D-041: the interval of the paired difference, +0.03 to +0.27,
+   excludes zero, so by the rule **full fine-tuning scores higher than LoRA**. The difference is 4 prompts where full fine-tuning
+   got 2 and LoRA 1, with 26 ties at the floor. It agrees in direction with D-040 (full fine-tuning lowers the response loss more),
+   and it is the smallest difference the scale can show: "less bad", not "answers".
+3. *Fine-tuning against the base model:* full fine-tuning is above the base model by the same rule (-0.30 to -0.03). LoRA's
+   interval reaches zero (-0.10 to +0.00), so it is not distinguished from the base model.
+4. *Limits.* One scorer, 30 prompts, a scale used only at 1 and 2, so the bootstrap rests on a handful of non-tied prompts. The
+   base model's markup made it recognizable, as D-041 expected. That the key was not opened before scoring rests on the scorer.
+   The replay models of D-043 are not on the sheet.
+
+**What it means for the project.** The rubric agrees, in a person's judgement, with the automatic measures: in this setup (17M
+parameters, 164M pretraining tokens, 1,000 fine-tuning steps), fine-tuning taught the format (the prompt's language, stopping, an
+answer-shaped reply) but not the answers. Item 4 of `docs/PROBLEM.md` is complete as a build and as an evaluation. Why the answers
+fail was not tested here. The likely next direction is a larger base model or more pretraining, since the base model's knowledge
+is what fine-tuning has to draw on; that is a hypothesis for a future plan, not a result of this one. Longer fine-tuning or
+better data are other candidates this experiment does not rule out.
