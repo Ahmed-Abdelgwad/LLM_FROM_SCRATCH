@@ -1,0 +1,175 @@
+{
+  "per_model": {
+    "base-1337": {
+      "all": {
+        "n": 30,
+        "overall": 1.0,
+        "overall_ci95": [
+          1.0,
+          1.0
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 30
+      },
+      "egyptian": {
+        "n": 6,
+        "overall": 1.0,
+        "overall_ci95": [
+          1.0,
+          1.0
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 6
+      },
+      "english": {
+        "n": 12,
+        "overall": 1.0,
+        "overall_ci95": [
+          1.0,
+          1.0
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 12
+      },
+      "msa": {
+        "n": 12,
+        "overall": 1.0,
+        "overall_ci95": [
+          1.0,
+          1.0
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 12
+      }
+    },
+    "full-1337": {
+      "all": {
+        "n": 30,
+        "overall": 1.1666666666666667,
+        "overall_ci95": [
+          1.0333333333333334,
+          1.3
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 30
+      },
+      "egyptian": {
+        "n": 6,
+        "overall": 1.1666666666666667,
+        "overall_ci95": [
+          1.0,
+          1.5
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 6
+      },
+      "english": {
+        "n": 12,
+        "overall": 1.0833333333333333,
+        "overall_ci95": [
+          1.0,
+          1.25
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 12
+      },
+      "msa": {
+        "n": 12,
+        "overall": 1.25,
+        "overall_ci95": [
+          1.0,
+          1.5
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 12
+      }
+    },
+    "lora-1337": {
+      "all": {
+        "n": 30,
+        "overall": 1.0333333333333334,
+        "overall_ci95": [
+          1.0,
+          1.1
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 29
+      },
+      "egyptian": {
+        "n": 6,
+        "overall": 1.0,
+        "overall_ci95": [
+          1.0,
+          1.0
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 6
+      },
+      "english": {
+        "n": 12,
+        "overall": 1.0,
+        "overall_ci95": [
+          1.0,
+          1.0
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 11
+      },
+      "msa": {
+        "n": 12,
+        "overall": 1.0833333333333333,
+        "overall_ci95": [
+          1.0,
+          1.25
+        ],
+        "fails_instruction_rate": 1.0,
+        "incorrect_rate": 1.0,
+        "incorrect_judged": 12
+      }
+    }
+  },
+  "paired": {
+    "base-1337 - full-1337": {
+      "overall_diff": -0.16666666666666666,
+      "ci95": [
+        -0.3,
+        -0.03333333333333333
+      ],
+      "wins": 0,
+      "ties": 25,
+      "losses": 5
+    },
+    "base-1337 - lora-1337": {
+      "overall_diff": -0.03333333333333333,
+      "ci95": [
+        -0.1,
+        0.0
+      ],
+      "wins": 0,
+      "ties": 29,
+      "losses": 1
+    },
+    "full-1337 - lora-1337": {
+      "overall_diff": 0.13333333333333333,
+      "ci95": [
+        0.03333333333333333,
+        0.26666666666666666
+      ],
+      "wins": 4,
+      "ties": 26,
+      "losses": 0
+    }
+  },
+  "prompts": 30
+}

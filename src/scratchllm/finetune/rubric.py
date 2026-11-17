@@ -247,16 +247,23 @@ def render_summary(summary: Mapping[str, Any]) -> str:
     lines = ["# Human rubric scores", "", f"{summary['prompts']} prompts, scored blind.", ""]
     lines += [
         "| Model | Prompts | Overall (1-7) | 95% interval | Fails instruction "
-        "| Incorrect (judged) |",
+        "| Incorrect, of the replies judged |",
         "|---|---|---|---|---|---|",
     ]
     for model, groups in summary["per_model"].items():
         for g, s in groups.items():
-            inc = "" if s["incorrect_rate"] is None else f"{s['incorrect_rate']:.0%}"
+            judged, n = s["incorrect_judged"], s["n"]
+            if s["incorrect_rate"] is None:
+                inc = f"none judged (0/{n})"
+            else:  # the denominator is the replies judged; an empty label is not counted
+                wrong = round(s["incorrect_rate"] * judged)
+                inc = f"{s['incorrect_rate']:.0%} ({wrong}/{judged} judged"
+                inc += f"; {n - judged} not judged)" if judged < n else ")"
+            fails = round(s["fails_instruction_rate"] * n)
             lines.append(
-                f"| {model} ({g}) | {s['n']} | {s['overall']:.2f} | "
+                f"| {model} ({g}) | {n} | {s['overall']:.2f} | "
                 f"{s['overall_ci95'][0]:.2f} to {s['overall_ci95'][1]:.2f} | "
-                f"{s['fails_instruction_rate']:.0%} | {inc} ({s['incorrect_judged']}) |"
+                f"{s['fails_instruction_rate']:.0%} ({fails}/{n}) | {inc} |"
             )
     lines += ["", "| Pair | Mean difference | 95% interval | Wins / ties / losses |"]
     lines += ["|---|---|---|---|"]

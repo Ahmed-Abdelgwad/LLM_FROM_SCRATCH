@@ -12,6 +12,7 @@ from scratchllm.finetune.rubric import (
     make_sheet,
     read_scores,
     render_html,
+    render_summary,
     score_sheet,
     summarize,
     write_sheet,
@@ -94,3 +95,24 @@ def test_incomplete_or_out_of_range_scores_are_refused(setup, tmp_path):  # noqa
     rows = [{"prompt_no": "1", "reply": "A", "overall": 3, "fails_instruction": 0, "incorrect": 0}]
     with pytest.raises(ValueError, match="do not match"):
         summarize(rows, key)
+
+
+def test_the_summary_names_the_denominator_of_each_rate():
+    """An empty "incorrect" label is not counted: the rate is over the replies judged, and the
+    table says how many those were (D-046: LoRA had 29 of 30 judged)."""
+
+    def group(n, judged, rate):
+        return {"n": n, "overall": 1.0, "overall_ci95": [1.0, 1.0], "fails_instruction_rate": 1.0,
+                "incorrect_rate": rate, "incorrect_judged": judged}  # fmt: skip
+
+    summary = {
+        "prompts": 30,
+        "per_model": {"m": {"all": group(30, 29, 1.0), "some": group(12, 11, 10 / 11),
+                            "none": group(6, 0, None), "full": group(30, 30, 0.5)}},
+        "paired": {},
+    }  # fmt: skip
+    text = render_summary(summary)
+    assert "| 100% (30/30) | 100% (29/29 judged; 1 not judged) |" in text
+    assert "| 91% (10/11 judged; 1 not judged) |" in text
+    assert "| none judged (0/6) |" in text
+    assert "| 50% (15/30 judged) |" in text
