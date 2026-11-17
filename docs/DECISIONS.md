@@ -2844,3 +2844,13 @@ the largest difference anywhere on the curve, tokens per second and peak memory.
 
 **Not in this plan:** a second seed; another machine or GPU; rebuilding the token files from the raw data (the data pipeline is
 tested, but not rerun end to end here); the fine-tuning runs.
+
+**Setup details, added before the run.** The worktree is at `/tmp/.../scratchpad/repro`, commit `9136841`. Two things make it
+work without changing the config or the worktree's clean state:
+
+- `data/processed/tokens-16k` in the worktree is a symlink to the main repository's token files. The path is gitignored, so
+  `git status` stays empty, and the config's `tokens_dir` stays as committed. The hash check above still decides whether the data
+  is the same.
+- The drive's files belong to root, so git refuses the worktree as "dubious ownership". Every command in the worktree runs with
+  `safe.directory` set for that one process (environment variables `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_0`, `GIT_CONFIG_VALUE_0`);
+  the global git config is not changed.
