@@ -1,0 +1,35 @@
+# Scaling arm A, epochs (D-049): the reference recipe (`reference-17m`) trained four times as long on the same text,
+# `tokens-16k` (167M train tokens, about 3.9 expected passes). Identical to `reference-17m` except the name and
+# `max_steps: 20000` (the cosine schedule ends at step 20,000); seed 1337. The criterion is D-049's, fixed before the run.
+name: scale-epochs4
+runs_dir: runs
+
+model:
+  vocab_size: 16384
+  context_length: 512
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  fast_attention: true
+  position: rope
+  ffn: swiglu
+
+data:
+  tokens_dir: data/processed/tokens-16k
+
+optim:
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+
+train:
+  seed: 1337
+  max_steps: 20000
+  micro_batch_size: 8
+  grad_accum_steps: 8
+  eval_interval: 250
+  eval_batches: 20
+  checkpoint_interval: 250
+  log_interval: 10
