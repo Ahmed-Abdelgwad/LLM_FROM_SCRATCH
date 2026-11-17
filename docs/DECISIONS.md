@@ -2792,3 +2792,55 @@ answer-shaped reply) but not the answers. Item 4 of `docs/PROBLEM.md` is complet
 fail was not tested here. The likely next direction is a larger base model or more pretraining, since the base model's knowledge
 is what fine-tuning has to draw on; that is a hypothesis for a future plan, not a result of this one. Longer fine-tuning or
 better data are other candidates this experiment does not rule out.
+
+## D-047 (2026-11-17): clean-checkout reproduction of the reference run, registered before any run
+
+`docs/PROBLEM.md` asks that "a run from a clean checkout, config and seed gives the same loss curve within tolerance". It has not
+been done. This entry fixes how, and what counts as reproduced, before the run.
+
+**What is reproduced.** `ablation-rope-swiglu` (D-034, D-035): seed 1337, 5,000 steps, 163,840,000 tokens, the run whose results are
+`configs/reference-17m.yaml`'s (D-036). It was made at commit `6f1ee7e`. Its log records the config, the commit, the environment
+(Python 3.13.12, torch 2.14.1+cu130, numpy 2.5.4, RTX 3050 Laptop GPU) and the SHA-256 of every token file it read.
+
+**How.**
+
+- *Code:* a `git worktree` of the commit that holds this entry, detached, with nothing but the committed files. It is the code a
+  reader cloning the repository gets today, not the code of `6f1ee7e`. The training and model code changed since in two commits,
+  both meant to leave this run's arithmetic unchanged: grouped-query attention, off by default (D-044), and the removal of an
+  unused data loader.
+- *Environment:* a new virtual environment in the worktree, `uv sync --frozen --extra dev --python 3.13.12`, built from `uv.lock`
+  with packages downloaded fresh (torch 2.14.1 is not in uv's cache). If the download fails, the existing environment is used
+  instead (`uv sync --frozen --dry-run` reports it matches the lock exactly), and the entry says so.
+- *Data:* the token files are not in git. The worktree reads the same `data/processed/tokens-16k` files. Before the comparison,
+  the SHA-256 of every train and validation file in the new run's log must equal the original's.
+- *Config:* `configs/reference-17m.yaml` as committed, with `--set name=repro-reference-17m` and `--set runs_dir=` the main
+  repository's `runs/`. The comparison script checks that the config equals the original's in every section except the name.
+- *Run and evaluation:* `scratchllm train`, then `scratchllm eval` of `best.pt` into `reports/eval/final-repro-reference-17m`,
+  both run from the worktree. Sleep inhibited, on mains power. About 65 minutes plus the evaluation.
+
+**Preconditions** (if one fails, there is no comparison; the entry reports which and why): same config except the name, same token
+files by hash, 16,913,280 parameters, Python 3.13.12 and torch 2.14.1+cu130, a clean worktree (the log's `git.dirty` false), no
+skipped steps, no resume.
+
+**Criterion: "reproduced within tolerance"** only if all hold. Let D be the rerun minus the original, bits/char.
+
+1. Step 5,000, in-training validation: Arabic mean |D| < 0.005, and English |D| < 0.005. This is the "same" band of D-031. The seed
+   to seed difference at this length is 0.0033 (D-029), so a same-seed rerun should fall well inside it.
+2. Full evaluation: `wiki_ary` |D| < 0.02, and every other source and split |D| < 0.01.
+3. The curve: at each of the 20 evaluations (every 250 steps), Arabic mean |D| < 0.015, and the training loss, averaged over each
+   block of 250 steps, |D| < 0.02.
+
+These thresholds were chosen by the assistant for this entry: criterion 1 reuses D-031, and the others are looser because single
+evaluations and unseen sources are noisier. Outcomes:
+
+- All hold: **reproduced within tolerance**.
+- Criterion 1 between 0.005 and 0.015, or criteria 2 or 3 missed by less than their own threshold again: **unresolved**, reported
+  with the numbers.
+- Anything larger: **not reproduced**. The next step would be a new entry finding the cause, for example the same run at `6f1ee7e`
+  to separate the code from the GPU. That is not part of this plan.
+
+Bit-identity is not expected: GPU runs of the same code differ (D-043). Reported, not judged: whether the step-10 losses are equal,
+the largest difference anywhere on the curve, tokens per second and peak memory.
+
+**Not in this plan:** a second seed; another machine or GPU; rebuilding the token files from the raw data (the data pipeline is
+tested, but not rerun end to end here); the fine-tuning runs.
